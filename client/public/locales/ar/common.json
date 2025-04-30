@@ -92,5 +92,39 @@
     "settings": {
       "description": "تكوين إعدادات حسابك والتطبيق."
     }
+  },
+  "personas": {
+    "manufacturer": {
+      "title": "مُصنِّع",
+      "description": "إنتاج وإدارة السلع الخاضعة للوائح EUDR",
+      "actions": {
+        "uploadDeclarations": "تحميل الإعلانات",
+        "viewSupplyChain": "عرض سلسلة التوريد"
+      }
+    },
+    "trader": {
+      "title": "تاجر",
+      "description": "تداول وتوزيع السلع الخاضعة للوائح",
+      "actions": {
+        "submitReports": "تقديم التقارير",
+        "verifySuppliers": "التحقق من الموردين"
+      }
+    },
+    "importer": {
+      "title": "مستورد",
+      "description": "استيراد السلع إلى سوق الاتحاد الأوروبي",
+      "actions": {
+        "verifyCompliance": "التحقق من الامتثال",
+        "submitDocuments": "تقديم وثائق EUDR"
+      }
+    },
+    "admin": {
+      "title": "مدير",
+      "description": "إدارة الامتثال عبر مؤسستك",
+      "actions": {
+        "viewAnalytics": "عرض التحليلات",
+        "manageTeam": "إدارة وصول الفريق"
+      }
+    }
   }
 }

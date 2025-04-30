@@ -6,7 +6,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 
 import {
   LayoutDashboard,
-  Link2,
+  Network,
   ShieldCheck,
   FileText,
   Users,
@@ -26,6 +26,7 @@ export const Sidebar: React.FC = () => {
   const { isRTL } = useLanguage();
   const [location] = useLocation();
 
+  // Navigation items in the order specified by the reference app
   const navItems: NavItem[] = [
     {
       href: '/',
@@ -35,7 +36,7 @@ export const Sidebar: React.FC = () => {
     {
       href: '/supply-chain',
       label: t('nav.supplyChain'),
-      icon: <Link2 className={cn('h-5 w-5', isRTL ? 'ml-3 rtl-flip' : 'mr-3')} />,
+      icon: <Network className={cn('h-5 w-5', isRTL ? 'ml-3 rtl-flip' : 'mr-3')} />,
     },
     {
       href: '/compliance',
@@ -67,7 +68,7 @@ export const Sidebar: React.FC = () => {
           <div className="flex items-center">
             <div className="w-8 h-8 bg-primary-600 rounded-md flex items-center justify-center">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812a3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
             </div>
             <h1 className={cn('ml-3 text-lg font-bold text-gray-900', isRTL && 'mr-3 ml-0')}>{t('app.name')}</h1>
@@ -78,19 +79,25 @@ export const Sidebar: React.FC = () => {
         <nav className="flex-1 py-4 overflow-y-auto">
           <ul className="space-y-1 px-3">
             {navItems.map((item) => (
-              <li key={item.href}>
+              <li key={item.href} className="relative">
                 <Link href={item.href}>
                   <div
                     className={cn(
-                      'flex items-center px-3 py-2 text-sm font-medium rounded-md cursor-pointer',
+                      'flex items-center px-3 py-2 text-sm font-medium rounded-md cursor-pointer transition-colors duration-150',
                       location === item.href
                         ? 'bg-primary-50 text-primary-700'
-                        : 'text-gray-700 hover:bg-gray-100',
+                        : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900',
                       isRTL && 'flex-row-reverse'
                     )}
                   >
                     {item.icon}
                     <span>{item.label}</span>
+                    
+                    {/* Active indicator bar */}
+                    {location === item.href && (
+                      <div className={cn("absolute inset-y-0 w-1 bg-primary-600 rounded-tr-md rounded-br-md", 
+                        isRTL ? "right-0" : "left-0")}></div>
+                    )}
                   </div>
                 </Link>
               </li>

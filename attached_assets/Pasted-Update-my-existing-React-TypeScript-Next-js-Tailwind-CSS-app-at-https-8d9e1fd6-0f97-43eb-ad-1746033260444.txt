@@ -1,0 +1,198 @@
+Update my existing React + TypeScript + Next.js + Tailwind CSS app at:
+https://8d9e1fd6-0f97-43eb-adcd-2f98ad7d8288-00-3o9u7z9m8zzsa.worf.replit.dev/
+
+to match the layout, structure, content, and multilingual features of the reference app at:
+https://complimate-eudr.replit.app/
+🧭 1. Navigation Menu:
+
+    Current Menu:
+
+        Supply Chain
+
+        Compliance
+
+        EUDR Declarations
+
+        Customers
+
+        Settings
+
+    Required Changes:
+
+        Change the menu to match the reference app exactly.
+
+        New Menu Order:
+
+            Dashboard
+
+            Supply Chain
+
+            Compliance
+
+            EUDR Declarations
+
+            Customers
+
+            Settings
+
+        Add Icons and ensure that each menu item matches the reference app's design, including active states.
+
+🏠 2. Dashboard (Home) Page:
+
+    Replicate the dashboard layout from the reference app:
+
+        User Personas: Include cards or tiles for each persona:
+
+            Manufacturer
+
+            Trader
+
+            Importer
+
+            Admin
+
+        Each persona card should include:
+
+            Role name
+
+            Short description
+
+            Key action buttons (e.g., "Upload Declarations", "View Suppliers")
+
+            Avatar or icon for each persona
+
+        Metrics on Dashboard:
+
+            Number of Suppliers
+
+            High-Risk Suppliers
+
+            Pending Declarations
+
+            Additional metrics from the reference app if applicable.
+
+        Use Tailwind CSS grid layout for the dashboard (e.g., grid-cols-1 md:grid-cols-2 lg:grid-cols-3).
+
+🌍 3. Multilingual Support (i18n):
+
+    Enable multilingual support using next-i18next:
+
+        Add a language switcher dropdown in the header for switching between English, French, and German.
+
+        Provide translation files:
+
+            en.json (English)
+
+            fr.json (French)
+
+            de.json (German)
+
+        Translate all UI text including:
+
+            Navigation menu items
+
+            Button text
+
+            Role descriptions
+
+            Section headers
+
+📄 4. Page Content Replication:
+
+For each page in the app, ensure that content matches the reference app exactly.
+
+    Supply Chain:
+
+        Replicate the detailed tables listing supplier information.
+
+        Include filtering options and action buttons for managing suppliers.
+
+    Compliance (Risk Score):
+
+        Add visual representations like risk score charts or tables.
+
+        Ensure interactivity for risk score data, showing high and low-risk suppliers.
+
+    EUDR Declarations / Documents:
+
+        Forms for declarations should be created, with document upload functionality.
+
+        Show the status of declarations (e.g., Pending, Approved, etc.).
+
+        Include buttons like "Submit Declaration" or "Download Documents."
+
+    Customers:
+
+        Add a section for customer management, showing customer data with relevant actions like "View Customer" or "Edit Customer."
+
+    Settings:
+
+        Create a settings page with:
+
+            User preferences
+
+            Account management
+
+            Notification settings
+
+        Ensure buttons and form fields match the reference app in terms of text and style.
+
+🎨 5. Visual Design & UI Components:
+
+    Match the Reference App's Styling:
+
+        Ensure the app is visually consistent by using Tailwind CSS utilities like bg-gray-100, text-blue-500, rounded-lg, p-4, etc.
+
+        Maintain spacing consistency, text sizes, and button styles.
+
+        Ensure that icons and graphics are added and styled consistently.
+
+        Ensure that the layout is responsive (use lg, md, sm Tailwind classes).
+
+⚙️ 6. Interactivity & Dynamic Features:
+
+    Add interactivity for the following:
+
+        Dynamic tables with sorting and pagination for suppliers and customers.
+
+        Forms for declaration submissions and customer editing.
+
+        Charts for risk scores and other relevant analytics.
+
+        Ensure all buttons (e.g., "View Details", "Download") are clickable and perform the correct actions.
+
+7. Data Handling:
+
+    Use realistic or mock data for the tables (e.g., suppliers, customers) to ensure proper layout.
+
+    Add functionality for sorting, filtering, and pagination in tables.
+
+    Ensure that all forms are validated properly (e.g., for declaration uploads).
+
+🧪 8. Testing & Debugging:
+
+    Test each page for responsiveness, ensuring it works on both mobile and desktop views.
+
+    Verify that interactive components like buttons, tables, and charts work as expected.
+
+    Ensure that multilingual support works and correctly switches between languages.
+
+    Conduct UI tests to make sure the layout matches the reference app.
+
+🎯 Final Goal:
+
+Your app should now match the reference app in structure, content, and behavior, including:
+
+    Identical navigation menu and icons
+
+    Dashboard with user personas and metrics
+
+    Fully translated content with multilingual support
+
+    Replicated pages like Supply Chain, Compliance, EUDR Declarations, Customers, and Settings
+
+    Fully responsive and styled with Tailwind CSS
+
+    Interactivity with dynamic tables, forms, and charts
+
+Use modular React components, TypeScript best practices, and Tailwind CSS for styling.

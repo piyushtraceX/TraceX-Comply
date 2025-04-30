@@ -92,5 +92,39 @@
     "settings": {
       "description": "Configurez les paramètres de votre compte et de l'application."
     }
+  },
+  "personas": {
+    "manufacturer": {
+      "title": "Fabricant",
+      "description": "Produire et gérer des produits soumis à la réglementation EUDR",
+      "actions": {
+        "uploadDeclarations": "Télécharger les déclarations",
+        "viewSupplyChain": "Voir la chaîne d'approvisionnement"
+      }
+    },
+    "trader": {
+      "title": "Négociant",
+      "description": "Commercialiser et distribuer des produits réglementés",
+      "actions": {
+        "submitReports": "Soumettre des rapports",
+        "verifySuppliers": "Vérifier les fournisseurs"
+      }
+    },
+    "importer": {
+      "title": "Importateur",
+      "description": "Importer des produits sur le marché européen",
+      "actions": {
+        "verifyCompliance": "Vérifier la conformité",
+        "submitDocuments": "Soumettre des documents EUDR"
+      }
+    },
+    "admin": {
+      "title": "Administrateur",
+      "description": "Gérer la conformité au sein de votre organisation",
+      "actions": {
+        "viewAnalytics": "Voir les analyses",
+        "manageTeam": "Gérer l'accès de l'équipe"
+      }
+    }
   }
 }

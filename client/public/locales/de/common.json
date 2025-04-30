@@ -92,5 +92,39 @@
     "settings": {
       "description": "Konfigurieren Sie Ihre Konto- und Anwendungseinstellungen."
     }
+  },
+  "personas": {
+    "manufacturer": {
+      "title": "Hersteller",
+      "description": "Produzieren und verwalten Sie Waren, die der EUDR-Verordnung unterliegen",
+      "actions": {
+        "uploadDeclarations": "Erklärungen hochladen",
+        "viewSupplyChain": "Lieferkette anzeigen"
+      }
+    },
+    "trader": {
+      "title": "Händler",
+      "description": "Handeln und verteilen Sie regulierte Waren",
+      "actions": {
+        "submitReports": "Berichte einreichen",
+        "verifySuppliers": "Lieferanten überprüfen"
+      }
+    },
+    "importer": {
+      "title": "Importeur",
+      "description": "Importieren Sie Waren in den EU-Markt",
+      "actions": {
+        "verifyCompliance": "Konformität prüfen",
+        "submitDocuments": "EUDR-Dokumente einreichen"
+      }
+    },
+    "admin": {
+      "title": "Administrator",
+      "description": "Verwalten Sie die Compliance in Ihrer Organisation",
+      "actions": {
+        "viewAnalytics": "Analysen anzeigen",
+        "manageTeam": "Teamzugriff verwalten"
+      }
+    }
   }
 }
