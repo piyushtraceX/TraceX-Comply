@@ -1,12 +1,13 @@
 {
   "app": {
-    "name": "Complimate EUDR"
+    "name": "EUDR Comply"
   },
   "nav": {
     "dashboard": "Dashboard",
-    "declarations": "Declarations",
-    "suppliers": "Suppliers",
-    "reports": "Reports",
+    "supplyChain": "Supply Chain",
+    "compliance": "Compliance",
+    "eudrDeclarations": "EUDR Declarations",
+    "customers": "Customers",
     "settings": "Settings"
   },
   "user": {
@@ -78,11 +79,14 @@
     "declarations": {
       "description": "Manage all your EUDR declarations here."
     },
-    "suppliers": {
-      "description": "View and manage your supplier list."
+    "supplyChain": {
+      "description": "View and manage your supply chain network."
     },
-    "reports": {
-      "description": "Access compliance reports and analytics."
+    "compliance": {
+      "description": "Monitor compliance status across your supply chain."
+    },
+    "customers": {
+      "description": "Manage your customer relationships and communications."
     },
     "settings": {
       "description": "Configure your account and application settings."

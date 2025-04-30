@@ -1,12 +1,13 @@
 {
   "app": {
-    "name": "كومبليمات EUDR"
+    "name": "EUDR Comply"
   },
   "nav": {
     "dashboard": "لوحة المعلومات",
-    "declarations": "الإعلانات",
-    "suppliers": "الموردين",
-    "reports": "التقارير",
+    "supplyChain": "سلسلة التوريد",
+    "compliance": "الامتثال",
+    "eudrDeclarations": "إعلانات EUDR",
+    "customers": "العملاء",
     "settings": "الإعدادات"
   },
   "user": {

@@ -6,9 +6,10 @@ import { useLanguage } from '@/contexts/LanguageContext';
 
 import {
   LayoutDashboard,
+  Link2,
+  ShieldCheck,
   FileText,
   Users,
-  FileBarChart,
   Settings,
   User,
   LogOut
@@ -32,19 +33,24 @@ export const Sidebar: React.FC = () => {
       icon: <LayoutDashboard className={cn('h-5 w-5', isRTL ? 'ml-3 rtl-flip' : 'mr-3')} />,
     },
     {
+      href: '/supply-chain',
+      label: t('nav.supplyChain'),
+      icon: <Link2 className={cn('h-5 w-5', isRTL ? 'ml-3 rtl-flip' : 'mr-3')} />,
+    },
+    {
+      href: '/compliance',
+      label: t('nav.compliance'),
+      icon: <ShieldCheck className={cn('h-5 w-5', isRTL ? 'ml-3 rtl-flip' : 'mr-3')} />,
+    },
+    {
       href: '/declarations',
-      label: t('nav.declarations'),
+      label: t('nav.eudrDeclarations'),
       icon: <FileText className={cn('h-5 w-5', isRTL ? 'ml-3 rtl-flip' : 'mr-3')} />,
     },
     {
-      href: '/suppliers',
-      label: t('nav.suppliers'),
+      href: '/customers',
+      label: t('nav.customers'),
       icon: <Users className={cn('h-5 w-5', isRTL ? 'ml-3 rtl-flip' : 'mr-3')} />,
-    },
-    {
-      href: '/reports',
-      label: t('nav.reports'),
-      icon: <FileBarChart className={cn('h-5 w-5', isRTL ? 'ml-3 rtl-flip' : 'mr-3')} />,
     },
     {
       href: '/settings',

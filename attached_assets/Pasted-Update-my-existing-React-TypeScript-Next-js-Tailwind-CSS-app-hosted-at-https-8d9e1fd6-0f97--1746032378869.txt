@@ -1,0 +1,91 @@
+Update my existing React + TypeScript + Next.js + Tailwind CSS app hosted at:
+https://8d9e1fd6-0f97-43eb-adcd-2f98ad7d8288-00-3o9u7z9m8zzsa.worf.replit.dev/
+
+so that it fully replicates the layout, structure, content, and multilingual features of the reference app at:
+https://complimate-eudr.replit.app/
+📌 Requirements:
+🧭 1. App Title and Navigation Menu
+
+    Set app title to: EUDR Comply
+
+    Replace existing sidebar/menu with the following items, in this order:
+
+        Dashboard
+
+        Supply Chain
+
+        Compliance
+
+        EUDR Declarations
+
+        Customers
+
+        Settings
+
+    Use the exact same labels, order, and icons as in the reference app.
+
+🏠 2. Dashboard Page (Home)
+
+    Replicate the entire dashboard layout from the reference app.
+
+    Include user personas (e.g., Manufacturer, Trader, Importer, Admin) as cards or tiles with:
+
+        Role name
+
+        Short description
+
+        Icons or avatars
+
+        Action buttons (e.g., “Upload Declarations”, “View Suppliers”)
+
+    Add summary cards with:
+
+        Number of Suppliers
+
+        High-Risk Suppliers
+
+        Pending Declarations
+
+        Any other metrics shown in the reference
+
+🌍 3. Multilingual Support
+
+    Add next-i18next internationalization.
+
+    Include a language switcher dropdown in the top navigation bar.
+
+    Provide translation files:
+
+        en.json (English)
+
+        fr.json (French)
+
+        de.json (German)
+
+    Use the exact wording used in the reference app for all labels, buttons, and section headers.
+
+📄 4. Section-by-Section Content Alignment
+
+    For each menu item page (Supply Chain, Compliance, EUDR Declarations, Customers, Settings):
+
+        Replicate headings, form labels, table headers, and button text exactly as in the reference.
+
+        Use Tailwind CSS layout utilities for consistent design.
+
+        Implement dummy/mock data as needed to reflect the same structure.
+
+🎯 Final Goal:
+
+Make the new app a visually and functionally identical clone of the reference app, matching:
+
+    Navigation
+
+    Dashboard layout
+
+    Content text
+
+    Section behavior
+
+    Language support
+
+Use idiomatic React + Next.js + Tailwind + TypeScript best practices.

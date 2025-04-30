@@ -1,12 +1,13 @@
 {
   "app": {
-    "name": "Complimate EUDR"
+    "name": "EUDR Comply"
   },
   "nav": {
     "dashboard": "Tableau de bord",
-    "declarations": "Déclarations",
-    "suppliers": "Fournisseurs",
-    "reports": "Rapports",
+    "supplyChain": "Chaîne d'approvisionnement",
+    "compliance": "Conformité",
+    "eudrDeclarations": "Déclarations EUDR",
+    "customers": "Clients",
     "settings": "Paramètres"
   },
   "user": {

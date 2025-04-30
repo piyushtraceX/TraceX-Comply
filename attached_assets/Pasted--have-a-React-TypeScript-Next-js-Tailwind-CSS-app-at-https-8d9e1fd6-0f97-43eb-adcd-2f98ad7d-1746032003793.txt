@@ -1,0 +1,96 @@
+ have a React + TypeScript + Next.js + Tailwind CSS app at:
+https://8d9e1fd6-0f97-43eb-adcd-2f98ad7d8288-00-3o9u7z9m8zzsa.worf.replit.dev/
+
+Please update it to fully match the UI, content structure, navigation layout, multilingual support, and user experience of the reference app at:
+https://complimate-eudr.replit.app/
+
+Here are the key content-related adjustments you need to make:
+🧭 Navigation Alignment
+
+Existing App Menu:
+
+    Supply Chain
+
+    Compliance
+
+    EUDR Declarations
+
+    Customers
+
+    Settings
+
+Reference App Menu:
+
+    Dashboard
+
+    Suppliers
+
+    Risk Score
+
+    Documents
+
+    Settings
+
+✅ Tasks:
+
+    Replace or realign the navigation menu to match the reference:
+
+        "Supply Chain" → "Suppliers"
+
+        "Compliance" → "Risk Score"
+
+        "EUDR Declarations" → "Documents"
+
+        Add a new "Dashboard" entry at the top.
+
+    Use the same route paths and icons for each section as shown in the reference app.
+
+📄 Page-Level Content and Layout
+
+For each section:
+
+    Dashboard: Add cards showing summary stats like "Number of Suppliers", "High Risk Suppliers", etc.
+
+    Suppliers: List view with sortable/filterable table, matching columns and buttons.
+
+    Risk Score: Show risk evaluation details and metrics like in the reference.
+
+    Documents: Provide upload/submit/view interfaces similar to the reference's declaration forms.
+
+    Settings: Retain, but align its content structure with the reference app.
+
+✅ Tasks:
+
+    Match headings, buttons, table headers, and placeholders to the reference app.
+
+    Apply correct layout using Tailwind utilities (grid, flex, space-y, shadow, etc.).
+
+🌍 Multilingual Support
+
+✅ Tasks:
+
+    Implement next-i18next support.
+
+    Use accurate labels and phrases as seen in the reference for each locale.
+
+    Provide sample en.json, fr.json, and de.json translation files with exact strings from the reference app.
+
+    Add a language switcher dropdown in the header.
+
+🧪 Final Goal
+
+Make the new app visually and functionally match the reference app with consistent:
+
+    Navigation structure
+
+    Content layout
+
+    Section titles
+
+    Button text
+
+    Table labels
+
+    Multilingual support
+
+Ensure the UI feels identical and consistent across both apps.
