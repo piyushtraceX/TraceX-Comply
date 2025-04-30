@@ -1,6 +1,17 @@
 import React from 'react';
 import { useTranslation } from '@/hooks/use-translation';
-import { FileText, CheckCircle, AlertTriangle, AlertCircle, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { 
+  FileText, 
+  CheckCircle, 
+  AlertTriangle, 
+  AlertCircle, 
+  TrendingUp, 
+  TrendingDown, 
+  Minus, 
+  Users,
+  AlertOctagon,
+  Clock
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -98,13 +109,54 @@ export const StatsCards: React.FC = () => {
       iconColor: 'text-red-600',
       changeColor: 'text-red-600',
     },
+    {
+      title: t('stats.totalSuppliers'),
+      value: 58,
+      change: 7,
+      icon: <Users className="h-6 w-6 text-blue-600" />,
+      iconBgColor: 'bg-blue-100',
+      iconColor: 'text-blue-600',
+      changeColor: 'text-green-600',
+    },
+    {
+      title: t('stats.highRiskSuppliers'),
+      value: 12,
+      change: -3,
+      icon: <AlertOctagon className="h-6 w-6 text-orange-600" />,
+      iconBgColor: 'bg-orange-100',
+      iconColor: 'text-orange-600',
+      changeColor: 'text-green-600',
+    },
+    {
+      title: t('stats.pendingDeclarations'),
+      value: 26,
+      change: 5,
+      icon: <Clock className="h-6 w-6 text-purple-600" />,
+      iconBgColor: 'bg-purple-100',
+      iconColor: 'text-purple-600',
+      changeColor: 'text-red-600',
+    },
   ];
 
+  // We'll display them in two rows for better layout
+  const firstRowStats = stats.slice(0, 4);
+  const secondRowStats = stats.slice(4);
+
   return (
-    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-      {stats.map((stat, index) => (
-        <StatCard key={index} {...stat} />
-      ))}
+    <div className="space-y-6 mb-6">
+      {/* First row - 4 original stats */}
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        {firstRowStats.map((stat, index) => (
+          <StatCard key={index} {...stat} />
+        ))}
+      </div>
+      
+      {/* Second row - 3 new metrics */}
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {secondRowStats.map((stat, index) => (
+          <StatCard key={index + 4} {...stat} />
+        ))}
+      </div>
     </div>
   );
 };

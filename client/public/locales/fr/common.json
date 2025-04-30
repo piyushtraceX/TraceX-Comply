@@ -37,7 +37,10 @@
     "totalDeclarations": "Déclarations totales",
     "compliantProducts": "Produits conformes",
     "pendingReview": "En attente de révision",
-    "nonCompliant": "Non conformes"
+    "nonCompliant": "Non conformes",
+    "totalSuppliers": "Nombre de fournisseurs",
+    "highRiskSuppliers": "Fournisseurs à haut risque",
+    "pendingDeclarations": "Déclarations en attente"
   },
   "recentActivity": {
     "title": "Activité récente",

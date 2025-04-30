@@ -37,7 +37,10 @@
     "totalDeclarations": "إجمالي الإعلانات",
     "compliantProducts": "المنتجات المتوافقة",
     "pendingReview": "قيد المراجعة",
-    "nonCompliant": "غير متوافقة"
+    "nonCompliant": "غير متوافقة",
+    "totalSuppliers": "عدد الموردين",
+    "highRiskSuppliers": "الموردين ذوي المخاطر العالية",
+    "pendingDeclarations": "الإعلانات المعلقة"
   },
   "recentActivity": {
     "title": "النشاط الحديث",
