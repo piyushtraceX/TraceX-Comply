@@ -61,7 +61,7 @@ export const SupplierList: React.FC = () => {
       {suppliers.map((supplier) => (
         <li key={supplier.id}>
           <Link href={`/suppliers/${supplier.id}`}>
-            <a className="block hover:bg-gray-50">
+            <div className="block hover:bg-gray-50 cursor-pointer">
               <div className="px-4 py-4 sm:px-6">
                 <div className={cn("flex items-center justify-between", isRTL && "flex-row-reverse")}>
                   <div className={cn("flex items-center", isRTL && "flex-row-reverse")}>
@@ -88,7 +88,7 @@ export const SupplierList: React.FC = () => {
                   </div>
                 </div>
               </div>
-            </a>
+            </div>
           </Link>
         </li>
       ))}

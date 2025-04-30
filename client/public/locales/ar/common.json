@@ -18,7 +18,8 @@
     "title": "لوحة المعلومات",
     "lastUpdated": "آخر تحديث: {{date}}",
     "exportBtn": "تصدير",
-    "newDeclarationBtn": "إعلان جديد"
+    "newDeclarationBtn": "إعلان جديد",
+    "userRoles": "أدوار المستخدمين"
   },
   "search": {
     "placeholder": "بحث"

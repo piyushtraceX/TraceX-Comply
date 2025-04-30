@@ -92,5 +92,39 @@
     "settings": {
       "description": "Configure your account and application settings."
     }
+  },
+  "personas": {
+    "manufacturer": {
+      "title": "Manufacturer",
+      "description": "Produce and manage commodities subject to EUDR regulation",
+      "actions": {
+        "uploadDeclarations": "Upload Declarations",
+        "viewSupplyChain": "View Supply Chain"
+      }
+    },
+    "trader": {
+      "title": "Trader",
+      "description": "Trade and distribute regulated commodities",
+      "actions": {
+        "submitReports": "Submit Reports",
+        "verifySuppliers": "Verify Suppliers"
+      }
+    },
+    "importer": {
+      "title": "Importer",
+      "description": "Import commodities to the EU market",
+      "actions": {
+        "verifyCompliance": "Verify Compliance",
+        "submitDocuments": "Submit EUDR Documents"
+      }
+    },
+    "admin": {
+      "title": "Admin",
+      "description": "Manage compliance across your organization",
+      "actions": {
+        "viewAnalytics": "View Analytics",
+        "manageTeam": "Manage Team Access"
+      }
+    }
   }
 }

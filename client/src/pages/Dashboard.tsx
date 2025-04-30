@@ -18,31 +18,27 @@ export default function Dashboard() {
   // Last updated date would typically come from an API
   const lastUpdated = formatDate(new Date());
 
-  // User personas
+  // User personas with translations
   const userPersonas = [
     {
-      role: 'Manufacturer',
-      description: 'Produce and manage commodities subject to EUDR regulation',
+      role: 'manufacturer',
       icon: <Factory className="h-8 w-8 text-primary-600" />,
-      actions: ['Upload Declarations', 'View Supply Chain']
+      actions: ['uploadDeclarations', 'viewSupplyChain']
     },
     {
-      role: 'Trader',
-      description: 'Trade and distribute regulated commodities',
+      role: 'trader',
       icon: <TrendingUp className="h-8 w-8 text-primary-600" />,
-      actions: ['Submit Reports', 'Verify Suppliers']
+      actions: ['submitReports', 'verifySuppliers']
     },
     {
-      role: 'Importer',
-      description: 'Import commodities to the EU market',
+      role: 'importer',
       icon: <ShieldCheck className="h-8 w-8 text-primary-600" />,
-      actions: ['Verify Compliance', 'Submit EUDR Documents']
+      actions: ['verifyCompliance', 'submitDocuments']
     },
     {
-      role: 'Admin',
-      description: 'Manage compliance across your organization',
+      role: 'admin',
       icon: <Users className="h-8 w-8 text-primary-600" />,
-      actions: ['View Analytics', 'Manage Team Access']
+      actions: ['viewAnalytics', 'manageTeam']
     }
   ];
 
@@ -86,10 +82,10 @@ export default function Dashboard() {
                       {persona.icon}
                     </div>
                     <div className="ml-4">
-                      <h4 className="text-lg font-medium text-gray-900">{persona.role}</h4>
+                      <h4 className="text-lg font-medium text-gray-900">{t(`personas.${persona.role}.title`)}</h4>
                     </div>
                   </div>
-                  <p className="text-sm text-gray-500 mb-4">{persona.description}</p>
+                  <p className="text-sm text-gray-500 mb-4">{t(`personas.${persona.role}.description`)}</p>
                   <div className="mt-5 space-y-2">
                     {persona.actions.map((action, actionIndex) => (
                       <Button 
@@ -98,7 +94,7 @@ export default function Dashboard() {
                         className="w-full justify-center"
                         size="sm"
                       >
-                        {action}
+                        {t(`personas.${persona.role}.actions.${action}`)}
                       </Button>
                     ))}
                   </div>
