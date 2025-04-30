@@ -1,0 +1,51 @@
+
+Objective: Create a React app in TypeScript using Tailwind CSS that mimics the UI/UX of the proof of concept Complimate EUDR (https://complimate-eudr.replit.app/), with multilingual support using Next.js.
+Features to include:
+1. User Interface:
+    * Replicate the UI/UX of the Complimate EUDR website (dashboard, forms, tables, navigation).
+    * Use Tailwind CSS for responsive, modern design.
+    * Implement components such as buttons, forms, tables, and navigation, styled using Tailwind.
+2. Multilingual Support:
+    * Implement multilingual features using Next.js and next-i18next.
+    * Support multiple languages such as English, French, and German.
+    * Support RTL for Arabics.
+    * Load language files for each language in public/locales/ with JSON format, containing translation keys (e.g., welcome, submit, etc.).
+3. Responsive Design:
+    * The app should be fully responsive, optimizing for both desktop and mobile devices.
+    * Use Tailwind's responsive design utilities to ensure a consistent experience across devices.
+4. Next.js Setup:
+    * Set up the app using Next.js for routing and server-side rendering (SSR).
+    * Ensure the project is configured to handle dynamic routing where needed.
+5. TypeScript Integration:
+    * Write the app in TypeScript for better type safety and code clarity.
+    * Ensure that type definitions are in place for components, props, and states.
+6. Tailwind CSS:
+    * Use Tailwind CSS for utility-first design, allowing easy customization and fast development.
+    * Ensure all pages and components follow Tailwind's best practices for styling.
+7. State Management (Optional):
+    * Use React’s Context API or React Query for handling any global state or data fetching that might be needed (for example, fetching user data or dashboard statistics).
+8. Deployment Ready:
+    * Prepare the app to be deployed on Replit or any other platform, ensuring it runs smoothly and the code is production-ready.
+Development Steps:
+1. Initialize the Next.js project with TypeScript:
+    * Use npx create-next-app to set up the base project.
+    * Configure TypeScript, Tailwind CSS, and next-i18next for multilingual support.
+2. Configure Tailwind CSS:
+    * Set up Tailwind CSS with tailwind.config.js and globals.css.
+3. Add Multilingual Support:
+    * Set up next-i18next for language configuration in next-i18next.config.js.
+    * Add language-specific JSON files under public/locales/.
+4. Replicate the UI Design:
+    * Start by creating the core layout (header, sidebar, footer).
+    * Recreate the dashboard interface and forms as seen in the Complimate EUDR app.
+    * Implement components for form inputs, buttons, modals, and tables using Tailwind CSS.
+5. Testing and Debugging:
+    * Test the app thoroughly for both functionality and design across multiple devices.
+    * Ensure that the multilingual feature is working as expected, allowing users to toggle between languages.
+Additional Instructions for the AI Agent:
+* Ensure that the app is optimized for performance and accessibility.
+* Use best practices for structuring the project and organizing components (e.g., components, pages, and hooks).
+* Provide sample translation files (e.g., common.json for each language).
+* Ensure that the multilingual feature is toggleable via a language switcher in the UI.
+
+
