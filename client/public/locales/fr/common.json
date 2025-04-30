@@ -1,0 +1,91 @@
+{
+  "app": {
+    "name": "Complimate EUDR"
+  },
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "declarations": "Déclarations",
+    "suppliers": "Fournisseurs",
+    "reports": "Rapports",
+    "settings": "Paramètres"
+  },
+  "user": {
+    "name": "Jane Cooper",
+    "email": "jane@example.com"
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "lastUpdated": "Dernière mise à jour: {{date}}",
+    "exportBtn": "Exporter",
+    "newDeclarationBtn": "Nouvelle déclaration"
+  },
+  "search": {
+    "placeholder": "Rechercher"
+  },
+  "languages": {
+    "en": "Anglais",
+    "fr": "Français",
+    "de": "Allemand",
+    "ar": "Arabe"
+  },
+  "notifications": {
+    "label": "Voir les notifications"
+  },
+  "stats": {
+    "totalDeclarations": "Déclarations totales",
+    "compliantProducts": "Produits conformes",
+    "pendingReview": "En attente de révision",
+    "nonCompliant": "Non conformes"
+  },
+  "recentActivity": {
+    "title": "Activité récente",
+    "showing": "Affichage de {{count}} sur {{total}} activités",
+    "viewAll": "Voir tout"
+  },
+  "activity": {
+    "title": "Déclaration #{{id}} {{action}}",
+    "documentRequested": "Documentation supplémentaire demandée",
+    "product": "{{product}} - Fournisseur: {{supplier}}",
+    "category": "Catégorie: {{category}}",
+    "date": "{{date}}"
+  },
+  "recentSuppliers": {
+    "title": "Fournisseurs récents",
+    "viewAll": "Voir tous les fournisseurs"
+  },
+  "supplier": {
+    "status": {
+      "active": "Actif",
+      "pending": "En attente",
+      "flagged": "Signalé"
+    }
+  },
+  "complianceStatus": {
+    "title": "Statut de conformité",
+    "compliant": "Conforme",
+    "pending": "En attente de révision",
+    "nonCompliant": "Non conforme",
+    "percentage": "Pourcentage",
+    "totalLegend": "Déclarations totales",
+    "detailedReport": "Voir le rapport détaillé de conformité"
+  },
+  "status": {
+    "compliant": "Conforme",
+    "pending": "En attente",
+    "non-compliant": "Non conforme"
+  },
+  "pages": {
+    "declarations": {
+      "description": "Gérez toutes vos déclarations EUDR ici."
+    },
+    "suppliers": {
+      "description": "Consultez et gérez votre liste de fournisseurs."
+    },
+    "reports": {
+      "description": "Accédez aux rapports de conformité et aux analyses."
+    },
+    "settings": {
+      "description": "Configurez les paramètres de votre compte et de l'application."
+    }
+  }
+}

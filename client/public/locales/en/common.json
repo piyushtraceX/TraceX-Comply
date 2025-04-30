@@ -1,0 +1,91 @@
+{
+  "app": {
+    "name": "Complimate EUDR"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "declarations": "Declarations",
+    "suppliers": "Suppliers",
+    "reports": "Reports",
+    "settings": "Settings"
+  },
+  "user": {
+    "name": "Jane Cooper",
+    "email": "jane@example.com"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "lastUpdated": "Last updated: {{date}}",
+    "exportBtn": "Export",
+    "newDeclarationBtn": "New Declaration"
+  },
+  "search": {
+    "placeholder": "Search"
+  },
+  "languages": {
+    "en": "English",
+    "fr": "French",
+    "de": "German",
+    "ar": "Arabic"
+  },
+  "notifications": {
+    "label": "View notifications"
+  },
+  "stats": {
+    "totalDeclarations": "Total Declarations",
+    "compliantProducts": "Compliant Products",
+    "pendingReview": "Pending Review",
+    "nonCompliant": "Non-Compliant"
+  },
+  "recentActivity": {
+    "title": "Recent Activity",
+    "showing": "Showing {{count}} of {{total}} activities",
+    "viewAll": "View all"
+  },
+  "activity": {
+    "title": "Declaration #{{id}} {{action}}",
+    "documentRequested": "Additional documentation requested",
+    "product": "{{product}} - Supplier: {{supplier}}",
+    "category": "Category: {{category}}",
+    "date": "{{date}}"
+  },
+  "recentSuppliers": {
+    "title": "Recent Suppliers",
+    "viewAll": "View all suppliers"
+  },
+  "supplier": {
+    "status": {
+      "active": "Active",
+      "pending": "Pending",
+      "flagged": "Flagged"
+    }
+  },
+  "complianceStatus": {
+    "title": "Compliance Status",
+    "compliant": "Compliant",
+    "pending": "Pending Review",
+    "nonCompliant": "Non-Compliant",
+    "percentage": "Percentage",
+    "totalLegend": "Total declarations",
+    "detailedReport": "View detailed compliance report"
+  },
+  "status": {
+    "compliant": "Compliant",
+    "pending": "Pending",
+    "non-compliant": "Non-compliant"
+  },
+  "pages": {
+    "declarations": {
+      "description": "Manage all your EUDR declarations here."
+    },
+    "suppliers": {
+      "description": "View and manage your supplier list."
+    },
+    "reports": {
+      "description": "Access compliance reports and analytics."
+    },
+    "settings": {
+      "description": "Configure your account and application settings."
+    }
+  }
+}

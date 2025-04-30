@@ -1,0 +1,91 @@
+{
+  "app": {
+    "name": "كومبليمات EUDR"
+  },
+  "nav": {
+    "dashboard": "لوحة المعلومات",
+    "declarations": "الإعلانات",
+    "suppliers": "الموردين",
+    "reports": "التقارير",
+    "settings": "الإعدادات"
+  },
+  "user": {
+    "name": "جين كوبر",
+    "email": "jane@example.com"
+  },
+  "dashboard": {
+    "title": "لوحة المعلومات",
+    "lastUpdated": "آخر تحديث: {{date}}",
+    "exportBtn": "تصدير",
+    "newDeclarationBtn": "إعلان جديد"
+  },
+  "search": {
+    "placeholder": "بحث"
+  },
+  "languages": {
+    "en": "الإنجليزية",
+    "fr": "الفرنسية",
+    "de": "الألمانية",
+    "ar": "العربية"
+  },
+  "notifications": {
+    "label": "عرض الإشعارات"
+  },
+  "stats": {
+    "totalDeclarations": "إجمالي الإعلانات",
+    "compliantProducts": "المنتجات المتوافقة",
+    "pendingReview": "قيد المراجعة",
+    "nonCompliant": "غير متوافقة"
+  },
+  "recentActivity": {
+    "title": "النشاط الحديث",
+    "showing": "عرض {{count}} من {{total}} نشاط",
+    "viewAll": "عرض الكل"
+  },
+  "activity": {
+    "title": "الإعلان #{{id}} {{action}}",
+    "documentRequested": "طلب وثائق إضافية",
+    "product": "{{product}} - المورد: {{supplier}}",
+    "category": "الفئة: {{category}}",
+    "date": "{{date}}"
+  },
+  "recentSuppliers": {
+    "title": "الموردين الحديثين",
+    "viewAll": "عرض جميع الموردين"
+  },
+  "supplier": {
+    "status": {
+      "active": "نشط",
+      "pending": "قيد الانتظار",
+      "flagged": "محدد"
+    }
+  },
+  "complianceStatus": {
+    "title": "حالة التوافق",
+    "compliant": "متوافق",
+    "pending": "قيد المراجعة",
+    "nonCompliant": "غير متوافق",
+    "percentage": "النسبة",
+    "totalLegend": "إجمالي الإعلانات",
+    "detailedReport": "عرض تقرير التوافق المفصل"
+  },
+  "status": {
+    "compliant": "متوافق",
+    "pending": "قيد الانتظار",
+    "non-compliant": "غير متوافق"
+  },
+  "pages": {
+    "declarations": {
+      "description": "قم بإدارة جميع إعلانات EUDR الخاصة بك هنا."
+    },
+    "suppliers": {
+      "description": "عرض وإدارة قائمة الموردين الخاصة بك."
+    },
+    "reports": {
+      "description": "الوصول إلى تقارير التوافق والتحليلات."
+    },
+    "settings": {
+      "description": "تكوين إعدادات حسابك والتطبيق."
+    }
+  }
+}
