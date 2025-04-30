@@ -80,9 +80,9 @@ export const Sidebar: React.FC = () => {
             {navItems.map((item) => (
               <li key={item.href}>
                 <Link href={item.href}>
-                  <a
+                  <div
                     className={cn(
-                      'flex items-center px-3 py-2 text-sm font-medium rounded-md',
+                      'flex items-center px-3 py-2 text-sm font-medium rounded-md cursor-pointer',
                       location === item.href
                         ? 'bg-primary-50 text-primary-700'
                         : 'text-gray-700 hover:bg-gray-100',
@@ -91,7 +91,7 @@ export const Sidebar: React.FC = () => {
                   >
                     {item.icon}
                     <span>{item.label}</span>
-                  </a>
+                  </div>
                 </Link>
               </li>
             ))}

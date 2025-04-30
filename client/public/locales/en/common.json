@@ -18,7 +18,8 @@
     "title": "Dashboard",
     "lastUpdated": "Last updated: {{date}}",
     "exportBtn": "Export",
-    "newDeclarationBtn": "New Declaration"
+    "newDeclarationBtn": "New Declaration",
+    "userRoles": "User Roles"
   },
   "search": {
     "placeholder": "Search"

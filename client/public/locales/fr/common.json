@@ -18,7 +18,8 @@
     "title": "Tableau de bord",
     "lastUpdated": "Dernière mise à jour: {{date}}",
     "exportBtn": "Exporter",
-    "newDeclarationBtn": "Nouvelle déclaration"
+    "newDeclarationBtn": "Nouvelle déclaration",
+    "userRoles": "Rôles d'utilisateur"
   },
   "search": {
     "placeholder": "Rechercher"
@@ -79,11 +80,14 @@
     "declarations": {
       "description": "Gérez toutes vos déclarations EUDR ici."
     },
-    "suppliers": {
-      "description": "Consultez et gérez votre liste de fournisseurs."
+    "supplyChain": {
+      "description": "Consultez et gérez votre réseau de chaîne d'approvisionnement."
     },
-    "reports": {
-      "description": "Accédez aux rapports de conformité et aux analyses."
+    "compliance": {
+      "description": "Surveillez l'état de conformité de votre chaîne d'approvisionnement."
+    },
+    "customers": {
+      "description": "Gérez vos relations et communications avec les clients."
     },
     "settings": {
       "description": "Configurez les paramètres de votre compte et de l'application."

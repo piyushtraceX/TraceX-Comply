@@ -5,9 +5,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/Dashboard";
+import SupplyChain from "@/pages/SupplyChain";
+import Compliance from "@/pages/Compliance";
 import Declarations from "@/pages/Declarations";
-import Suppliers from "@/pages/Suppliers";
-import Reports from "@/pages/Reports";
+import Customers from "@/pages/Customers";
 import Settings from "@/pages/Settings";
 import { ThemeProvider } from "next-themes";
 import { LanguageProvider } from "./contexts/LanguageContext";
@@ -16,9 +17,10 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Dashboard} />
+      <Route path="/supply-chain" component={SupplyChain} />
+      <Route path="/compliance" component={Compliance} />
       <Route path="/declarations" component={Declarations} />
-      <Route path="/suppliers" component={Suppliers} />
-      <Route path="/reports" component={Reports} />
+      <Route path="/customers" component={Customers} />
       <Route path="/settings" component={Settings} />
       <Route component={NotFound} />
     </Switch>

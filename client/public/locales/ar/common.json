@@ -79,11 +79,14 @@
     "declarations": {
       "description": "قم بإدارة جميع إعلانات EUDR الخاصة بك هنا."
     },
-    "suppliers": {
-      "description": "عرض وإدارة قائمة الموردين الخاصة بك."
+    "supplyChain": {
+      "description": "عرض وإدارة شبكة سلسلة التوريد الخاصة بك."
     },
-    "reports": {
-      "description": "الوصول إلى تقارير التوافق والتحليلات."
+    "compliance": {
+      "description": "مراقبة حالة الامتثال عبر سلسلة التوريد الخاصة بك."
+    },
+    "customers": {
+      "description": "إدارة علاقات العملاء والتواصل."
     },
     "settings": {
       "description": "تكوين إعدادات حسابك والتطبيق."

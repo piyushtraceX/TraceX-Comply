@@ -18,7 +18,8 @@
     "title": "Dashboard",
     "lastUpdated": "Zuletzt aktualisiert: {{date}}",
     "exportBtn": "Exportieren",
-    "newDeclarationBtn": "Neue Erklärung"
+    "newDeclarationBtn": "Neue Erklärung",
+    "userRoles": "Benutzerrollen"
   },
   "search": {
     "placeholder": "Suchen"
@@ -79,11 +80,14 @@
     "declarations": {
       "description": "Verwalten Sie hier alle Ihre EUDR-Erklärungen."
     },
-    "suppliers": {
-      "description": "Sehen und verwalten Sie Ihre Lieferantenliste."
+    "supplyChain": {
+      "description": "Sehen und verwalten Sie Ihr Lieferkettennetzwerk."
     },
-    "reports": {
-      "description": "Greifen Sie auf Konformitätsberichte und Analysen zu."
+    "compliance": {
+      "description": "Überwachen Sie den Konformitätsstatus in Ihrer Lieferkette."
+    },
+    "customers": {
+      "description": "Verwalten Sie Ihre Kundenbeziehungen und Kommunikation."
     },
     "settings": {
       "description": "Konfigurieren Sie Ihre Konto- und Anwendungseinstellungen."
