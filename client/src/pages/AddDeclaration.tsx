@@ -94,6 +94,12 @@ export default function AddDeclaration() {
   const [location, navigate] = useLocation();
   const [activeTab, setActiveTab] = useState<'basic' | 'compliance' | 'documents'>('basic');
   
+  // Parse URL query parameters
+  const searchParams = new URLSearchParams(location.split('?')[1]);
+  const urlDeclarationType = searchParams.get('type') || 'inbound';
+  const isNewDeclaration = searchParams.get('new') === 'true';
+  const isFromExisting = searchParams.get('existing') === 'true';
+  
   // Sample data - would come from API in real application
   const suppliers = [
     { id: 1, name: "Eco Forestry Ltd." },
@@ -148,11 +154,11 @@ export default function AddDeclaration() {
     "Organic"
   ];
   
-  // Define form with default values
+  // Define form with default values based on URL parameters
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      declarationType: 'inbound',
+      declarationType: urlDeclarationType as 'inbound' | 'outbound',
       productType: '',
       productCode: '',
       volume: '',
@@ -169,7 +175,8 @@ export default function AddDeclaration() {
     }
   });
   
-  const declarationType = form.watch('declarationType');
+  // Watch the declaration type to conditionally render form fields
+  const formDeclarationType = form.watch('declarationType');
   
   const onSubmit = (data: FormData) => {
     console.log('Form submitted:', data);
@@ -271,7 +278,7 @@ export default function AddDeclaration() {
                   </CardHeader>
                   <CardContent className="space-y-6">
                     {/* Partner Selection (Supplier or Customer) */}
-                    {declarationType === 'inbound' ? (
+                    {formDeclarationType === 'inbound' ? (
                       <FormField
                         control={form.control}
                         name="supplier"
