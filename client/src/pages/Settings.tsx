@@ -11,7 +11,8 @@ import {
   Lock,
   Calendar,
   Mail,
-  Save
+  Save,
+  Plus
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -61,18 +62,30 @@ export default function Settings() {
         
         <div className="mt-6">
           <Tabs defaultValue="profile" className="w-full" onValueChange={setActiveTab}>
-            <TabsList className="grid w-full md:w-auto grid-cols-3 md:inline-flex">
+            <TabsList className="grid w-full md:w-auto grid-cols-3 lg:grid-cols-6 md:inline-flex overflow-auto">
               <TabsTrigger value="profile" className="flex items-center">
                 <User className="h-4 w-4 mr-2" />
                 <span>Profile</span>
               </TabsTrigger>
-              <TabsTrigger value="organization" className="flex items-center">
-                <Building className="h-4 w-4 mr-2" />
-                <span>Organization</span>
+              <TabsTrigger value="notifications" className="flex items-center">
+                <Bell className="h-4 w-4 mr-2" />
+                <span>Notifications</span>
               </TabsTrigger>
-              <TabsTrigger value="preferences" className="flex items-center">
+              <TabsTrigger value="api" className="flex items-center">
+                <Globe className="h-4 w-4 mr-2" />
+                <span>API Access</span>
+              </TabsTrigger>
+              <TabsTrigger value="display" className="flex items-center">
                 <SettingsIcon className="h-4 w-4 mr-2" />
-                <span>Preferences</span>
+                <span>Display & Language</span>
+              </TabsTrigger>
+              <TabsTrigger value="questionnaire" className="flex items-center">
+                <Calendar className="h-4 w-4 mr-2" />
+                <span>Questionnaire Config</span>
+              </TabsTrigger>
+              <TabsTrigger value="roles" className="flex items-center">
+                <Lock className="h-4 w-4 mr-2" />
+                <span>Roles & Access</span>
               </TabsTrigger>
             </TabsList>
             
@@ -196,13 +209,211 @@ export default function Settings() {
               </Card>
             </TabsContent>
             
-            {/* Preferences Tab */}
-            <TabsContent value="preferences">
+            {/* Notifications Tab */}
+            <TabsContent value="notifications">
               <Card>
                 <CardHeader>
-                  <CardTitle>Preferences</CardTitle>
+                  <CardTitle>Notification Settings</CardTitle>
                   <CardDescription>
-                    Manage your language, timezone, and notification settings
+                    Configure how and when you receive notifications
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <h3 className="text-md font-medium">Notification Channels</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label htmlFor="emailNotif">Email Notifications</Label>
+                        <p className="text-sm text-gray-500">
+                          Receive notifications via email
+                        </p>
+                      </div>
+                      <Switch id="emailNotif" defaultChecked />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label htmlFor="browserNotif">Browser Notifications</Label>
+                        <p className="text-sm text-gray-500">
+                          Receive notifications in your browser
+                        </p>
+                      </div>
+                      <Switch id="browserNotif" defaultChecked />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label htmlFor="smsNotif">SMS Notifications</Label>
+                        <p className="text-sm text-gray-500">
+                          Receive important alerts via SMS
+                        </p>
+                      </div>
+                      <Switch id="smsNotif" />
+                    </div>
+                  </div>
+                  
+                  <Separator />
+                  
+                  <h3 className="text-md font-medium">Notification Types</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label htmlFor="declarationAlerts">Declaration Alerts</Label>
+                        <p className="text-sm text-gray-500">
+                          Get notified about new or updated declarations
+                        </p>
+                      </div>
+                      <Switch id="declarationAlerts" defaultChecked />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label htmlFor="complianceAlerts">Compliance Alerts</Label>
+                        <p className="text-sm text-gray-500">
+                          Get notified about compliance issues or updates
+                        </p>
+                      </div>
+                      <Switch id="complianceAlerts" defaultChecked />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label htmlFor="documentAlerts">Document Alerts</Label>
+                        <p className="text-sm text-gray-500">
+                          Get notified about document uploads and verification
+                        </p>
+                      </div>
+                      <Switch id="documentAlerts" defaultChecked />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label htmlFor="systemAlerts">System Alerts</Label>
+                        <p className="text-sm text-gray-500">
+                          Get notified about system updates and maintenance
+                        </p>
+                      </div>
+                      <Switch id="systemAlerts" />
+                    </div>
+                  </div>
+                </CardContent>
+                <CardFooter className="flex justify-end">
+                  <Button>
+                    <Save className="h-4 w-4 mr-2" />
+                    Save Notification Settings
+                  </Button>
+                </CardFooter>
+              </Card>
+            </TabsContent>
+            
+            {/* API Access Tab */}
+            <TabsContent value="api">
+              <Card>
+                <CardHeader>
+                  <CardTitle>API Access</CardTitle>
+                  <CardDescription>
+                    Manage API keys and integration settings
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="bg-gray-50 p-4 rounded-lg border">
+                    <h3 className="text-md font-medium mb-2">Your API Key</h3>
+                    <div className="flex items-center space-x-2">
+                      <Input 
+                        type="password" 
+                        value="sk_test_51M9EUDR3gul4rty0mpl1an_XXXXXXXXXXXXXX" 
+                        readOnly 
+                        className="bg-gray-100 font-mono text-sm"
+                      />
+                      <Button variant="outline" size="sm">
+                        Copy
+                      </Button>
+                      <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
+                        Regenerate
+                      </Button>
+                    </div>
+                    <p className="text-sm text-gray-500 mt-2">
+                      Keep this key secret. Never share it or expose it in client-side code.
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <h3 className="text-md font-medium">API Permissions</h3>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label htmlFor="readAccess">Read Access</Label>
+                        <p className="text-sm text-gray-500">
+                          Allow reading declarations and compliance data
+                        </p>
+                      </div>
+                      <Switch id="readAccess" defaultChecked />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label htmlFor="writeAccess">Write Access</Label>
+                        <p className="text-sm text-gray-500">
+                          Allow creating and updating declarations
+                        </p>
+                      </div>
+                      <Switch id="writeAccess" defaultChecked />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label htmlFor="adminAccess">Admin Access</Label>
+                        <p className="text-sm text-gray-500">
+                          Allow managing users and system settings
+                        </p>
+                      </div>
+                      <Switch id="adminAccess" />
+                    </div>
+                  </div>
+                  
+                  <Separator />
+                  
+                  <div className="space-y-4">
+                    <h3 className="text-md font-medium">Webhook Endpoints</h3>
+                    <div className="space-y-2">
+                      <Label htmlFor="webhookUrl">Webhook URL</Label>
+                      <Input 
+                        id="webhookUrl" 
+                        placeholder="https://your-domain.com/webhook"
+                        defaultValue="https://example.com/webhook/eudr-notify"
+                      />
+                      <p className="text-sm text-gray-500">
+                        We'll send notifications to this URL when events occur
+                      </p>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label htmlFor="webhookEnabled">Enable Webhooks</Label>
+                        <p className="text-sm text-gray-500">
+                          Send real-time event notifications to your webhook URL
+                        </p>
+                      </div>
+                      <Switch id="webhookEnabled" defaultChecked />
+                    </div>
+                  </div>
+                </CardContent>
+                <CardFooter className="flex justify-end">
+                  <Button>
+                    <Save className="h-4 w-4 mr-2" />
+                    Save API Settings
+                  </Button>
+                </CardFooter>
+              </Card>
+            </TabsContent>
+            
+            {/* Display & Language Tab */}
+            <TabsContent value="display">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Display & Language</CardTitle>
+                  <CardDescription>
+                    Customize your interface language and display preferences
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -255,47 +466,296 @@ export default function Settings() {
                   
                   <Separator />
                   
-                  <h3 className="text-lg font-medium mb-2 flex items-center">
-                    <Bell className="h-5 w-5 mr-2 text-gray-600" />
-                    Notification Settings
-                  </h3>
+                  <h3 className="text-md font-medium">Theme & Display</h3>
                   
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label htmlFor="darkMode">Dark Mode</Label>
+                      <p className="text-sm text-gray-500">
+                        Enable dark mode for the interface
+                      </p>
+                    </div>
+                    <Switch id="darkMode" />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label htmlFor="compactView">Compact View</Label>
+                      <p className="text-sm text-gray-500">
+                        Show more information in less space
+                      </p>
+                    </div>
+                    <Switch id="compactView" />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label htmlFor="highContrast">High Contrast</Label>
+                      <p className="text-sm text-gray-500">
+                        Increase contrast for better visibility
+                      </p>
+                    </div>
+                    <Switch id="highContrast" />
+                  </div>
+                </CardContent>
+                <CardFooter className="flex justify-end">
+                  <Button>
+                    <Save className="h-4 w-4 mr-2" />
+                    Save Display Settings
+                  </Button>
+                </CardFooter>
+              </Card>
+            </TabsContent>
+            
+            {/* Questionnaire Configuration Tab */}
+            <TabsContent value="questionnaire">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Questionnaire Configuration</CardTitle>
+                  <CardDescription>
+                    Configure self-assessment questionnaires for EUDR compliance
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="defaultTemplate">Default Questionnaire Template</Label>
+                    <Select defaultValue="standard">
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select default template" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="standard">Standard EUDR SAQ</SelectItem>
+                        <SelectItem value="comprehensive">Comprehensive EUDR Assessment</SelectItem>
+                        <SelectItem value="simplified">Simplified EUDR SAQ</SelectItem>
+                        <SelectItem value="custom">Custom Template</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <Separator />
+                  
+                  <h3 className="text-md font-medium mb-2">Questionnaire Sections</h3>
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <Label htmlFor="emailNotif">Email Notifications</Label>
+                        <Label htmlFor="sectionEnvironmental">Environmental Impact</Label>
                         <p className="text-sm text-gray-500">
-                          Receive notifications via email
+                          Questions about environmental practices and impacts
                         </p>
                       </div>
-                      <Switch id="emailNotif" defaultChecked />
+                      <Switch id="sectionEnvironmental" defaultChecked />
                     </div>
                     
                     <div className="flex items-center justify-between">
                       <div>
-                        <Label htmlFor="declarationAlerts">Declaration Alerts</Label>
+                        <Label htmlFor="sectionSocial">Social Responsibility</Label>
                         <p className="text-sm text-gray-500">
-                          Get notified about new or updated declarations
+                          Questions about labor practices and community relations
                         </p>
                       </div>
-                      <Switch id="declarationAlerts" defaultChecked />
+                      <Switch id="sectionSocial" defaultChecked />
                     </div>
                     
                     <div className="flex items-center justify-between">
                       <div>
-                        <Label htmlFor="complianceAlerts">Compliance Alerts</Label>
+                        <Label htmlFor="sectionGovernance">Governance & Compliance</Label>
                         <p className="text-sm text-gray-500">
-                          Get notified about compliance issues or updates
+                          Questions about policies, procedures, and record-keeping
                         </p>
                       </div>
-                      <Switch id="complianceAlerts" defaultChecked />
+                      <Switch id="sectionGovernance" defaultChecked />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label htmlFor="sectionRisk">Risk Assessment</Label>
+                        <p className="text-sm text-gray-500">
+                          Questions about risk identification and mitigation
+                        </p>
+                      </div>
+                      <Switch id="sectionRisk" defaultChecked />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label htmlFor="sectionCertification">Certification</Label>
+                        <p className="text-sm text-gray-500">
+                          Questions about third-party certifications and audits
+                        </p>
+                      </div>
+                      <Switch id="sectionCertification" defaultChecked />
+                    </div>
+                  </div>
+                  
+                  <Separator />
+                  
+                  <h3 className="text-md font-medium mb-2">Assessment Settings</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label htmlFor="requireEvidence">Require Supporting Evidence</Label>
+                        <p className="text-sm text-gray-500">
+                          Require document uploads for key questions
+                        </p>
+                      </div>
+                      <Switch id="requireEvidence" defaultChecked />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label htmlFor="autoReminders">Automatic Reminders</Label>
+                        <p className="text-sm text-gray-500">
+                          Send automatic reminders for incomplete questionnaires
+                        </p>
+                      </div>
+                      <Switch id="autoReminders" defaultChecked />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label htmlFor="autoAssessment">Automatic Risk Assessment</Label>
+                        <p className="text-sm text-gray-500">
+                          Automatically categorize risk levels based on responses
+                        </p>
+                      </div>
+                      <Switch id="autoAssessment" defaultChecked />
+                    </div>
+                  </div>
+                </CardContent>
+                <CardFooter className="flex justify-end">
+                  <Button variant="outline" className="mr-2">
+                    Edit Questions
+                  </Button>
+                  <Button>
+                    <Save className="h-4 w-4 mr-2" />
+                    Save Questionnaire Settings
+                  </Button>
+                </CardFooter>
+              </Card>
+            </TabsContent>
+            
+            {/* Roles & Access Tab */}
+            <TabsContent value="roles">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Roles & Access Control</CardTitle>
+                  <CardDescription>
+                    Manage user roles and access permissions
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="space-y-4">
+                    <h3 className="text-md font-medium">System Roles</h3>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <div className="border rounded-lg p-4 bg-gray-50">
+                        <h4 className="font-medium mb-2">Admin</h4>
+                        <p className="text-sm text-gray-500 mb-2">
+                          Full access to all features and settings
+                        </p>
+                        <div className="flex justify-end">
+                          <Button variant="outline" size="sm">Edit</Button>
+                        </div>
+                      </div>
+                      
+                      <div className="border rounded-lg p-4 bg-gray-50">
+                        <h4 className="font-medium mb-2">Compliance Manager</h4>
+                        <p className="text-sm text-gray-500 mb-2">
+                          Manage declarations and compliance data
+                        </p>
+                        <div className="flex justify-end">
+                          <Button variant="outline" size="sm">Edit</Button>
+                        </div>
+                      </div>
+                      
+                      <div className="border rounded-lg p-4 bg-gray-50">
+                        <h4 className="font-medium mb-2">Supplier Manager</h4>
+                        <p className="text-sm text-gray-500 mb-2">
+                          Manage suppliers and supplier data
+                        </p>
+                        <div className="flex justify-end">
+                          <Button variant="outline" size="sm">Edit</Button>
+                        </div>
+                      </div>
+                      
+                      <div className="border rounded-lg p-4 bg-gray-50">
+                        <h4 className="font-medium mb-2">Auditor</h4>
+                        <p className="text-sm text-gray-500 mb-2">
+                          View-only access to compliance data
+                        </p>
+                        <div className="flex justify-end">
+                          <Button variant="outline" size="sm">Edit</Button>
+                        </div>
+                      </div>
+                      
+                      <div className="border rounded-lg p-4 bg-gray-50">
+                        <h4 className="font-medium mb-2">Supplier</h4>
+                        <p className="text-sm text-gray-500 mb-2">
+                          Limited access to own data and questionnaires
+                        </p>
+                        <div className="flex justify-end">
+                          <Button variant="outline" size="sm">Edit</Button>
+                        </div>
+                      </div>
+                      
+                      <div className="border rounded-lg p-4 border-dashed flex items-center justify-center">
+                        <Button variant="ghost" className="flex items-center">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Custom Role
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <Separator />
+                  
+                  <h3 className="text-md font-medium mb-2">Access Control Settings</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label htmlFor="twoFactor">Require Two-Factor Authentication</Label>
+                        <p className="text-sm text-gray-500">
+                          Require 2FA for all administrator accounts
+                        </p>
+                      </div>
+                      <Switch id="twoFactor" defaultChecked />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label htmlFor="accessLogs">Enable Access Logs</Label>
+                        <p className="text-sm text-gray-500">
+                          Log all user access and actions
+                        </p>
+                      </div>
+                      <Switch id="accessLogs" defaultChecked />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label htmlFor="ipRestriction">IP Restriction</Label>
+                        <p className="text-sm text-gray-500">
+                          Limit access to specific IP addresses
+                        </p>
+                      </div>
+                      <Switch id="ipRestriction" />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label htmlFor="sessionTimeout">Session Timeout</Label>
+                        <p className="text-sm text-gray-500">
+                          Automatically log out inactive users after 60 minutes
+                        </p>
+                      </div>
+                      <Switch id="sessionTimeout" defaultChecked />
                     </div>
                   </div>
                 </CardContent>
                 <CardFooter className="flex justify-end">
                   <Button>
                     <Save className="h-4 w-4 mr-2" />
-                    Save Preferences
+                    Save Access Settings
                   </Button>
                 </CardFooter>
               </Card>

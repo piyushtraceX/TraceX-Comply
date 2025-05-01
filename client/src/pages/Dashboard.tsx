@@ -61,40 +61,115 @@ export default function Dashboard() {
           <RiskAssessmentCategories />
         </div>
         
-        {/* Recent Activity */}
-        <div className="bg-white shadow rounded-lg mb-6">
-          <div className="px-4 py-5 border-b border-gray-200 sm:px-6">
-            <h3 className="text-lg leading-6 font-medium text-gray-900">
-              {t('recentActivity.title')}
-            </h3>
-          </div>
-          <div className="overflow-hidden">
-            <ActivityTimeline />
-            
-            <div className="bg-gray-50 px-4 py-4 sm:px-6">
-              <div className={cn("flex items-center justify-between", isRTL && "flex-row-reverse")}>
-                <div className="text-sm text-gray-500">
-                  {t('recentActivity.showing', { count: 3, total: 25 })}
+        {/* Supplier Compliance Status */}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 mb-6">
+          <div className="bg-white shadow rounded-lg">
+            <div className="px-4 py-5 border-b border-gray-200 sm:px-6">
+              <h3 className="text-lg leading-6 font-medium text-gray-900">
+                Supplier Compliance Status
+              </h3>
+            </div>
+            <div className="p-6">
+              <div className="mb-8">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-medium text-gray-700">Overall Compliance</span>
+                  <span className="text-sm font-medium text-gray-700">72%</span>
                 </div>
+                <div className="w-full bg-gray-200 rounded-full h-2.5">
+                  <div className="bg-primary-600 h-2.5 rounded-full" style={{ width: '72%' }}></div>
+                </div>
+              </div>
+              
+              <div className="space-y-4">
                 <div>
-                  <a 
-                    href="#" 
-                    className={cn(
-                      "inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500",
-                      isRTL && "flex-row-reverse"
-                    )}
-                  >
-                    {t('recentActivity.viewAll')}
-                    {isRTL ? (
-                      <svg xmlns="http://www.w3.org/2000/svg" className="mr-2 h-5 w-5 text-gray-400 rtl-flip" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                      </svg>
-                    ) : (
-                      <svg xmlns="http://www.w3.org/2000/svg" className="ml-2 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                      </svg>
-                    )}
-                  </a>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm font-medium text-gray-700">Tier 1 Suppliers</span>
+                    <span className="text-sm font-medium text-gray-700">85%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2.5">
+                    <div className="bg-green-500 h-2.5 rounded-full" style={{ width: '85%' }}></div>
+                  </div>
+                </div>
+                
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm font-medium text-gray-700">Tier 2 Suppliers</span>
+                    <span className="text-sm font-medium text-gray-700">64%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2.5">
+                    <div className="bg-amber-500 h-2.5 rounded-full" style={{ width: '64%' }}></div>
+                  </div>
+                </div>
+                
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm font-medium text-gray-700">Tier 3 Suppliers</span>
+                    <span className="text-sm font-medium text-gray-700">42%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2.5">
+                    <div className="bg-red-500 h-2.5 rounded-full" style={{ width: '42%' }}></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white shadow rounded-lg">
+            <div className="px-4 py-5 border-b border-gray-200 sm:px-6">
+              <h3 className="text-lg leading-6 font-medium text-gray-900">
+                Compliance by Product Category
+              </h3>
+            </div>
+            <div className="p-6">
+              <div className="space-y-4">
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm font-medium text-gray-700">Cocoa</span>
+                    <span className="text-sm font-medium text-gray-700">88%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2.5">
+                    <div className="bg-green-500 h-2.5 rounded-full" style={{ width: '88%' }}></div>
+                  </div>
+                </div>
+                
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm font-medium text-gray-700">Palm Oil</span>
+                    <span className="text-sm font-medium text-gray-700">76%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2.5">
+                    <div className="bg-green-500 h-2.5 rounded-full" style={{ width: '76%' }}></div>
+                  </div>
+                </div>
+                
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm font-medium text-gray-700">Coffee</span>
+                    <span className="text-sm font-medium text-gray-700">62%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2.5">
+                    <div className="bg-amber-500 h-2.5 rounded-full" style={{ width: '62%' }}></div>
+                  </div>
+                </div>
+                
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm font-medium text-gray-700">Timber</span>
+                    <span className="text-sm font-medium text-gray-700">54%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2.5">
+                    <div className="bg-amber-500 h-2.5 rounded-full" style={{ width: '54%' }}></div>
+                  </div>
+                </div>
+                
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm font-medium text-gray-700">Rubber</span>
+                    <span className="text-sm font-medium text-gray-700">39%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2.5">
+                    <div className="bg-red-500 h-2.5 rounded-full" style={{ width: '39%' }}></div>
+                  </div>
                 </div>
               </div>
             </div>

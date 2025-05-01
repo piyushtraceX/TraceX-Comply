@@ -265,13 +265,41 @@ export default function Declarations() {
               {t('pages.declarations.description')}
             </p>
           </div>
-          <div className="mt-4 flex md:mt-0">
-            <Link href="/add-declaration">
+          <div className="mt-4 flex gap-2 md:mt-0">
+            <Link href="/add-declaration?type=inbound">
               <Button className="flex items-center">
                 <Plus className="mr-2 h-4 w-4" />
-                New Declaration
+                Add Inbound Declaration
               </Button>
             </Link>
+            
+            <div className="relative group">
+              <Button 
+                variant="outline" 
+                className="flex items-center"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Add Outbound Declaration
+                <ChevronRight className="ml-2 h-4 w-4" />
+              </Button>
+              
+              <div className="absolute right-0 mt-2 w-60 bg-white rounded-md shadow-lg overflow-hidden z-20 border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
+                <div className="py-1">
+                  <Link href="/add-declaration?type=outbound&new=true">
+                    <button className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 flex items-center">
+                      <Plus className="mr-2 h-4 w-4 text-primary-600" />
+                      New Declaration
+                    </button>
+                  </Link>
+                  <Link href="/add-declaration?type=outbound&existing=true">
+                    <button className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 flex items-center">
+                      <FileText className="mr-2 h-4 w-4 text-primary-600" />
+                      From Existing Declaration
+                    </button>
+                  </Link>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         
