@@ -16,37 +16,79 @@ import AddCustomer from "@/pages/AddCustomer";
 import Settings from "@/pages/Settings";
 import { ThemeProvider } from "next-themes";
 import { LanguageProvider } from "./contexts/LanguageContext";
+import React, { Suspense } from "react";
+
+// Simple loading component for suspense fallback
+const Loading = () => (
+  <div className="flex h-screen w-full items-center justify-center bg-gray-50">
+    <div className="text-center">
+      <div className="h-16 w-16 animate-spin rounded-full border-4 border-gray-200 border-t-primary-600 mx-auto"></div>
+      <p className="mt-4 text-gray-700">Loading application...</p>
+    </div>
+  </div>
+);
+
+// Debug component to help diagnose routing issues
+const DebugInfo = () => {
+  const [location, setLocation] = React.useState(window.location.pathname);
+  
+  React.useEffect(() => {
+    console.log("Debug component mounted at:", location);
+    const handleLocationChange = () => {
+      const newLocation = window.location.pathname;
+      console.log("Location changed to:", newLocation);
+      setLocation(newLocation);
+    };
+    
+    window.addEventListener('popstate', handleLocationChange);
+    return () => window.removeEventListener('popstate', handleLocationChange);
+  }, []);
+  
+  return (
+    <div className="fixed bottom-0 right-0 bg-white p-2 text-xs border border-gray-300 rounded-tl-md">
+      Route: {location}
+    </div>
+  );
+};
 
 function Router() {
   return (
-    <Switch>
-      <Route path="/" component={Dashboard} />
-      <Route path="/supply-chain" component={SupplyChain} />
-      <Route path="/add-supplier" component={AddSupplier} />
-      <Route path="/supplier/:id" component={SupplierDetail} />
-      <Route path="/compliance" component={Compliance} />
-      <Route path="/declarations" component={Declarations} />
-      <Route path="/add-declaration" component={AddDeclaration} />
-      <Route path="/customers" component={Customers} />
-      <Route path="/add-customer" component={AddCustomer} />
-      <Route path="/settings" component={Settings} />
-      <Route component={NotFound} />
-    </Switch>
+    <Suspense fallback={<Loading />}>
+      <Switch>
+        <Route path="/" component={Dashboard} />
+        <Route path="/supply-chain" component={SupplyChain} />
+        <Route path="/add-supplier" component={AddSupplier} />
+        <Route path="/supplier/:id" component={SupplierDetail} />
+        <Route path="/compliance" component={Compliance} />
+        <Route path="/declarations" component={Declarations} />
+        <Route path="/add-declaration" component={AddDeclaration} />
+        <Route path="/customers" component={Customers} />
+        <Route path="/add-customer" component={AddCustomer} />
+        <Route path="/settings" component={Settings} />
+        <Route path="/debug" component={() => <div className="p-10">Debug Page Working</div>} />
+        <Route component={NotFound} />
+      </Switch>
+      <DebugInfo />
+    </Suspense>
   );
 }
 
 function App() {
+  console.log("App component rendering");
+  
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider attribute="class" defaultTheme="light">
-        <LanguageProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Router />
-          </TooltipProvider>
-        </LanguageProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+    <div className="app-container">
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider attribute="class" defaultTheme="light">
+          <LanguageProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Router />
+            </TooltipProvider>
+          </LanguageProvider>
+        </ThemeProvider>
+      </QueryClientProvider>
+    </div>
   );
 }
 

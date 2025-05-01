@@ -5,20 +5,9 @@ import { useTranslation } from '@/hooks/use-translation';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Logo } from '@/components/ui/logo';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { X } from 'lucide-react';
+import { X, Menu, LayoutDashboard, Network, ShieldCheck, FileText, Users, Settings, User, LogOut, ClipboardList } from 'lucide-react';
 
-import {
-  LayoutDashboard,
-  Network,
-  ShieldCheck,
-  FileText,
-  Users,
-  Settings,
-  User,
-  LogOut,
-  ClipboardList
-} from 'lucide-react';
-
+// Navigation item type
 type NavItem = {
   href: string;
   label: string;
@@ -39,6 +28,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const { isRTL } = useLanguage();
   const [location] = useLocation();
   const isMobile = useIsMobile();
+
+  // Log sidebar state for debugging
+  useEffect(() => {
+    console.log("Sidebar rendered:", { isOpen, isMobile, location });
+    
+    return () => console.log("Sidebar unmounted");
+  }, [isOpen, isMobile, location]);
 
   // Navigation items in the order specified by the reference app
   const navItems: NavItem[] = [
@@ -106,19 +102,31 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <>
+      {/* Mobile menu toggle button - independent of sidebar state */}
+      {isMobile && !isOpen && (
+        <button
+          className="fixed md:hidden top-4 left-4 z-50 p-2 bg-white rounded-md shadow-md"
+          onClick={onClose}
+          aria-label="Open menu"
+        >
+          <Menu className="h-6 w-6 text-gray-700" />
+        </button>
+      )}
+    
+      {/* Sidebar */}
       <aside className={cn(
-        "bg-white border-r border-gray-200 md:w-64 flex-shrink-0 fixed md:sticky md:top-0 md:h-screen z-40 transition-all duration-300",
+        "bg-white border-r border-gray-200 h-screen overflow-hidden z-40 transition-all duration-300",
         isMobile ? (
           isOpen 
-            ? "top-0 left-0 right-0 bottom-0 h-screen w-full"
-            : "hidden md:block"
-        ) : "w-64"
+            ? "fixed inset-0 w-full md:w-64"
+            : "hidden"
+        ) : "fixed w-64 md:block"
       )}>
         <div className="flex flex-col h-full">
-          {/* Logo and close button on mobile */}
-          <div className="px-6 py-6 border-b border-gray-200 flex items-center justify-between">
+          {/* Logo and close button */}
+          <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
             <Logo />
-            {isMobile && isOpen && (
+            {isMobile && isOpen && onClose && (
               <button 
                 onClick={onClose}
                 className="rounded-md p-2 text-gray-500 hover:bg-gray-100"
@@ -204,7 +212,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </nav>
           
           {/* User Profile */}
-          <div className="border-t border-gray-200 p-4">
+          <div className="border-t border-gray-200 p-4 mt-auto">
             <div className={cn('flex items-center', isRTL && 'flex-row-reverse')}>
               <div className="flex-shrink-0">
                 <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
