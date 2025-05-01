@@ -63,6 +63,35 @@
       "active": "نشط",
       "pending": "قيد الانتظار",
       "flagged": "محدد"
+    },
+    "tabs": {
+      "profile": "الملف الشخصي",
+      "saq": "استبيان التقييم الذاتي",
+      "saqManagement": "إدارة SAQ",
+      "onboarding": "الإعداد الأولي",
+      "declarations": "الإعلانات",
+      "documents": "المستندات"
+    },
+    "saqManagement": {
+      "title": "إدارة SAQ",
+      "description": "إدارة استبيانات التقييم الذاتي لهذا المورد",
+      "createNew": "إنشاء استبيان جديد",
+      "exportTemplate": "تصدير النموذج",
+      "table": {
+        "name": "اسم الاستبيان",
+        "type": "النوع",
+        "status": "الحالة",
+        "sentDate": "تاريخ الإرسال",
+        "dueDate": "تاريخ الاستحقاق",
+        "completion": "الإكمال",
+        "actions": "الإجراءات"
+      },
+      "status": {
+        "completed": "مكتمل",
+        "pending": "قيد التنفيذ",
+        "overdue": "متأخر",
+        "draft": "مسودة"
+      }
     }
   },
   "complianceStatus": {

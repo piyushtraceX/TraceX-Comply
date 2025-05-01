@@ -63,6 +63,35 @@
       "active": "Actif",
       "pending": "En attente",
       "flagged": "Signalé"
+    },
+    "tabs": {
+      "profile": "Profil",
+      "saq": "Questionnaire d'auto-évaluation",
+      "saqManagement": "Gestion SAQ",
+      "onboarding": "Intégration",
+      "declarations": "Déclarations",
+      "documents": "Documents"
+    },
+    "saqManagement": {
+      "title": "Gestion SAQ",
+      "description": "Gérer les questionnaires d'auto-évaluation pour ce fournisseur",
+      "createNew": "Créer un nouveau questionnaire",
+      "exportTemplate": "Exporter le modèle",
+      "table": {
+        "name": "Nom du questionnaire",
+        "type": "Type",
+        "status": "Statut",
+        "sentDate": "Date d'envoi",
+        "dueDate": "Date d'échéance",
+        "completion": "Achèvement",
+        "actions": "Actions"
+      },
+      "status": {
+        "completed": "Terminé",
+        "pending": "En cours",
+        "overdue": "En retard",
+        "draft": "Brouillon"
+      }
     }
   },
   "complianceStatus": {

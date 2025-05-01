@@ -63,6 +63,35 @@
       "active": "Aktiv",
       "pending": "Ausstehend",
       "flagged": "Markiert"
+    },
+    "tabs": {
+      "profile": "Profil",
+      "saq": "Selbstbewertungsfragebogen",
+      "saqManagement": "SAQ-Verwaltung",
+      "onboarding": "Onboarding",
+      "declarations": "Erklärungen",
+      "documents": "Dokumente"
+    },
+    "saqManagement": {
+      "title": "SAQ-Verwaltung",
+      "description": "Selbstbewertungsfragebögen für diesen Lieferanten verwalten",
+      "createNew": "Neuen Fragebogen erstellen",
+      "exportTemplate": "Vorlage exportieren",
+      "table": {
+        "name": "Fragebogenname",
+        "type": "Typ",
+        "status": "Status",
+        "sentDate": "Sendedatum",
+        "dueDate": "Fälligkeitsdatum",
+        "completion": "Fertigstellung",
+        "actions": "Aktionen"
+      },
+      "status": {
+        "completed": "Abgeschlossen",
+        "pending": "In Bearbeitung",
+        "overdue": "Überfällig",
+        "draft": "Entwurf"
+      }
     }
   },
   "complianceStatus": {
