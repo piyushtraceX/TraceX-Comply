@@ -464,7 +464,7 @@ export default function SupplierDetail() {
                             <td className="py-3 px-4 text-sm">EUDR Due Diligence Q1 2024</td>
                             <td className="py-3 px-4 text-sm">Specific</td>
                             <td className="py-3 px-4 text-sm">
-                              <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">{t('supplier.saqManagement.status.pending')}</Badge>
+                              <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">Pending</Badge>
                             </td>
                             <td className="py-3 px-4 text-sm">Mar 1, 2024</td>
                             <td className="py-3 px-4 text-sm">Apr 1, 2024</td>
