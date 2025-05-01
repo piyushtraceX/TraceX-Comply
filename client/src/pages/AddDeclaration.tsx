@@ -95,7 +95,7 @@ export default function AddDeclaration() {
   const [activeTab, setActiveTab] = useState<'basic' | 'compliance' | 'documents'>('basic');
   
   // Parse URL query parameters
-  const searchParams = new URLSearchParams(location.split('?')[1]);
+  const searchParams = new URLSearchParams(location.split('?')[1] || '');
   const urlDeclarationType = searchParams.get('type') || 'inbound';
   const isNewDeclaration = searchParams.get('new') === 'true';
   const isFromExisting = searchParams.get('existing') === 'true';
