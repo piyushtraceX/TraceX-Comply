@@ -23,6 +23,8 @@ interface StatCardProps {
   iconBgColor: string;
   iconColor: string;
   changeColor: string;
+  progress?: number;
+  progressColor?: string;
 }
 
 const StatCard: React.FC<StatCardProps> = ({
@@ -33,6 +35,8 @@ const StatCard: React.FC<StatCardProps> = ({
   iconBgColor,
   iconColor,
   changeColor,
+  progress,
+  progressColor,
 }) => {
   const { isRTL } = useLanguage();
 
@@ -52,13 +56,24 @@ const StatCard: React.FC<StatCardProps> = ({
           </div>
           <div className={cn("ml-5 w-0 flex-1", isRTL && "mr-5 ml-0 text-right")}>
             <dt className="text-sm font-medium text-gray-500 truncate">{title}</dt>
-            <dd className={cn("flex items-baseline", isRTL && "flex-row-reverse justify-end")}>
-              <div className="text-2xl font-semibold text-gray-900">{value}</div>
-              {change !== 0 && (
-                <div className={cn(`ml-2 flex items-baseline text-sm font-semibold ${changeColor}`, isRTL && "mr-2 ml-0")}>
-                  {changeIcon}
-                  <span className="sr-only">{change > 0 ? 'Increased by' : change < 0 ? 'Decreased by' : 'No change'}</span>
-                  {Math.abs(change)}%
+            <dd>
+              <div className={cn("flex items-baseline", isRTL && "flex-row-reverse justify-end")}>
+                <div className="text-2xl font-semibold text-gray-900">{value}</div>
+                {change !== 0 && (
+                  <div className={cn(`ml-2 flex items-baseline text-sm font-semibold ${changeColor}`, isRTL && "mr-2 ml-0")}>
+                    {changeIcon}
+                    <span className="sr-only">{change > 0 ? 'Increased by' : change < 0 ? 'Decreased by' : 'No change'}</span>
+                    {Math.abs(change)}%
+                  </div>
+                )}
+              </div>
+              
+              {progress !== undefined && (
+                <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                  <div 
+                    className={`h-2 rounded-full ${progressColor || 'bg-primary-600'}`} 
+                    style={{ width: `${progress}%` }}
+                  ></div>
                 </div>
               )}
             </dd>
@@ -72,10 +87,59 @@ const StatCard: React.FC<StatCardProps> = ({
 export const StatsCards: React.FC = () => {
   const { t } = useTranslation();
 
-  // Return an empty div as requested to remove all stat tiles
+  // Sample data for stats cards
+  const statCards = [
+    {
+      title: t('stats.totalDeclarations'),
+      value: 142,
+      change: 12,
+      icon: <FileText className="h-6 w-6 text-white" />,
+      iconBgColor: 'bg-primary-600',
+      iconColor: 'text-white',
+      changeColor: 'text-green-600',
+      progress: 85,
+      progressColor: 'bg-primary-600'
+    },
+    {
+      title: t('stats.completedAssessments'),
+      value: 78,
+      change: 5,
+      icon: <CheckCircle className="h-6 w-6 text-white" />,
+      iconBgColor: 'bg-green-600',
+      iconColor: 'text-white',
+      changeColor: 'text-green-600',
+      progress: 78,
+      progressColor: 'bg-green-600'
+    },
+    {
+      title: t('stats.pendingReviews'),
+      value: 23,
+      change: -8,
+      icon: <Clock className="h-6 w-6 text-white" />,
+      iconBgColor: 'bg-amber-500',
+      iconColor: 'text-white',
+      changeColor: 'text-amber-500',
+      progress: 62,
+      progressColor: 'bg-amber-500'
+    },
+    {
+      title: t('stats.complianceIssues'),
+      value: 6,
+      change: -15,
+      icon: <AlertTriangle className="h-6 w-6 text-white" />,
+      iconBgColor: 'bg-red-600',
+      iconColor: 'text-white',
+      changeColor: 'text-green-600',
+      progress: 35,
+      progressColor: 'bg-red-600'
+    }
+  ];
+
   return (
-    <div className="mb-6">
-      {/* Stat tiles have been removed as requested */}
+    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-6">
+      {statCards.map((card, index) => (
+        <StatCard key={index} {...card} />
+      ))}
     </div>
   );
 };

@@ -226,6 +226,8 @@ export default function SupplierDetail() {
           <TabsList className="bg-gray-100 p-1">
             <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="saq">Self Assessment Questionnaire</TabsTrigger>
+            <TabsTrigger value="saq-management">SAQ Management</TabsTrigger>
+            <TabsTrigger value="onboarding">Onboarding</TabsTrigger>
             <TabsTrigger value="declarations">Declarations</TabsTrigger>
             <TabsTrigger value="documents">Documents</TabsTrigger>
           </TabsList>
