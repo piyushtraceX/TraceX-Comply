@@ -252,10 +252,12 @@ export default function SupplyChain() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex justify-end space-x-2">
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                          <span className="sr-only">View</span>
-                          <Eye className="h-4 w-4" />
-                        </Button>
+                        <Link href={`/supplier/${supplier.id}`}>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <span className="sr-only">View</span>
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </Link>
                         <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                           <span className="sr-only">Edit</span>
                           <Edit className="h-4 w-4" />

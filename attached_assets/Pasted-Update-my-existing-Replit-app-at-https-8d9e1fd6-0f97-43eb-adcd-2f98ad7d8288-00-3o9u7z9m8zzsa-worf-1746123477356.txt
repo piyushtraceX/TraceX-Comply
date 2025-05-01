@@ -1,0 +1,96 @@
+Update my existing Replit app at:
+https://8d9e1fd6-0f97-43eb-adcd-2f98ad7d8288-00-3o9u7z9m8zzsa.worf.replit.dev/
+
+to exactly match the reference app at:
+https://complimate-eudr.replit.app/
+
+⚠️ Do NOT create a new project. Update the existing codebase in-place.
+
+🧩 Tech stack:
+- React
+- TypeScript
+- Next.js
+- Tailwind CSS
+- Internationalization via next-i18next or similar
+
+---
+
+✅ TASK OBJECTIVES
+
+1. **🧭 Navigation Sidebar**
+   - Match structure and icons:
+     - Dashboard
+     - Supply Chain
+     - Compliance
+       - EUDR Declarations (nested)
+     - Customers
+     - Settings
+   - Sidebar must collapse/toggle on smaller screens.
+   - Active menu should be visually highlighted.
+
+2. **📊 Dashboard Page**
+   - Replicate content: cards, risk charts, compliance progress, document status.
+   - Make layout responsive for all screen sizes.
+   - **Remove persona/user profile cards**.
+   - Ensure interactive filters/charts function correctly.
+
+3. **📦 Supply Chain Page**
+   - Add responsive **"Add Supplier"** button → Navigates to a form page.
+   - Each supplier row should have a **View** button → Opens detail view with:
+     - Profile section
+     - **SAQ (Self Assessment Questionnaire)** tab — include all fields/sections as in the reference.
+   - Supplier detail page should include working tabs and responsive layout.
+
+4. **📂 Compliance Page**
+   - Match metrics display, layout, and styling.
+   - Nest **EUDR Declarations** under this menu.
+
+5. **📋 EUDR Declarations Page**
+   - Include two tabs:
+     - **Inbound Declarations**
+     - **Outbound Declarations**
+   - Each has its own table layout, filter controls, and action buttons.
+   - "Add Declaration" button opens a form page.
+   - Forms should be responsive and functional.
+   - Ensure pagination, status tags, and row actions work and match the reference.
+
+6. **👥 Customers Page**
+   - Add **"Add Company"** button — opens responsive form page.
+   - Table should show: Company Name, Industry, Score.
+   - View/Edit/Delete buttons must work and look identical to reference.
+
+7. **⚙️ Settings Page**
+   - Ensure all settings tabs (profile, language, etc.) are present.
+   - Forms should be responsive, styled, and working.
+
+8. **🔄 Persona Switcher**
+   - Dropdown in top-right with these roles:
+     - Admin, Compliance Officer, Supplier Manager, Declaration Specialist, Auditor, Supplier, Customer, EU Operator
+   - Make dropdown fully styled and responsive.
+
+9. **🌍 Internationalization**
+   - Implement i18n using `next-i18next`:
+     - All visible UI text must use translation keys.
+     - Provide translation files (`en.json`, `fr.json`).
+   - Add working language switcher in the top bar.
+
+10. **📱 Responsiveness & Functionality**
+   - All buttons (Add Supplier, Add Company, Add Declaration) must:
+     - Be responsive
+     - Trigger navigation or modal actions
+     - Link to proper forms or tabs
+   - All forms must validate fields, look good on mobile, and be styled with Tailwind.
+
+11. **🧠 Bonus**
+   - Match color scheme, font size, padding, and whitespace exactly to the reference.
+   - Ensure proper scroll areas for tables and nested sections.
+   - Tabs (like SAQ and Inbound/Outbound) should remember state if possible.
+
+---
+
+📤 Output:
+- Updated and functional app
+- Responsive components and hierarchy
+- Working buttons and linked forms
+- Language switcher enabled
+- Full parity with Complimate EUDR reference app
