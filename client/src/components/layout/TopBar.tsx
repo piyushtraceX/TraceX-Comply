@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Menu, Search, Bell } from 'lucide-react';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { PersonaSwitcher } from '@/components/PersonaSwitcher';
 import { useTranslation } from '@/hooks/use-translation';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
@@ -48,6 +49,11 @@ export const TopBar: React.FC<TopBarProps> = ({ title, toggleSidebar }) => {
         
         {/* Right navigation */}
         <div className={cn('flex items-center space-x-4', isRTL && 'flex-row-reverse space-x-0 space-x-reverse')}>
+          {/* Persona Switcher */}
+          <div className="hidden md:block">
+            <PersonaSwitcher />
+          </div>
+          
           {/* Notifications */}
           <button type="button" className="p-1 rounded-full text-gray-500 hover:text-gray-600 hover:bg-gray-100 relative">
             <span className="sr-only">{t('notifications.label')}</span>

@@ -4,6 +4,9 @@ import { StatsCards } from '@/components/dashboard/StatsCards';
 import { ActivityTimeline } from '@/components/dashboard/ActivityTimeline';
 import { SupplierList } from '@/components/dashboard/SupplierList';
 import { ComplianceChart } from '@/components/dashboard/ComplianceChart';
+import { TopLevelMetrics } from '@/components/dashboard/TopLevelMetrics';
+import { ComplianceTrendsChart } from '@/components/dashboard/ComplianceTrendsChart';
+import { RiskAssessmentCategories } from '@/components/dashboard/RiskAssessmentCategories';
 import { useTranslation } from '@/hooks/use-translation';
 import { Calendar, Download, Plus, Factory, TrendingUp, ShieldCheck, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -104,8 +107,17 @@ export default function Dashboard() {
           </div>
         </div>
         
+        {/* Top Level Metrics */}
+        <TopLevelMetrics />
+        
         {/* Stats cards */}
         <StatsCards />
+        
+        {/* Two-column layout for trends and risk assessment */}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 mb-6">
+          <ComplianceTrendsChart />
+          <RiskAssessmentCategories />
+        </div>
         
         {/* Recent Activity */}
         <div className="bg-white shadow rounded-lg mb-6">
