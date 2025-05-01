@@ -153,11 +153,9 @@ export default function Declarations() {
         <div className="md:flex md:items-center md:justify-between mb-6">
           <div className="flex-1 min-w-0">
             <div className="flex items-center">
-              <Link href="/compliance">
-                <a className="text-primary-600 hover:text-primary-700 flex items-center mr-2">
-                  <ChevronLeft className="h-5 w-5" />
-                  <span>Compliance</span>
-                </a>
+              <Link href="/compliance" className="text-primary-600 hover:text-primary-700 flex items-center mr-2">
+                <ChevronLeft className="h-5 w-5" />
+                <span>Compliance</span>
               </Link>
               <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
                 EUDR Declarations
