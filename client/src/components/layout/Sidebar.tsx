@@ -3,6 +3,7 @@ import { Link, useLocation } from 'wouter';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/hooks/use-translation';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { Logo } from '@/components/ui/logo';
 
 import {
   LayoutDashboard,
@@ -12,7 +13,8 @@ import {
   Users,
   Settings,
   User,
-  LogOut
+  LogOut,
+  ClipboardList
 } from 'lucide-react';
 
 type NavItem = {
@@ -38,13 +40,6 @@ export const Sidebar: React.FC = () => {
       href: '/supply-chain',
       label: t('nav.supplyChain'),
       icon: <Network className={cn('h-5 w-5', isRTL ? 'ml-3 rtl-flip' : 'mr-3')} />,
-      children: [
-        {
-          href: '/saq-management',
-          label: t('nav.saqManagement') || 'SAQ Management',
-          icon: <FileText className={cn('h-5 w-5', isRTL ? 'ml-3 rtl-flip' : 'mr-3')} />,
-        },
-      ]
     },
     {
       href: '/compliance',
@@ -55,6 +50,11 @@ export const Sidebar: React.FC = () => {
           href: '/declarations',
           label: t('nav.eudrDeclarations'),
           icon: <FileText className={cn('h-5 w-5', isRTL ? 'ml-3 rtl-flip' : 'mr-3')} />,
+        },
+        {
+          href: '/saq-management',
+          label: t('nav.saqManagement') || 'SAQ Management',
+          icon: <ClipboardList className={cn('h-5 w-5', isRTL ? 'ml-3 rtl-flip' : 'mr-3')} />,
         },
       ]
     },
@@ -75,14 +75,7 @@ export const Sidebar: React.FC = () => {
       <div className="flex flex-col h-full">
         {/* Logo */}
         <div className="px-6 py-6 border-b border-gray-200">
-          <div className="flex items-center">
-            <div className="w-8 h-8 bg-primary-600 rounded-md flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812a3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <h1 className={cn('ml-3 text-lg font-bold text-gray-900', isRTL && 'mr-3 ml-0')}>{t('app.name')}</h1>
-          </div>
+          <Logo />
         </div>
         
         {/* Navigation Menu */}

@@ -106,6 +106,11 @@ export default function AddDeclaration() {
   const isNewDeclaration = searchParams.get('new') === 'true';
   const isFromExisting = searchParams.get('existing') === 'true';
   
+  // Set page title based on declaration type
+  const pageTitle = urlDeclarationType === 'inbound' 
+    ? 'Add Inbound Declaration' 
+    : 'Add Outbound Declaration';
+  
   // Sample data - would come from API in real application
   const suppliers = [
     { id: 1, name: "Eco Forestry Ltd." },
@@ -198,7 +203,7 @@ export default function AddDeclaration() {
   };
 
   return (
-    <Layout title="Add Declaration">
+    <Layout title={pageTitle}>
       <div className="py-6 px-4 sm:px-6 lg:px-8">
         {/* Page header */}
         <div className="mb-6">
@@ -208,10 +213,14 @@ export default function AddDeclaration() {
           </Link>
           
           <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
-            Add EUDR Declaration
+            {pageTitle}
           </h2>
           <p className="mt-2 text-sm text-gray-500">
-            Create a new EUDR declaration for your supply chain
+            {isNewDeclaration 
+              ? `Create a new ${urlDeclarationType} declaration` 
+              : isFromExisting 
+                ? `Create from existing ${urlDeclarationType} declaration` 
+                : `Create a new ${urlDeclarationType} declaration`}
           </p>
         </div>
         
