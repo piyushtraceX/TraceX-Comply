@@ -1,0 +1,132 @@
+Replicate the UI and content of https://complimate-eudr.replit.app/ in my new Replit app https://8d9e1fd6-0f97-43eb-adcd-2f98ad7d8288-00-3o9u7z9m8zzsa.worf.replit.dev/ with the following detailed requirements:
+🧭 Sidebar Navigation (Structure & Icons)
+
+Update the sidebar to match exactly:
+
+    EUDR Comply (top brand title)
+
+    Menu Items:
+
+        Dashboard
+
+        Supply Chain
+
+        Compliance
+
+            EUDR Declarations (nested under Compliance as a sub-item)
+
+        Customers
+
+        Settings
+
+Use the same icons, spacing, and nesting as in the reference app.
+🏠 Dashboard Page: Layout & Content
+
+Update the homepage to look exactly like the EUDR Compliance Dashboard in the screenshot:
+1. Top-Level Metrics:
+
+    Overall Compliance
+
+        78%, upward trend arrow, “Last updated 2 hours ago”
+
+    Risk Level
+
+        17, Medium, “3 high-risk items need attention”
+
+    Document Status
+
+        84/100, “8 Missing”, deadline
+
+    Supplier Summary
+
+        Similar metric box like above
+
+Use same card layout (grid of 4), style, spacing.
+2. Compliance Trends Graph:
+
+    Multi-line chart with:
+
+        Overall Compliance (blue)
+
+        Supplier Compliance (green)
+
+        Document Status (yellow)
+
+    Time range dropdown: "Last 6 months"
+
+3. Risk Assessment Categories:
+
+    List these with matching color dots:
+
+        Environmental (yellow)
+
+        Social (green)
+
+        Governance (red)
+
+        Deforestation (blue)
+
+👤 Persona Switcher (Top Right)
+
+Replicate the persona dropdown shown in the top-right user menu:
+
+    Label: Switch Persona
+
+    List of personas with circle icons:
+
+        Admin
+
+        Compliance Officer
+
+        Supplier Manager
+
+        Declaration Specialist
+
+        Auditor
+
+        Supplier
+
+        Customer
+
+        EU Operator
+
+Active persona should show a checkmark next to it.
+Position and behavior must be identical.
+🌍 Multilingual Support
+
+Ensure language switcher is present.
+Enable support for:
+
+    English
+
+    French
+
+    German
+
+Translate all UI strings using next-i18next.
+🎨 Styling, Layout, Visual Parity
+
+Use Tailwind CSS to match:
+
+    Padding, spacing (p-4, gap-6)
+
+    Card styles (rounded-lg, shadow-md)
+
+    Typography (text-xl, font-semibold)
+
+    Light background colors & graph styles
+
+Ensure all UI components are pixel-matched to the screenshot and the reference app.
+✅ Final Checklist:
+
+Sidebar with exact structure & icons
+
+Homepage matches reference (metrics + graphs + risks)
+
+Persona switcher with avatars, switch behavior
+
+EUDR Declarations nested under Compliance
+
+i18n support (EN/FR/DE)
+
+Visual styling matches exactly (no layout drift)

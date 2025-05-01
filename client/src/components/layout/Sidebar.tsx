@@ -19,6 +19,7 @@ type NavItem = {
   href: string;
   label: string;
   icon: React.ReactNode;
+  children?: NavItem[];
 };
 
 export const Sidebar: React.FC = () => {
@@ -42,11 +43,13 @@ export const Sidebar: React.FC = () => {
       href: '/compliance',
       label: t('nav.compliance'),
       icon: <ShieldCheck className={cn('h-5 w-5', isRTL ? 'ml-3 rtl-flip' : 'mr-3')} />,
-    },
-    {
-      href: '/declarations',
-      label: t('nav.eudrDeclarations'),
-      icon: <FileText className={cn('h-5 w-5', isRTL ? 'ml-3 rtl-flip' : 'mr-3')} />,
+      children: [
+        {
+          href: '/declarations',
+          label: t('nav.eudrDeclarations'),
+          icon: <FileText className={cn('h-5 w-5', isRTL ? 'ml-3 rtl-flip' : 'mr-3')} />,
+        },
+      ]
     },
     {
       href: '/customers',
@@ -87,6 +90,7 @@ export const Sidebar: React.FC = () => {
                       location === item.href
                         ? 'bg-primary-50 text-primary-700'
                         : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900',
+                      item.children && 'mb-1',  
                       isRTL && 'flex-row-reverse'
                     )}
                   >
@@ -100,6 +104,36 @@ export const Sidebar: React.FC = () => {
                     )}
                   </div>
                 </Link>
+                
+                {/* Render children if they exist */}
+                {item.children && item.children.length > 0 && (
+                  <ul className="mt-1 pl-6 space-y-1">
+                    {item.children.map((child) => (
+                      <li key={child.href} className="relative">
+                        <Link href={child.href}>
+                          <div
+                            className={cn(
+                              'flex items-center px-3 py-2 text-sm font-medium rounded-md cursor-pointer transition-colors duration-150',
+                              location === child.href
+                                ? 'bg-primary-50 text-primary-700'
+                                : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900',
+                              isRTL && 'flex-row-reverse'
+                            )}
+                          >
+                            {child.icon}
+                            <span>{child.label}</span>
+                            
+                            {/* Active indicator bar */}
+                            {location === child.href && (
+                              <div className={cn("absolute inset-y-0 w-1 bg-primary-600 rounded-tr-md rounded-br-md", 
+                                isRTL ? "right-0" : "left-0")}></div>
+                            )}
+                          </div>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </li>
             ))}
           </ul>

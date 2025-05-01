@@ -1,0 +1,91 @@
+import React from 'react';
+import { Clock, TrendingUp, AlertTriangle, Users } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useTranslation } from '@/hooks/use-translation';
+
+interface MetricCardProps {
+  title: string;
+  value: React.ReactNode;
+  subtitle: string;
+  icon: React.ReactNode;
+  iconBgColor: string;
+  iconColor: string;
+}
+
+const MetricCard: React.FC<MetricCardProps> = ({
+  title,
+  value,
+  subtitle,
+  icon,
+  iconBgColor,
+  iconColor,
+}) => {
+  const { isRTL } = useLanguage();
+
+  return (
+    <div className="bg-white overflow-hidden shadow rounded-lg">
+      <div className="px-4 py-5 sm:p-6">
+        <div className={cn("flex items-center", isRTL && "flex-row-reverse")}>
+          <div className={cn(`flex-shrink-0 ${iconBgColor} rounded-md p-3`)}>
+            {icon}
+          </div>
+          <div className={cn("ml-5 w-0 flex-1", isRTL && "mr-5 ml-0 text-right")}>
+            <dt className="text-sm font-medium text-gray-500 truncate">{title}</dt>
+            <dd>
+              <div className="text-2xl font-semibold text-gray-900">{value}</div>
+              <div className="mt-1 text-sm text-gray-500">{subtitle}</div>
+            </dd>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export const TopLevelMetrics: React.FC = () => {
+  const { t } = useTranslation();
+
+  const metrics = [
+    {
+      title: t('metrics.overallCompliance'),
+      value: <div className="flex items-center">78% <TrendingUp className="h-4 w-4 ml-2 text-green-500" /></div>,
+      subtitle: t('metrics.lastUpdated', { time: '2 hours ago' }),
+      icon: <TrendingUp className="h-6 w-6 text-blue-600" />,
+      iconBgColor: 'bg-blue-100',
+      iconColor: 'text-blue-600',
+    },
+    {
+      title: t('metrics.riskLevel'),
+      value: '17, Medium',
+      subtitle: t('metrics.highRiskItems', { count: 3 }),
+      icon: <AlertTriangle className="h-6 w-6 text-amber-600" />,
+      iconBgColor: 'bg-amber-100',
+      iconColor: 'text-amber-600',
+    },
+    {
+      title: t('metrics.documentStatus'),
+      value: '84/100',
+      subtitle: t('metrics.missingItems', { count: 8 }),
+      icon: <Clock className="h-6 w-6 text-red-600" />,
+      iconBgColor: 'bg-red-100',
+      iconColor: 'text-red-600',
+    },
+    {
+      title: t('metrics.supplierSummary'),
+      value: '58',
+      subtitle: t('metrics.activeSuppliers', { count: 42 }),
+      icon: <Users className="h-6 w-6 text-green-600" />,
+      iconBgColor: 'bg-green-100',
+      iconColor: 'text-green-600',
+    },
+  ];
+
+  return (
+    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-6">
+      {metrics.map((metric, index) => (
+        <MetricCard key={index} {...metric} />
+      ))}
+    </div>
+  );
+};

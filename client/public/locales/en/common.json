@@ -21,6 +21,16 @@
     "newDeclarationBtn": "New Declaration",
     "userRoles": "User Roles"
   },
+  "metrics": {
+    "overallCompliance": "Overall Compliance",
+    "lastUpdated": "Last updated {{time}}",
+    "riskLevel": "Risk Level",
+    "highRiskItems": "{{count}} high-risk items need attention",
+    "documentStatus": "Document Status",
+    "missingItems": "{{count}} Missing",
+    "supplierSummary": "Supplier Summary",
+    "activeSuppliers": "{{count}} active suppliers"
+  },
   "search": {
     "placeholder": "Search"
   },
@@ -129,5 +139,44 @@
         "manageTeam": "Manage Team Access"
       }
     }
+  },
+  "charts": {
+    "complianceTrends": "Compliance Trends",
+    "selectTimeRange": "Select Time Range",
+    "timeRanges": {
+      "oneMonth": "Last 1 month",
+      "threeMonths": "Last 3 months",
+      "sixMonths": "Last 6 months",
+      "oneYear": "Last 1 year"
+    },
+    "series": {
+      "overallCompliance": "Overall Compliance",
+      "supplierCompliance": "Supplier Compliance",
+      "documentStatus": "Document Status"
+    }
+  },
+  "riskCategories": {
+    "title": "Risk Assessment Categories",
+    "environmental": "Environmental",
+    "social": "Social",
+    "governance": "Governance",
+    "deforestation": "Deforestation",
+    "viewDetailedReport": "View detailed risk assessment report",
+    "status": {
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
+    }
+  },
+  "personaSwitcher": {
+    "label": "Switch Persona",
+    "admin": "Admin",
+    "complianceOfficer": "Compliance Officer",
+    "supplierManager": "Supplier Manager",
+    "declarationSpecialist": "Declaration Specialist",
+    "auditor": "Auditor",
+    "supplier": "Supplier",
+    "customer": "Customer",
+    "euOperator": "EU Operator"
   }
 }
