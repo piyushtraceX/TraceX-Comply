@@ -3,6 +3,7 @@ import { Layout } from '@/components/layout/Layout';
 import { useTranslation } from '@/hooks/use-translation';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
+import { Link } from 'wouter';
 import { 
   Search, 
   Filter, 
