@@ -69,7 +69,7 @@ export const LanguageSwitcher = () => {
               alt={lang.name}
               aria-hidden="true"
             />
-            <span>{t(`languages.${lang.code}`)}</span>
+            <span>{lang.name}</span>
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

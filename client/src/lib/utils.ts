@@ -18,10 +18,10 @@ export const getLanguageName = (code: string): string => {
 
 export const getLanguageFlag = (code: string): string => {
   const flags: Record<string, string> = {
-    en: './flags/gb.png',
-    fr: './flags/fr.png',
-    de: './flags/de.png',
-    ar: './flags/sa.png',
+    en: '/flags/gb.png',
+    fr: '/flags/fr.png',
+    de: '/flags/de.png',
+    ar: '/flags/sa.png',
   };
   
   return flags[code] || '';
