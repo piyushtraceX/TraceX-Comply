@@ -20,7 +20,10 @@ import {
   Leaf,
   Edit,
   Calendar,
-  User
+  User,
+  Plus,
+  Download,
+  Upload
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -418,7 +421,7 @@ export default function SupplierDetail() {
                       </CardHeader>
                       <CardContent>
                         <div className="text-3xl font-bold text-green-600">{supplierData.saq.environmentalScore}%</div>
-                        <Progress value={supplierData.saq.environmentalScore} className="h-2 mt-2 bg-gray-200" indicatorClassName="bg-green-600" />
+                        <Progress value={supplierData.saq.environmentalScore} className="h-2 mt-2 bg-gray-200" />
                       </CardContent>
                     </Card>
                     
@@ -428,7 +431,7 @@ export default function SupplierDetail() {
                       </CardHeader>
                       <CardContent>
                         <div className="text-3xl font-bold text-blue-600">{supplierData.saq.socialScore}%</div>
-                        <Progress value={supplierData.saq.socialScore} className="h-2 mt-2 bg-gray-200" indicatorClassName="bg-blue-600" />
+                        <Progress value={supplierData.saq.socialScore} className="h-2 mt-2 bg-gray-200" />
                       </CardContent>
                     </Card>
                     
@@ -438,7 +441,7 @@ export default function SupplierDetail() {
                       </CardHeader>
                       <CardContent>
                         <div className="text-3xl font-bold text-purple-600">{supplierData.saq.governanceScore}%</div>
-                        <Progress value={supplierData.saq.governanceScore} className="h-2 mt-2 bg-gray-200" indicatorClassName="bg-purple-600" />
+                        <Progress value={supplierData.saq.governanceScore} className="h-2 mt-2 bg-gray-200" />
                       </CardContent>
                     </Card>
                   </div>
