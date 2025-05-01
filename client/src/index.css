@@ -150,6 +150,30 @@
     transform: scaleX(-1);
   }
 
+  /* RTL specific overrides */
+  [dir="rtl"] .ml-auto {
+    margin-left: 0;
+    margin-right: auto;
+  }
+
+  [dir="rtl"] .mr-auto {
+    margin-right: 0;
+    margin-left: auto;
+  }
+
+  [dir="rtl"] .ml-2, [dir="rtl"] .ml-3, [dir="rtl"] .ml-4 {
+    margin-left: 0;
+  }
+
+  [dir="rtl"] .mr-2, [dir="rtl"] .mr-3, [dir="rtl"] .mr-4 {
+    margin-right: 0;
+  }
+
+  [dir="rtl"] .rtl {
+    direction: rtl;
+    text-align: right;
+  }
+
   .lang-flag {
     width: 24px;
     height: 18px;

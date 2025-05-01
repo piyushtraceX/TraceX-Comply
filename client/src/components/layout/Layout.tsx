@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -10,24 +10,14 @@ interface LayoutProps {
 }
 
 export const Layout: React.FC<LayoutProps> = ({ children, title }) => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const { isRTL } = useLanguage();
 
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
-
   return (
-    <div className={cn("min-h-screen flex flex-col md:flex-row", isRTL && "rtl")}>
-      <div className={cn(
-        "md:block",
-        sidebarOpen ? "block" : "hidden"
-      )}>
-        <Sidebar />
-      </div>
+    <div className={cn("min-h-screen flex flex-col", isRTL && "rtl")}>
+      <Sidebar />
       
-      <main className="flex-1 overflow-x-hidden">
-        <TopBar title={title} toggleSidebar={toggleSidebar} />
+      <main className="flex-1 overflow-x-hidden md:ml-64">
+        <TopBar title={title} />
         {children}
       </main>
     </div>
