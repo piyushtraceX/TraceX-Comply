@@ -3,13 +3,13 @@ import { Layout } from '@/components/layout/Layout';
 import { StatsCards } from '@/components/dashboard/StatsCards';
 import { ActivityTimeline } from '@/components/dashboard/ActivityTimeline';
 import { SupplierList } from '@/components/dashboard/SupplierList';
-import { ComplianceChart } from '@/components/dashboard/ComplianceChart';
 import { TopLevelMetrics } from '@/components/dashboard/TopLevelMetrics';
 import { ComplianceTrendsChart } from '@/components/dashboard/ComplianceTrendsChart';
 import { RiskAssessmentCategories } from '@/components/dashboard/RiskAssessmentCategories';
 import { useTranslation } from '@/hooks/use-translation';
-import { Calendar, Download, Plus } from 'lucide-react';
+import { Calendar, Download, Plus, FileText, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { formatDate } from '@/lib/utils';
@@ -101,10 +101,10 @@ export default function Dashboard() {
           </div>
         </div>
         
-        {/* Two-column layout for additional content */}
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        {/* Three-column layout for additional content */}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {/* Recent Suppliers */}
-          <div className="bg-white shadow rounded-lg">
+          <div className="bg-white shadow rounded-lg lg:col-span-1">
             <div className="px-4 py-5 border-b border-gray-200 sm:px-6">
               <h3 className="text-lg leading-6 font-medium text-gray-900">
                 {t('recentSuppliers.title')}
@@ -138,15 +138,78 @@ export default function Dashboard() {
             </div>
           </div>
           
-          {/* Compliance Status */}
-          <div className="bg-white shadow rounded-lg">
+          {/* Recent Activities */}
+          <div className="bg-white shadow rounded-lg lg:col-span-1">
             <div className="px-4 py-5 border-b border-gray-200 sm:px-6">
               <h3 className="text-lg leading-6 font-medium text-gray-900">
-                {t('complianceStatus.title')}
+                Recent Activities
               </h3>
             </div>
-            <div className="px-4 py-6 sm:px-6">
-              <ComplianceChart />
+            <ul className="divide-y divide-gray-200">
+              {[1, 2, 3, 4, 5].map((item) => (
+                <li key={item} className="px-4 py-4 sm:px-6">
+                  <div className="flex items-center space-x-4">
+                    <div className="flex-shrink-0 h-8 w-8 rounded-full bg-primary-100 flex items-center justify-center">
+                      <FileText className="h-4 w-4 text-primary-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        EUDR Declaration Updated
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        By Jane Cooper • 2 hours ago
+                      </p>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <div className="bg-gray-50 px-4 py-4 sm:px-6 text-center">
+              <a href="#" className="text-sm font-medium text-primary-600 hover:text-primary-500">
+                View all activities
+              </a>
+            </div>
+          </div>
+          
+          {/* Upcoming Tasks */}
+          <div className="bg-white shadow rounded-lg lg:col-span-1">
+            <div className="px-4 py-5 border-b border-gray-200 sm:px-6">
+              <h3 className="text-lg leading-6 font-medium text-gray-900">
+                Upcoming Tasks
+              </h3>
+            </div>
+            <ul className="divide-y divide-gray-200">
+              {[1, 2, 3, 4].map((item) => (
+                <li key={item} className="px-4 py-4 sm:px-6">
+                  <div className="flex items-center space-x-4">
+                    <div className="flex-shrink-0">
+                      <input 
+                        type="checkbox" 
+                        className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        Review compliance documentation
+                      </p>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Due in 3 days
+                      </p>
+                    </div>
+                    <div>
+                      <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                        Medium
+                      </Badge>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <div className="bg-gray-50 px-4 py-4 sm:px-6 flex justify-between items-center">
+              <span className="text-sm text-gray-500">4 of 12 tasks</span>
+              <a href="#" className="text-sm font-medium text-primary-600 hover:text-primary-500">
+                View all tasks
+              </a>
             </div>
           </div>
         </div>
