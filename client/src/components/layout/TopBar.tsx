@@ -5,6 +5,7 @@ import { PersonaSwitcher } from '@/components/PersonaSwitcher';
 import { useTranslation } from '@/hooks/use-translation';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 
 interface TopBarProps {
   title: string;
@@ -18,23 +19,26 @@ export const TopBar: React.FC<TopBarProps> = ({ title, toggleSidebar }) => {
   return (
     <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-20">
       <div className={cn('flex items-center justify-between px-4 py-3 sm:px-6', isRTL && 'flex-row-reverse')}>
-        {/* Mobile menu button */}
-        {toggleSidebar && (
-          <button 
-            type="button" 
-            className="md:hidden inline-flex items-center justify-center rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-600"
-            onClick={toggleSidebar}
-          >
-            <Menu className="h-6 w-6" />
-          </button>
-        )}
+        {/* Left side: Page title and optionally mobile menu button */}
+        <div className={cn('flex items-center', isRTL && 'flex-row-reverse')}>
+          {/* Mobile menu button - only visible on mobile */}
+          {toggleSidebar && (
+            <button 
+              type="button" 
+              className="md:hidden inline-flex items-center justify-center rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-600 mr-2"
+              onClick={toggleSidebar}
+            >
+              <Menu className="h-6 w-6" />
+            </button>
+          )}
+          
+          {/* Page title */}
+          <h1 className="text-lg font-semibold text-gray-900">{title}</h1>
+        </div>
         
-        {/* Page title */}
-        <h1 className="text-lg font-semibold text-gray-900">{title}</h1>
-        
-        {/* Search */}
-        <div className={cn('hidden md:flex md:flex-1 md:items-center', isRTL && 'md:justify-end')}>
-          <div className="relative max-w-md w-full">
+        {/* Search - hidden on mobile */}
+        <div className={cn('hidden md:flex md:flex-1 md:items-center md:max-w-md mx-4', isRTL && 'md:justify-end')}>
+          <div className="relative w-full">
             <div className={cn('absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none', isRTL && 'left-auto right-0 pl-0 pr-3')}>
               <Search className="h-5 w-5 text-gray-400" />
             </div>
@@ -50,18 +54,18 @@ export const TopBar: React.FC<TopBarProps> = ({ title, toggleSidebar }) => {
         </div>
         
         {/* Right navigation */}
-        <div className={cn('flex items-center space-x-4', isRTL && 'flex-row-reverse space-x-0 space-x-reverse')}>
-          {/* Persona Switcher */}
+        <div className={cn('flex items-center gap-3', isRTL && 'flex-row-reverse')}>
+          {/* Persona Switcher - hidden on mobile */}
           <div className="hidden md:block">
             <PersonaSwitcher />
           </div>
           
           {/* Notifications */}
-          <button type="button" className="p-1 rounded-full text-gray-500 hover:text-gray-600 hover:bg-gray-100 relative">
+          <Button variant="ghost" size="icon" className="relative">
             <span className="sr-only">{t('notifications.label')}</span>
-            <Bell className="h-6 w-6" />
-            <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
-          </button>
+            <Bell className="h-5 w-5" />
+            <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
+          </Button>
           
           {/* Language switcher */}
           <LanguageSwitcher />
