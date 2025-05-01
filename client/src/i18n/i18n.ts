@@ -37,7 +37,7 @@ i18n
     
     // Backend configuration - where to load translations from
     backend: {
-      loadPath: '/locales/{{lng}}/{{ns}}.json',
+      loadPath: './locales/{{lng}}/{{ns}}.json',
     },
   });
 
