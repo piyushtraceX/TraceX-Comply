@@ -226,12 +226,12 @@ export default function SupplierDetail() {
         {/* Supplier Tabs */}
         <Tabs defaultValue="profile" className="space-y-6" onValueChange={setActiveTab}>
           <TabsList className="bg-gray-100 p-1">
-            <TabsTrigger value="profile">Profile</TabsTrigger>
-            <TabsTrigger value="saq">Self Assessment Questionnaire</TabsTrigger>
-            <TabsTrigger value="saq-management">SAQ Management</TabsTrigger>
-            <TabsTrigger value="onboarding">Onboarding</TabsTrigger>
-            <TabsTrigger value="declarations">Declarations</TabsTrigger>
-            <TabsTrigger value="documents">Documents</TabsTrigger>
+            <TabsTrigger value="profile">{t('supplier.tabs.profile')}</TabsTrigger>
+            <TabsTrigger value="saq">{t('supplier.tabs.saq')}</TabsTrigger>
+            <TabsTrigger value="saq-management">{t('supplier.tabs.saqManagement')}</TabsTrigger>
+            <TabsTrigger value="onboarding">{t('supplier.tabs.onboarding')}</TabsTrigger>
+            <TabsTrigger value="declarations">{t('supplier.tabs.declarations')}</TabsTrigger>
+            <TabsTrigger value="documents">{t('supplier.tabs.documents')}</TabsTrigger>
           </TabsList>
           
           {/* Profile Tab */}
@@ -400,10 +400,10 @@ export default function SupplierDetail() {
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <ListChecks className="h-5 w-5 mr-2 text-gray-500" />
-                    SAQ Management
+                    {t('supplier.saqManagement.title')}
                   </CardTitle>
                   <CardDescription>
-                    Manage Self Assessment Questionnaires for this supplier
+                    {t('supplier.saqManagement.description')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -412,11 +412,11 @@ export default function SupplierDetail() {
                     <div className="flex flex-wrap gap-4 mb-6">
                       <Button className="flex items-center gap-2">
                         <Plus className="h-4 w-4" />
-                        Create New Questionnaire
+                        {t('supplier.saqManagement.createNew')}
                       </Button>
                       <Button variant="outline" className="flex items-center gap-2">
                         <Download className="h-4 w-4" />
-                        Export Template
+                        {t('supplier.saqManagement.exportTemplate')}
                       </Button>
                     </div>
                     
@@ -425,13 +425,13 @@ export default function SupplierDetail() {
                       <table className="w-full border-collapse">
                         <thead>
                           <tr className="border-b">
-                            <th className="text-left font-medium text-sm py-3 px-4">Questionnaire Name</th>
-                            <th className="text-left font-medium text-sm py-3 px-4">Type</th>
-                            <th className="text-left font-medium text-sm py-3 px-4">Status</th>
-                            <th className="text-left font-medium text-sm py-3 px-4">Sent Date</th>
-                            <th className="text-left font-medium text-sm py-3 px-4">Due Date</th>
-                            <th className="text-left font-medium text-sm py-3 px-4">Completion</th>
-                            <th className="text-left font-medium text-sm py-3 px-4">Actions</th>
+                            <th className="text-left font-medium text-sm py-3 px-4">{t('supplier.saqManagement.table.name')}</th>
+                            <th className="text-left font-medium text-sm py-3 px-4">{t('supplier.saqManagement.table.type')}</th>
+                            <th className="text-left font-medium text-sm py-3 px-4">{t('supplier.saqManagement.table.status')}</th>
+                            <th className="text-left font-medium text-sm py-3 px-4">{t('supplier.saqManagement.table.sentDate')}</th>
+                            <th className="text-left font-medium text-sm py-3 px-4">{t('supplier.saqManagement.table.dueDate')}</th>
+                            <th className="text-left font-medium text-sm py-3 px-4">{t('supplier.saqManagement.table.completion')}</th>
+                            <th className="text-left font-medium text-sm py-3 px-4">{t('supplier.saqManagement.table.actions')}</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -439,7 +439,7 @@ export default function SupplierDetail() {
                             <td className="py-3 px-4 text-sm">Annual EUDR Assessment 2023</td>
                             <td className="py-3 px-4 text-sm">Standard</td>
                             <td className="py-3 px-4 text-sm">
-                              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Completed</Badge>
+                              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">{t('supplier.saqManagement.status.completed')}</Badge>
                             </td>
                             <td className="py-3 px-4 text-sm">Jan 15, 2023</td>
                             <td className="py-3 px-4 text-sm">Feb 15, 2023</td>
@@ -464,7 +464,7 @@ export default function SupplierDetail() {
                             <td className="py-3 px-4 text-sm">EUDR Due Diligence Q1 2024</td>
                             <td className="py-3 px-4 text-sm">Specific</td>
                             <td className="py-3 px-4 text-sm">
-                              <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">In Progress</Badge>
+                              <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">{t('supplier.saqManagement.status.pending')}</Badge>
                             </td>
                             <td className="py-3 px-4 text-sm">Mar 1, 2024</td>
                             <td className="py-3 px-4 text-sm">Apr 1, 2024</td>

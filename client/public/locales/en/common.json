@@ -73,6 +73,35 @@
       "active": "Active",
       "pending": "Pending",
       "flagged": "Flagged"
+    },
+    "tabs": {
+      "profile": "Profile",
+      "saq": "Self Assessment Questionnaire",
+      "saqManagement": "SAQ Management",
+      "onboarding": "Onboarding",
+      "declarations": "Declarations",
+      "documents": "Documents"
+    },
+    "saqManagement": {
+      "title": "SAQ Management",
+      "description": "Manage Self Assessment Questionnaires for this supplier",
+      "createNew": "Create New Questionnaire",
+      "exportTemplate": "Export Template",
+      "table": {
+        "name": "Questionnaire Name",
+        "type": "Type",
+        "status": "Status",
+        "sentDate": "Sent Date",
+        "dueDate": "Due Date",
+        "completion": "Completion",
+        "actions": "Actions"
+      },
+      "status": {
+        "completed": "Completed",
+        "pending": "Pending",
+        "overdue": "Overdue",
+        "draft": "Draft"
+      }
     }
   },
   "complianceStatus": {
