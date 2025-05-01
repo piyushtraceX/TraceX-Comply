@@ -140,10 +140,12 @@ export default function SupplyChain() {
               <Download className={cn("mr-2 h-4 w-4", isRTL && "mr-0 ml-2")} />
               Export
             </Button>
-            <Button className={cn("flex items-center", isRTL && "flex-row-reverse")}>
-              <Plus className={cn("mr-2 h-4 w-4", isRTL && "mr-0 ml-2")} />
-              Add Supplier
-            </Button>
+            <Link href="/add-supplier">
+              <Button className={cn("flex items-center", isRTL && "flex-row-reverse")}>
+                <Plus className={cn("mr-2 h-4 w-4", isRTL && "mr-0 ml-2")} />
+                Add Supplier
+              </Button>
+            </Link>
           </div>
         </div>
         

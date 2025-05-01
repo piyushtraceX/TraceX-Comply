@@ -6,11 +6,13 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/Dashboard";
 import SupplyChain from "@/pages/SupplyChain";
+import AddSupplier from "@/pages/AddSupplier";
 import SupplierDetail from "@/pages/SupplierDetail";
 import Compliance from "@/pages/Compliance";
 import Declarations from "@/pages/Declarations";
 import AddDeclaration from "@/pages/AddDeclaration";
 import Customers from "@/pages/Customers";
+import AddCustomer from "@/pages/AddCustomer";
 import Settings from "@/pages/Settings";
 import { ThemeProvider } from "next-themes";
 import { LanguageProvider } from "./contexts/LanguageContext";
@@ -20,11 +22,13 @@ function Router() {
     <Switch>
       <Route path="/" component={Dashboard} />
       <Route path="/supply-chain" component={SupplyChain} />
+      <Route path="/add-supplier" component={AddSupplier} />
       <Route path="/supplier/:id" component={SupplierDetail} />
       <Route path="/compliance" component={Compliance} />
       <Route path="/declarations" component={Declarations} />
       <Route path="/add-declaration" component={AddDeclaration} />
       <Route path="/customers" component={Customers} />
+      <Route path="/add-customer" component={AddCustomer} />
       <Route path="/settings" component={Settings} />
       <Route component={NotFound} />
     </Switch>

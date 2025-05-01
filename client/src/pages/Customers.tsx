@@ -3,6 +3,7 @@ import { Layout } from '@/components/layout/Layout';
 import { useTranslation } from '@/hooks/use-translation';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
+import { Link } from 'wouter';
 import { 
   Search, 
   Filter, 
@@ -148,10 +149,12 @@ export default function Customers() {
             </p>
           </div>
           <div className="mt-4 flex md:mt-0">
-            <Button className="flex items-center">
-              <Plus className="mr-2 h-4 w-4" />
-              Add Customer
-            </Button>
+            <Link href="/add-customer">
+              <Button className="flex items-center">
+                <Plus className="mr-2 h-4 w-4" />
+                Add Customer
+              </Button>
+            </Link>
           </div>
         </div>
         
