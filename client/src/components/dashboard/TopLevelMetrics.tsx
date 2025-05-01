@@ -3,6 +3,7 @@ import { Clock, TrendingUp, AlertTriangle, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTranslation } from '@/hooks/use-translation';
+import { Progress } from '@/components/ui/progress';
 
 interface MetricCardProps {
   title: string;
@@ -11,6 +12,8 @@ interface MetricCardProps {
   icon: React.ReactNode;
   iconBgColor: string;
   iconColor: string;
+  progress?: number;
+  progressColor?: string;
 }
 
 const MetricCard: React.FC<MetricCardProps> = ({
@@ -20,6 +23,8 @@ const MetricCard: React.FC<MetricCardProps> = ({
   icon,
   iconBgColor,
   iconColor,
+  progress,
+  progressColor,
 }) => {
   const { isRTL } = useLanguage();
 
@@ -35,6 +40,13 @@ const MetricCard: React.FC<MetricCardProps> = ({
             <dd>
               <div className="text-2xl font-semibold text-gray-900">{value}</div>
               <div className="mt-1 text-sm text-gray-500">{subtitle}</div>
+              
+              {progress !== undefined && (
+                <Progress 
+                  value={progress} 
+                  className={`h-2 mt-2 ${progressColor ? `[&>div]:${progressColor}` : ''}`}
+                />
+              )}
             </dd>
           </div>
         </div>
@@ -54,6 +66,8 @@ export const TopLevelMetrics: React.FC = () => {
       icon: <TrendingUp className="h-6 w-6 text-blue-600" />,
       iconBgColor: 'bg-blue-100',
       iconColor: 'text-blue-600',
+      progress: 78,
+      progressColor: 'bg-blue-600'
     },
     {
       title: t('metrics.riskLevel'),
@@ -62,6 +76,8 @@ export const TopLevelMetrics: React.FC = () => {
       icon: <AlertTriangle className="h-6 w-6 text-amber-600" />,
       iconBgColor: 'bg-amber-100',
       iconColor: 'text-amber-600',
+      progress: 65,
+      progressColor: 'bg-amber-600'
     },
     {
       title: t('metrics.documentStatus'),
@@ -70,6 +86,8 @@ export const TopLevelMetrics: React.FC = () => {
       icon: <Clock className="h-6 w-6 text-red-600" />,
       iconBgColor: 'bg-red-100',
       iconColor: 'text-red-600',
+      progress: 84,
+      progressColor: 'bg-red-600'
     },
     {
       title: t('metrics.supplierSummary'),
@@ -78,6 +96,8 @@ export const TopLevelMetrics: React.FC = () => {
       icon: <Users className="h-6 w-6 text-green-600" />,
       iconBgColor: 'bg-green-100',
       iconColor: 'text-green-600',
+      progress: 72,
+      progressColor: 'bg-green-600'
     },
   ];
 

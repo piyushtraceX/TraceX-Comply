@@ -87,59 +87,10 @@ const StatCard: React.FC<StatCardProps> = ({
 export const StatsCards: React.FC = () => {
   const { t } = useTranslation();
 
-  // Sample data for stats cards
-  const statCards = [
-    {
-      title: t('stats.totalDeclarations'),
-      value: 142,
-      change: 12,
-      icon: <FileText className="h-6 w-6 text-white" />,
-      iconBgColor: 'bg-primary-600',
-      iconColor: 'text-white',
-      changeColor: 'text-green-600',
-      progress: 85,
-      progressColor: 'bg-primary-600'
-    },
-    {
-      title: t('stats.completedAssessments'),
-      value: 78,
-      change: 5,
-      icon: <CheckCircle className="h-6 w-6 text-white" />,
-      iconBgColor: 'bg-green-600',
-      iconColor: 'text-white',
-      changeColor: 'text-green-600',
-      progress: 78,
-      progressColor: 'bg-green-600'
-    },
-    {
-      title: t('stats.pendingReviews'),
-      value: 23,
-      change: -8,
-      icon: <Clock className="h-6 w-6 text-white" />,
-      iconBgColor: 'bg-amber-500',
-      iconColor: 'text-white',
-      changeColor: 'text-amber-500',
-      progress: 62,
-      progressColor: 'bg-amber-500'
-    },
-    {
-      title: t('stats.complianceIssues'),
-      value: 6,
-      change: -15,
-      icon: <AlertTriangle className="h-6 w-6 text-white" />,
-      iconBgColor: 'bg-red-600',
-      iconColor: 'text-white',
-      changeColor: 'text-green-600',
-      progress: 35,
-      progressColor: 'bg-red-600'
-    }
-  ];
-
+  // Return an empty div to remove stats tiles (they're replaced by TopLevelMetrics)
   return (
-    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-      {statCards.map((card, index) => (
-        <StatCard key={index} {...card} />
-      ))}
+    <div className="mb-6">
+      {/* Stat tiles have been removed as requested */}
     </div>
   );
 };
