@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Menu, Search, Bell } from 'lucide-react';
+import React from 'react';
+import { Search, Bell } from 'lucide-react';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { PersonaSwitcher } from '@/components/PersonaSwitcher';
 import { useTranslation } from '@/hooks/use-translation';
@@ -8,27 +8,19 @@ import { cn } from '@/lib/utils';
 
 interface TopBarProps {
   title: string;
-  toggleSidebar: () => void;
+  toggleSidebar?: () => void;
 }
 
-export const TopBar: React.FC<TopBarProps> = ({ title, toggleSidebar }) => {
+export const TopBar: React.FC<TopBarProps> = ({ title }) => {
   const { t } = useTranslation();
   const { isRTL } = useLanguage();
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-20">
       <div className={cn('flex items-center justify-between px-4 py-3 sm:px-6', isRTL && 'flex-row-reverse')}>
-        {/* Mobile menu button */}
-        <button 
-          type="button" 
-          className="md:hidden inline-flex items-center justify-center rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-600"
-          onClick={toggleSidebar}
-        >
-          <Menu className="h-6 w-6" />
-        </button>
-        
-        {/* Page title (visible on mobile only) */}
-        <h1 className="text-lg font-semibold text-gray-900 md:hidden">{title}</h1>
+        {/* Page title */}
+        <h1 className="text-lg font-semibold text-gray-900 hidden md:block">{title}</h1>
+        <div className="md:hidden w-8"></div> {/* Spacer for mobile */}
         
         {/* Search */}
         <div className={cn('hidden md:flex md:flex-1 md:items-center', isRTL && 'md:justify-end')}>
