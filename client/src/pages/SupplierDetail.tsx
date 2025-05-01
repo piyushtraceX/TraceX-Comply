@@ -15,6 +15,7 @@ import {
   Check, 
   CheckCircle2, 
   AlertTriangle,
+  AlertCircle,
   ListChecks,
   FileText,
   Leaf,
@@ -23,7 +24,8 @@ import {
   User,
   Plus,
   Download,
-  Upload
+  Upload,
+  Clock
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -388,6 +390,282 @@ export default function SupplierDetail() {
                   </CardContent>
                 </Card>
               </div>
+            </div>
+          </TabsContent>
+          
+          {/* SAQ Management Tab */}
+          <TabsContent value="saq-management">
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <ListChecks className="h-5 w-5 mr-2 text-gray-500" />
+                    SAQ Management
+                  </CardTitle>
+                  <CardDescription>
+                    Manage Self Assessment Questionnaires for this supplier
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-6">
+                    {/* SAQ Management Controls */}
+                    <div className="flex flex-wrap gap-4 mb-6">
+                      <Button className="flex items-center gap-2">
+                        <Plus className="h-4 w-4" />
+                        Create New Questionnaire
+                      </Button>
+                      <Button variant="outline" className="flex items-center gap-2">
+                        <Download className="h-4 w-4" />
+                        Export Template
+                      </Button>
+                    </div>
+                    
+                    {/* SAQ Status Table */}
+                    <div className="overflow-x-auto">
+                      <table className="w-full border-collapse">
+                        <thead>
+                          <tr className="border-b">
+                            <th className="text-left font-medium text-sm py-3 px-4">Questionnaire Name</th>
+                            <th className="text-left font-medium text-sm py-3 px-4">Type</th>
+                            <th className="text-left font-medium text-sm py-3 px-4">Status</th>
+                            <th className="text-left font-medium text-sm py-3 px-4">Sent Date</th>
+                            <th className="text-left font-medium text-sm py-3 px-4">Due Date</th>
+                            <th className="text-left font-medium text-sm py-3 px-4">Completion</th>
+                            <th className="text-left font-medium text-sm py-3 px-4">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr className="border-b hover:bg-gray-50">
+                            <td className="py-3 px-4 text-sm">Annual EUDR Assessment 2023</td>
+                            <td className="py-3 px-4 text-sm">Standard</td>
+                            <td className="py-3 px-4 text-sm">
+                              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Completed</Badge>
+                            </td>
+                            <td className="py-3 px-4 text-sm">Jan 15, 2023</td>
+                            <td className="py-3 px-4 text-sm">Feb 15, 2023</td>
+                            <td className="py-3 px-4 text-sm">
+                              <div className="flex items-center gap-2">
+                                <Progress value={100} className="h-2 w-24" />
+                                <span>100%</span>
+                              </div>
+                            </td>
+                            <td className="py-3 px-4 text-sm">
+                              <div className="flex items-center gap-2">
+                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                  <FileText className="h-4 w-4" />
+                                </Button>
+                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                  <Download className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </td>
+                          </tr>
+                          <tr className="border-b hover:bg-gray-50">
+                            <td className="py-3 px-4 text-sm">EUDR Due Diligence Q1 2024</td>
+                            <td className="py-3 px-4 text-sm">Specific</td>
+                            <td className="py-3 px-4 text-sm">
+                              <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">In Progress</Badge>
+                            </td>
+                            <td className="py-3 px-4 text-sm">Mar 1, 2024</td>
+                            <td className="py-3 px-4 text-sm">Apr 1, 2024</td>
+                            <td className="py-3 px-4 text-sm">
+                              <div className="flex items-center gap-2">
+                                <Progress value={65} className="h-2 w-24" />
+                                <span>65%</span>
+                              </div>
+                            </td>
+                            <td className="py-3 px-4 text-sm">
+                              <div className="flex items-center gap-2">
+                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                  <FileText className="h-4 w-4" />
+                                </Button>
+                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                  <Download className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              {/* Questionnaire Template Card */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <FileText className="h-5 w-5 mr-2 text-gray-500" />
+                    Questionnaire Templates
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center p-4 border rounded-lg hover:bg-gray-50">
+                      <div className="flex items-center gap-3">
+                        <FileText className="h-6 w-6 text-gray-400" />
+                        <div>
+                          <h4 className="font-medium">Standard EUDR Assessment</h4>
+                          <p className="text-sm text-gray-500">Basic template for EUDR compliance</p>
+                        </div>
+                      </div>
+                      <Button variant="outline" size="sm">Use Template</Button>
+                    </div>
+                    
+                    <div className="flex justify-between items-center p-4 border rounded-lg hover:bg-gray-50">
+                      <div className="flex items-center gap-3">
+                        <FileText className="h-6 w-6 text-gray-400" />
+                        <div>
+                          <h4 className="font-medium">Detailed Deforestation Risk Assessment</h4>
+                          <p className="text-sm text-gray-500">Comprehensive assessment focused on deforestation risks</p>
+                        </div>
+                      </div>
+                      <Button variant="outline" size="sm">Use Template</Button>
+                    </div>
+                    
+                    <div className="flex justify-between items-center p-4 border rounded-lg hover:bg-gray-50">
+                      <div className="flex items-center gap-3">
+                        <FileText className="h-6 w-6 text-gray-400" />
+                        <div>
+                          <h4 className="font-medium">Supply Chain Traceability</h4>
+                          <p className="text-sm text-gray-500">Template for evaluating supply chain transparency</p>
+                        </div>
+                      </div>
+                      <Button variant="outline" size="sm">Use Template</Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+          
+          {/* Onboarding Tab */}
+          <TabsContent value="onboarding">
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <ListChecks className="h-5 w-5 mr-2 text-gray-500" />
+                    Supplier Onboarding Progress
+                  </CardTitle>
+                  <CardDescription>
+                    Track and manage the supplier onboarding process
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="mb-8">
+                    <div className="flex justify-between items-center mb-2">
+                      <h3 className="text-base font-medium">Overall Onboarding Progress</h3>
+                      <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">In Progress</Badge>
+                    </div>
+                    <Progress value={65} className="h-2 mb-1" />
+                    <div className="flex justify-between text-sm text-gray-500">
+                      <span>Started: Jan 10, 2024</span>
+                      <span>65% Complete</span>
+                      <span>Estimated Completion: Apr 15, 2024</span>
+                    </div>
+                  </div>
+                  
+                  {/* Onboarding Checklist */}
+                  <div className="space-y-4">
+                    <h3 className="text-base font-medium">Onboarding Checklist</h3>
+                    
+                    <div className="space-y-4">
+                      <div className="border rounded-lg p-4 bg-gray-50">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-2">
+                            <CheckCircle2 className="h-5 w-5 text-green-600" />
+                            <h4 className="font-medium">Initial Registration</h4>
+                          </div>
+                          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Completed</Badge>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-2">Supplier basic details and primary contacts registered in system</p>
+                        <div className="flex justify-between text-xs text-gray-500">
+                          <span>Completed on: Jan 15, 2024</span>
+                          <span>By: Maria Rodriguez</span>
+                        </div>
+                      </div>
+                      
+                      <div className="border rounded-lg p-4 bg-gray-50">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-2">
+                            <CheckCircle2 className="h-5 w-5 text-green-600" />
+                            <h4 className="font-medium">Documentation Collection</h4>
+                          </div>
+                          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Completed</Badge>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-2">Legal documentation and certification paperwork collected</p>
+                        <div className="flex justify-between text-xs text-gray-500">
+                          <span>Completed on: Feb 02, 2024</span>
+                          <span>By: John Smith</span>
+                        </div>
+                      </div>
+                      
+                      <div className="border rounded-lg p-4 bg-gray-50">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-2">
+                            <CheckCircle2 className="h-5 w-5 text-green-600" />
+                            <h4 className="font-medium">Initial Assessment</h4>
+                          </div>
+                          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Completed</Badge>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-2">Preliminary risk assessment and compliance verification</p>
+                        <div className="flex justify-between text-xs text-gray-500">
+                          <span>Completed on: Feb 20, 2024</span>
+                          <span>By: Sarah Johnson</span>
+                        </div>
+                      </div>
+                      
+                      <div className="border rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-2">
+                            <AlertCircle className="h-5 w-5 text-amber-500" />
+                            <h4 className="font-medium">EUDR Due Diligence Questionnaire</h4>
+                          </div>
+                          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">In Progress</Badge>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-2">Detailed assessment of EUDR compliance requirements</p>
+                        <div className="flex justify-between text-xs text-gray-500">
+                          <span>Started on: Mar 01, 2024</span>
+                          <span>Due by: Apr 01, 2024</span>
+                        </div>
+                        <Progress value={65} className="h-2 mt-2" />
+                      </div>
+                      
+                      <div className="border rounded-lg p-4 border-dashed">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-5 w-5 text-gray-400" />
+                            <h4 className="font-medium">Supply Chain Mapping</h4>
+                          </div>
+                          <Badge variant="outline">Pending</Badge>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-2">Complete mapping of supplier's upstream supply chain</p>
+                        <div className="flex justify-between text-xs text-gray-500">
+                          <span>Not started</span>
+                          <span>Due by: Apr 15, 2024</span>
+                        </div>
+                      </div>
+                      
+                      <div className="border rounded-lg p-4 border-dashed">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-5 w-5 text-gray-400" />
+                            <h4 className="font-medium">Final Verification</h4>
+                          </div>
+                          <Badge variant="outline">Pending</Badge>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-2">Final compliance verification and onboarding approval</p>
+                        <div className="flex justify-between text-xs text-gray-500">
+                          <span>Not started</span>
+                          <span>Estimated: May 01, 2024</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
           
