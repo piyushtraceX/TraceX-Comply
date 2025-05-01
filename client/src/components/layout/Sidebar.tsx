@@ -49,6 +49,11 @@ export const Sidebar: React.FC = () => {
           label: t('nav.eudrDeclarations'),
           icon: <FileText className={cn('h-5 w-5', isRTL ? 'ml-3 rtl-flip' : 'mr-3')} />,
         },
+        {
+          href: '/saq-management',
+          label: t('nav.saqManagement') || 'SAQ Management',
+          icon: <FileText className={cn('h-5 w-5', isRTL ? 'ml-3 rtl-flip' : 'mr-3')} />,
+        },
       ]
     },
     {

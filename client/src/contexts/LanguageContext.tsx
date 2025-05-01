@@ -24,17 +24,10 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
   };
 
   useEffect(() => {
-    // Set default language to English
-    const defaultLanguage = 'en';
-    if (i18n.language !== defaultLanguage) {
-      changeLanguage(defaultLanguage);
-    } else {
-      setLanguage(i18n.language);
-      setIsRTL(i18n.dir() === 'rtl');
-      document.documentElement.lang = i18n.language;
-      document.documentElement.dir = i18n.dir();
-    }
-  }, [i18n.language]);
+    // Initialize with the stored language or default to English
+    const storedLanguage = localStorage.getItem('i18nextLng') || 'en';
+    changeLanguage(storedLanguage);
+  }, []);
 
   return (
     <LanguageContext.Provider value={{ language, changeLanguage, isRTL }}>
