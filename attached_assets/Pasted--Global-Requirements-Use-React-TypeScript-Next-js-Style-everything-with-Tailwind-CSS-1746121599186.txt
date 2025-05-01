@@ -1,0 +1,133 @@
+🔄 Global Requirements
+
+    Use React + TypeScript + Next.js
+
+    Style everything with Tailwind CSS
+
+    Use next-i18next for i18n with default support for English, French, and German
+
+    Match all typography, colors, spacing, and layouts
+
+    Match all icons and visuals (use lucide-react or react-icons where applicable)
+
+    Remove user profile tiles/cards from the Dashboard
+
+    Keep top-right persona switcher as in reference
+
+📑 Page-by-Page Replication Details
+1. Dashboard (EUDR Compliance Dashboard)
+
+    Top metrics:
+
+        Overall Compliance (with % and trend arrow)
+
+        Risk Level (numeric + label + warning icon)
+
+        Document Status (score out of 100, “8 missing”)
+
+        Supplier Summary (status + badge)
+
+    Compliance Trends Chart:
+
+        Multi-line chart (Overall, Supplier, Document)
+
+        Last 6 months filter dropdown
+
+    Risk Assessment list:
+
+        Environmental, Social, Governance, Deforestation
+
+    ❌ Do NOT display user personas or profile cards here
+
+    Keep only top-right dropdown for persona switcher (Admin, Supplier Manager, etc.)
+
+2. Supply Chain Page
+
+    Sidebar menu: "Supply Chain"
+
+    Page title and content blocks (match layout from reference)
+
+    Section for Supplier Onboarding or Network
+
+    Table or list showing suppliers with status (Approved/Pending/Flagged)
+
+3. Compliance Page
+
+    Page title: "Compliance Overview"
+
+    Includes:
+
+        Compliance scoring widgets
+
+        List or chart showing non-compliance incidents
+
+    Submenu under Compliance:
+
+        EUDR Declarations must be shown as a nested item
+
+4. EUDR Declarations (Subpage under Compliance)
+
+    Table of declarations with:
+
+        Supplier Name
+
+        Product Type
+
+        Region
+
+        Declaration Status
+
+        Action buttons (View/Edit/Download)
+
+    Filters for status and supplier
+
+    Pagination at the bottom
+
+    Add new declaration button
+
+5. Customers Page
+
+    Customer list view:
+
+        Company Name, Industry, Risk Score
+
+    Add customer button
+
+    Each row has actions: View, Edit, Remove
+
+    Summary section or insights chart if present in original
+
+6. Settings Page
+
+    Settings menu (Profile, Organization, Preferences)
+
+    Only retain relevant settings fields (language, timezone)
+
+    Match input styling and spacing exactly
+
+👤 Persona Switcher (Top Right)
+
+    Match dropdown UI with all personas:
+
+        Admin, Compliance Officer, Supplier Manager, Declaration Specialist, Auditor, Supplier, Customer, EU Operator
+
+    Highlight active selection with check icon
+
+    Behavior: When switched, optionally show a toast or refresh data as needed
+
+✅ Final Checklist
+
+Pixel-perfect match of every screen and layout
+
+Remove dashboard profile tiles
+
+Match sidebar nesting and icons
+
+All pages accessible via routing
+
+i18n language toggle in header
+
+Tailwind utility classes used throughout
+
+    Fully responsive and mobile-friendly
+

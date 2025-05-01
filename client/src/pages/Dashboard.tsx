@@ -8,7 +8,7 @@ import { TopLevelMetrics } from '@/components/dashboard/TopLevelMetrics';
 import { ComplianceTrendsChart } from '@/components/dashboard/ComplianceTrendsChart';
 import { RiskAssessmentCategories } from '@/components/dashboard/RiskAssessmentCategories';
 import { useTranslation } from '@/hooks/use-translation';
-import { Calendar, Download, Plus, Factory, TrendingUp, ShieldCheck, Users } from 'lucide-react';
+import { Calendar, Download, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -20,30 +20,6 @@ export default function Dashboard() {
   
   // Last updated date would typically come from an API
   const lastUpdated = formatDate(new Date());
-
-  // User personas with translations
-  const userPersonas = [
-    {
-      role: 'manufacturer',
-      icon: <Factory className="h-8 w-8 text-primary-600" />,
-      actions: ['uploadDeclarations', 'viewSupplyChain']
-    },
-    {
-      role: 'trader',
-      icon: <TrendingUp className="h-8 w-8 text-primary-600" />,
-      actions: ['submitReports', 'verifySuppliers']
-    },
-    {
-      role: 'importer',
-      icon: <ShieldCheck className="h-8 w-8 text-primary-600" />,
-      actions: ['verifyCompliance', 'submitDocuments']
-    },
-    {
-      role: 'admin',
-      icon: <Users className="h-8 w-8 text-primary-600" />,
-      actions: ['viewAnalytics', 'manageTeam']
-    }
-  ];
 
   return (
     <Layout title={t('dashboard.title')}>
@@ -70,40 +46,6 @@ export default function Dashboard() {
               <Plus className={cn("-ml-1 mr-2 h-5 w-5", isRTL && "-mr-1 ml-2")} />
               {t('dashboard.newDeclarationBtn')}
             </Button>
-          </div>
-        </div>
-        
-        {/* User Personas */}
-        <div className="mb-8">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">{t('dashboard.userRoles')}</h3>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {userPersonas.map((persona, index) => (
-              <div key={index} className="bg-white overflow-hidden shadow rounded-lg">
-                <div className="px-4 py-5 sm:p-6">
-                  <div className="flex items-center mb-4">
-                    <div className="flex-shrink-0 bg-primary-100 rounded-md p-2">
-                      {persona.icon}
-                    </div>
-                    <div className="ml-4">
-                      <h4 className="text-lg font-medium text-gray-900">{t(`personas.${persona.role}.title`)}</h4>
-                    </div>
-                  </div>
-                  <p className="text-sm text-gray-500 mb-4">{t(`personas.${persona.role}.description`)}</p>
-                  <div className="mt-5 space-y-2">
-                    {persona.actions.map((action, actionIndex) => (
-                      <Button 
-                        key={actionIndex}
-                        variant={actionIndex === 0 ? "default" : "outline"}
-                        className="w-full justify-center"
-                        size="sm"
-                      >
-                        {t(`personas.${persona.role}.actions.${action}`)}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ))}
           </div>
         </div>
         
