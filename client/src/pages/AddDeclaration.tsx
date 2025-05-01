@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Layout } from '@/components/layout/Layout';
 import { useTranslation } from '@/hooks/use-translation';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -96,7 +96,13 @@ export default function AddDeclaration() {
   
   // Parse URL query parameters
   const searchParams = new URLSearchParams(location.split('?')[1] || '');
-  const urlDeclarationType = searchParams.get('type') || 'inbound';
+  let urlDeclarationType = searchParams.get('type') || 'inbound';
+  
+  // Ensure declaration type is valid
+  if (urlDeclarationType !== 'inbound' && urlDeclarationType !== 'outbound') {
+    urlDeclarationType = 'inbound';
+  }
+  
   const isNewDeclaration = searchParams.get('new') === 'true';
   const isFromExisting = searchParams.get('existing') === 'true';
   
@@ -177,6 +183,11 @@ export default function AddDeclaration() {
   
   // Watch the declaration type to conditionally render form fields
   const formDeclarationType = form.watch('declarationType');
+  
+  // Update form when URL changes
+  useEffect(() => {
+    form.setValue('declarationType', urlDeclarationType as 'inbound' | 'outbound');
+  }, [urlDeclarationType, form]);
   
   const onSubmit = (data: FormData) => {
     console.log('Form submitted:', data);
