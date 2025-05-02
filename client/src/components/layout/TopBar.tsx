@@ -40,14 +40,14 @@ export const TopBar: React.FC<TopBarProps> = ({ title, toggleSidebar }) => {
         {/* Search - hidden on mobile */}
         <div className={cn('hidden md:flex md:flex-1 md:items-center md:max-w-md mx-4', isRTL && 'md:justify-end')}>
           <div className="relative w-full">
-            <div className={cn('absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none', isRTL && 'left-auto right-0 pl-0 pr-3')}>
-              <Search className="h-5 w-5 text-gray-400" />
+            <div className={cn('absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none', isRTL && 'left-auto right-0 pl-0 pr-2.5')}>
+              <Search className="h-4 w-4 text-gray-400" />
             </div>
             <input 
               type="text" 
               className={cn(
-                'block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-primary-500 focus:border-primary-500 sm:text-sm',
-                isRTL && 'pl-3 pr-10 text-right'
+                'block w-full pl-8 pr-2.5 py-1.5 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-primary-500 focus:border-primary-500 text-xs',
+                isRTL && 'pl-2.5 pr-8 text-right'
               )} 
               placeholder={t('search.placeholder')}
             />
@@ -55,11 +55,11 @@ export const TopBar: React.FC<TopBarProps> = ({ title, toggleSidebar }) => {
         </div>
         
         {/* Right navigation */}
-        <div className={cn('flex items-center gap-3', isRTL && 'flex-row-reverse')}>
+        <div className={cn('flex items-center gap-2', isRTL && 'flex-row-reverse')}>
           {/* Persona Switcher */}
           <div className="block">
             {/* Conditionally render PersonaSwitcher to handle potential errors */}
-            <React.Suspense fallback={<Button variant="outline" className="flex items-center gap-2 h-9">
+            <React.Suspense fallback={<Button variant="outline" className="flex items-center gap-1.5 h-8 px-2.5 py-1.5 text-xs font-medium">
               <span className="hidden sm:inline">Administrator</span>
               <span className="sm:hidden">Admin</span>
             </Button>}>
@@ -68,10 +68,10 @@ export const TopBar: React.FC<TopBarProps> = ({ title, toggleSidebar }) => {
           </div>
           
           {/* Notifications */}
-          <Button variant="ghost" size="icon" className="relative">
+          <Button variant="ghost" size="icon" className="relative h-8 w-8">
             <span className="sr-only">{t('notifications.label')}</span>
-            <Bell className="h-5 w-5" />
-            <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
+            <Bell className="h-4 w-4" />
+            <span className="absolute top-0.5 right-0.5 block h-1.5 w-1.5 rounded-full bg-red-500 ring-1 ring-white"></span>
           </Button>
           
           {/* Language switcher - more prominent */}

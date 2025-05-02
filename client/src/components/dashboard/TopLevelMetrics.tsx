@@ -30,16 +30,16 @@ const MetricCard: React.FC<MetricCardProps> = ({
 
   return (
     <div className="bg-white overflow-hidden shadow rounded-lg">
-      <div className="px-4 py-5 sm:p-6">
+      <div className="px-4 py-4 sm:p-5">
         <div className={cn("flex items-center", isRTL && "flex-row-reverse")}>
-          <div className={cn(`flex-shrink-0 ${iconBgColor} rounded-md p-3`)}>
-            {icon}
+          <div className={cn(`flex-shrink-0 ${iconBgColor} rounded-md p-2.5`)}>
+            {React.cloneElement(icon as React.ReactElement, { className: 'h-5 w-5' })}
           </div>
           <div className={cn("ml-5 w-0 flex-1", isRTL && "mr-5 ml-0 text-right")}>
             <dt className="text-sm font-medium text-gray-500 truncate">{title}</dt>
             <dd>
-              <div className="text-2xl font-semibold text-gray-900">{value}</div>
-              <div className="mt-1 text-sm text-gray-500">{subtitle}</div>
+              <div className="text-xl font-medium text-gray-900">{value}</div>
+              <div className="mt-0.5 text-xs text-gray-500">{subtitle}</div>
               
               {progress !== undefined && (
                 <Progress 
