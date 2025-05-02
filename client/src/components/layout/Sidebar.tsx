@@ -165,7 +165,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         
                         {/* Active indicator bar */}
                         {isActive && (
-                          <div className={cn("absolute inset-y-0 w-1 bg-primary-600 rounded-tr-md rounded-br-md", 
+                          <div className={cn("absolute inset-y-0 w-0.5 bg-primary-600 rounded-tr-md rounded-br-md", 
                             isRTL ? "right-0" : "left-0")}></div>
                         )}
                       </div>
@@ -195,7 +195,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                                   
                                   {/* Active indicator bar */}
                                   {isActive && (
-                                    <div className={cn("absolute inset-y-0 w-1 bg-primary-600 rounded-tr-md rounded-br-md", 
+                                    <div className={cn("absolute inset-y-0 w-0.5 bg-primary-600 rounded-tr-md rounded-br-md", 
                                       isRTL ? "right-0" : "left-0")}></div>
                                   )}
                                 </div>
