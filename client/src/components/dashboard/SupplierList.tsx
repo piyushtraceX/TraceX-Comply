@@ -62,12 +62,12 @@ export const SupplierList: React.FC = () => {
         <li key={supplier.id}>
           <Link href={`/suppliers/${supplier.id}`}>
             <div className="block hover:bg-gray-50 cursor-pointer">
-              <div className="px-4 py-4 sm:px-6">
+              <div className="px-4 py-3 sm:px-6">
                 <div className={cn("flex items-center justify-between", isRTL && "flex-row-reverse")}>
                   <div className={cn("flex items-center", isRTL && "flex-row-reverse")}>
                     <div className="flex-shrink-0">
-                      <span className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                        <Building className="h-6 w-6 text-gray-500" />
+                      <span className="h-9 w-9 rounded-full bg-gray-100 flex items-center justify-center">
+                        <Building className="h-5 w-5 text-gray-500" />
                       </span>
                     </div>
                     <div className={cn("ml-4", isRTL && "mr-4 ml-0 text-right")}>
@@ -76,7 +76,7 @@ export const SupplierList: React.FC = () => {
                     </div>
                   </div>
                   <div className={cn("ml-2 flex-shrink-0 flex", isRTL && "mr-2 ml-0")}>
-                    <span className={cn(`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusClasses(supplier.status)}`)}>
+                    <span className={cn(`px-2 py-0.5 inline-flex text-xs leading-4 font-medium rounded-full ${getStatusClasses(supplier.status)}`)}>
                       {t(`supplier.status.${supplier.status}`)}
                     </span>
                   </div>

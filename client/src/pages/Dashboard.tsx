@@ -180,8 +180,8 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
           {/* Recent Suppliers */}
           <div className="bg-white shadow rounded-lg md:col-span-1">
-            <div className="px-4 py-5 border-b border-gray-200 sm:px-6">
-              <h3 className="text-lg leading-6 font-medium text-gray-900">
+            <div className="px-4 py-3 border-b border-gray-200 sm:px-6">
+              <h3 className="text-base font-medium text-gray-900">
                 {t('recentSuppliers.title')}
               </h3>
             </div>
@@ -215,8 +215,8 @@ export default function Dashboard() {
           
           {/* Recent Activities */}
           <div className="bg-white shadow rounded-lg md:col-span-1">
-            <div className="px-4 py-5 border-b border-gray-200 sm:px-6">
-              <h3 className="text-lg leading-6 font-medium text-gray-900">
+            <div className="px-4 py-3 border-b border-gray-200 sm:px-6">
+              <h3 className="text-base font-medium text-gray-900">
                 Recent Activities
               </h3>
             </div>
@@ -248,8 +248,8 @@ export default function Dashboard() {
           
           {/* Upcoming Tasks */}
           <div className="bg-white shadow rounded-lg md:col-span-2 lg:col-span-1">
-            <div className="px-4 py-5 border-b border-gray-200 sm:px-6">
-              <h3 className="text-lg leading-6 font-medium text-gray-900">
+            <div className="px-4 py-3 border-b border-gray-200 sm:px-6">
+              <h3 className="text-base font-medium text-gray-900">
                 Upcoming Tasks
               </h3>
             </div>
