@@ -16,6 +16,7 @@ import AddCustomer from "@/pages/AddCustomer";
 import Settings from "@/pages/Settings";
 import { ThemeProvider } from "next-themes";
 import { LanguageProvider } from "./contexts/LanguageContext";
+import { Layout } from "@/components/layout/Layout";
 import React, { Suspense } from "react";
 
 // Simple loading component for suspense fallback
@@ -57,6 +58,7 @@ function Router() {
       <Switch>
         <Route path="/" component={Dashboard} />
         <Route path="/supply-chain" component={SupplyChain} />
+        <Route path="/saq-management" component={() => <Layout title="SAQ Management">SAQ Management Content</Layout>} />
         <Route path="/add-supplier" component={AddSupplier} />
         <Route path="/supplier/:id" component={SupplierDetail} />
         <Route path="/compliance" component={Compliance} />
