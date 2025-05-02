@@ -29,7 +29,10 @@ export const LanguageSwitcher = () => {
         <Button 
           variant="outline" 
           size="sm" 
-          className="flex items-center gap-2 h-9 px-3 py-2 border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+          className={cn(
+            "flex items-center gap-2 h-9 px-3 py-2 border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500",
+            isRTL && "flex-row-reverse"
+          )}
         >
           <img
             src={getLanguageFlag(language)}
@@ -44,7 +47,8 @@ export const LanguageSwitcher = () => {
             xmlns="http://www.w3.org/2000/svg"
             className={cn(
               "h-4 w-4 text-gray-400 transition-transform",
-              open ? "transform rotate-180" : ""
+              open ? "transform rotate-180" : "",
+              isRTL && open ? "transform -rotate-180" : ""
             )}
             viewBox="0 0 20 20"
             fill="currentColor"
@@ -64,7 +68,8 @@ export const LanguageSwitcher = () => {
             className={cn(
               "flex items-center px-3 py-2 text-sm rounded-md",
               language === lang.code ? "bg-gray-100 text-primary-600 font-medium" : "text-gray-700 hover:bg-gray-50", 
-              "cursor-pointer"
+              "cursor-pointer",
+              isRTL && "flex-row-reverse"
             )}
             onClick={() => {
               changeLanguage(lang.code);
@@ -73,7 +78,10 @@ export const LanguageSwitcher = () => {
           >
             <img
               src={getLanguageFlag(lang.code)}
-              className="lang-flag mr-2 w-5 h-4 object-cover border border-gray-200 rounded-sm shadow-sm"
+              className={cn(
+                "lang-flag w-5 h-4 object-cover border border-gray-200 rounded-sm shadow-sm",
+                isRTL ? "ml-2" : "mr-2"
+              )}
               alt={lang.name}
               aria-hidden="true"
             />

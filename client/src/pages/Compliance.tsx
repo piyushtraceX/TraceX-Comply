@@ -134,7 +134,7 @@ export default function Compliance() {
     <Layout title={t('nav.compliance')}>
       <div className="py-6 px-4 sm:px-6 lg:px-8">
         {/* Page header */}
-        <div className="md:flex md:items-center md:justify-between mb-6">
+        <div className={cn("md:flex md:items-center md:justify-between mb-6", isRTL && "md:flex-row-reverse")}>
           <div className="flex-1 min-w-0">
             <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
               Compliance Overview
@@ -143,16 +143,16 @@ export default function Compliance() {
               {t('pages.compliance.description')}
             </p>
           </div>
-          <div className="mt-4 flex md:mt-0">
-            <Button variant="outline" className="mr-3">
-              <BarChart3 className="mr-2 h-4 w-4" />
+          <div className={cn("mt-4 flex gap-3 md:mt-0", isRTL && "flex-row-reverse")}>
+            <Button variant="outline">
+              <BarChart3 className={cn(isRTL ? "ml-2" : "mr-2", "h-4 w-4")} />
               Generate Report
             </Button>
             <Link href="/declarations">
-              <Button className="flex items-center">
-                <FileText className="mr-2 h-4 w-4" />
+              <Button className={cn("flex items-center", isRTL && "flex-row-reverse")}>
+                <FileText className={cn(isRTL ? "ml-2" : "mr-2", "h-4 w-4")} />
                 EUDR Declarations
-                <ChevronRight className="ml-1 h-4 w-4" />
+                <ChevronRight className={cn(isRTL ? "mr-1 rtl-flip" : "ml-1", "h-4 w-4")} />
               </Button>
             </Link>
           </div>
@@ -199,8 +199,8 @@ export default function Compliance() {
             <ul className="divide-y divide-gray-200">
               {nonComplianceIncidents.map((incident) => (
                 <li key={incident.id} className="px-4 py-4 sm:px-6 hover:bg-gray-50">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-center mb-3 sm:mb-0">
                       <div className="flex-shrink-0">
                         {incident.status === 'open' ? (
                           <AlertTriangle className="h-6 w-6 text-red-500" />
@@ -217,9 +217,9 @@ export default function Compliance() {
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-4 ml-10 sm:ml-0">
                       {getSeverityBadge(incident.severity)}
-                      <div className="ml-2">{getStatusBadge(incident.status)}</div>
+                      <div className="ml-2 hidden sm:flex">{getStatusBadge(incident.status)}</div>
                       <Button variant="ghost" size="sm">
                         <span className="sr-only">View details</span>
                         <ArrowRight className="h-4 w-4" />
@@ -245,16 +245,16 @@ export default function Compliance() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex">
-                <ShieldCheck className="h-5 w-5 text-green-600 mr-3 flex-shrink-0" />
+              <div className={cn("flex", isRTL && "flex-row-reverse text-right")}>
+                <ShieldCheck className={cn("h-5 w-5 text-green-600 flex-shrink-0", isRTL ? "ml-3" : "mr-3")} />
                 <p className="text-sm">Ensure all suppliers have completed their due diligence documentation</p>
               </div>
-              <div className="flex">
-                <ShieldCheck className="h-5 w-5 text-green-600 mr-3 flex-shrink-0" />
+              <div className={cn("flex", isRTL && "flex-row-reverse text-right")}>
+                <ShieldCheck className={cn("h-5 w-5 text-green-600 flex-shrink-0", isRTL ? "ml-3" : "mr-3")} />
                 <p className="text-sm">Regularly monitor changes in EUDR compliance requirements</p>
               </div>
-              <div className="flex">
-                <ShieldCheck className="h-5 w-5 text-green-600 mr-3 flex-shrink-0" />
+              <div className={cn("flex", isRTL && "flex-row-reverse text-right")}>
+                <ShieldCheck className={cn("h-5 w-5 text-green-600 flex-shrink-0", isRTL ? "ml-3" : "mr-3")} />
                 <p className="text-sm">Conduct quarterly risk assessments for high-risk suppliers</p>
               </div>
             </div>
