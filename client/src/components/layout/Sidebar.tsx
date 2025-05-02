@@ -41,36 +41,36 @@ export const Sidebar: React.FC<SidebarProps> = ({
     {
       href: '/',
       label: t('nav.dashboard'),
-      icon: <LayoutDashboard className={cn('h-5 w-5', isRTL ? 'ml-3 rtl-flip' : 'mr-3')} />,
+      icon: <LayoutDashboard className={cn('h-4 w-4', isRTL ? 'ml-2.5 rtl-flip' : 'mr-2.5')} />,
     },
     {
       href: '/supply-chain',
       label: t('nav.supplyChain'),
-      icon: <Network className={cn('h-5 w-5', isRTL ? 'ml-3 rtl-flip' : 'mr-3')} />,
+      icon: <Network className={cn('h-4 w-4', isRTL ? 'ml-2.5 rtl-flip' : 'mr-2.5')} />,
       children: [
         {
           href: '/saq-management',
           label: t('nav.saqManagement') || 'SAQ Management',
-          icon: <ClipboardList className={cn('h-5 w-5', isRTL ? 'ml-3 rtl-flip' : 'mr-3')} />,
+          icon: <ClipboardList className={cn('h-4 w-4', isRTL ? 'ml-2.5 rtl-flip' : 'mr-2.5')} />,
         },
       ]
     },
     {
       href: '/compliance',
       label: t('nav.compliance'),
-      icon: <ShieldCheck className={cn('h-5 w-5', isRTL ? 'ml-3 rtl-flip' : 'mr-3')} />,
+      icon: <ShieldCheck className={cn('h-4 w-4', isRTL ? 'ml-2.5 rtl-flip' : 'mr-2.5')} />,
       children: [
         {
           href: '/declarations',
           label: t('nav.eudrDeclarations'),
-          icon: <FileText className={cn('h-5 w-5', isRTL ? 'ml-3 rtl-flip' : 'mr-3')} />,
+          icon: <FileText className={cn('h-4 w-4', isRTL ? 'ml-2.5 rtl-flip' : 'mr-2.5')} />,
         },
       ]
     },
     {
       href: '/customers',
       label: t('nav.customers'),
-      icon: <Users className={cn('h-5 w-5', isRTL ? 'ml-3 rtl-flip' : 'mr-3')} />,
+      icon: <Users className={cn('h-4 w-4', isRTL ? 'ml-2.5 rtl-flip' : 'mr-2.5')} />,
     },
     {
       href: '/settings',
@@ -118,9 +118,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
         "bg-white border-r border-gray-200 h-screen overflow-hidden z-40 transition-all duration-300",
         isMobile ? (
           isOpen 
-            ? "fixed inset-0 w-full md:w-64"
+            ? "fixed inset-0 w-full md:w-60"
             : "hidden"
-        ) : "fixed w-64 md:block"
+        ) : "fixed w-60 md:block"
       )}>
         <div className="flex flex-col h-full">
           {/* Logo and close button */}
@@ -165,7 +165,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         
                         {/* Active indicator bar */}
                         {isActive && (
-                          <div className={cn("absolute inset-y-0 w-0.5 bg-primary-600", 
+                          <div className={cn("absolute inset-y-0 w-1 bg-primary-600", 
                             isRTL ? "right-0" : "left-0")}></div>
                         )}
                       </div>
@@ -195,7 +195,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                                   
                                   {/* Active indicator bar */}
                                   {isActive && (
-                                    <div className={cn("absolute inset-y-0 w-0.5 bg-primary-600", 
+                                    <div className={cn("absolute inset-y-0 w-1 bg-primary-600", 
                                       isRTL ? "right-0" : "left-0")}></div>
                                   )}
                                 </div>
