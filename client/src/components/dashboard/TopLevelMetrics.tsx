@@ -42,10 +42,12 @@ const MetricCard: React.FC<MetricCardProps> = ({
               <div className="mt-0.5 text-xs text-gray-500">{subtitle}</div>
               
               {progress !== undefined && (
-                <Progress 
-                  value={progress} 
-                  className={`h-2 mt-2 ${progressColor ? `[&>div]:${progressColor}` : ''}`}
-                />
+                <div className="w-full bg-gray-200 rounded-full h-1.5 mt-2">
+                  <div 
+                    className={`h-1.5 rounded-full ${progressColor || 'bg-blue-600'}`}
+                    style={{ width: `${progress}%` }}
+                  ></div>
+                </div>
               )}
             </dd>
           </div>
@@ -61,7 +63,7 @@ export const TopLevelMetrics: React.FC = () => {
   const metrics = [
     {
       title: t('metrics.overallCompliance'),
-      value: <div className="flex items-center">78% <TrendingUp className="h-4 w-4 ml-2 text-green-500" /></div>,
+      value: <div className="flex items-center">78% <TrendingUp className="h-3.5 w-3.5 ml-1.5 text-green-500" /></div>,
       subtitle: t('metrics.lastUpdated', { time: '2 hours ago' }),
       icon: <TrendingUp className="h-6 w-6 text-blue-600" />,
       iconBgColor: 'bg-blue-100',
