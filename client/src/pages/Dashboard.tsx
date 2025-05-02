@@ -27,7 +27,7 @@ export default function Dashboard() {
         {/* Page header */}
         <div className="md:flex md:items-center md:justify-between mb-6">
           <div className="flex-1 min-w-0">
-            <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
+            <h2 className="text-xl font-semibold leading-7 text-gray-900 sm:text-2xl sm:truncate">
               {t('dashboard.title')}
             </h2>
             <div className="mt-1 flex flex-col sm:flex-row sm:flex-wrap sm:mt-0 sm:space-x-6">
@@ -56,13 +56,13 @@ export default function Dashboard() {
         <StatsCards />
         
         {/* Two-column layout for trends and risk assessment */}
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 mb-5">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 mb-4">
           <ComplianceTrendsChart />
           <RiskAssessmentCategories />
         </div>
         
         {/* Supplier Compliance Status */}
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 mb-5">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 mb-4">
           <div className="bg-white shadow rounded-lg">
             <div className="px-4 py-5 border-b border-gray-200 sm:px-6">
               <h3 className="text-lg leading-6 font-medium text-gray-900">
@@ -177,7 +177,7 @@ export default function Dashboard() {
         </div>
         
         {/* Three-column layout for additional content */}
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {/* Recent Suppliers */}
           <div className="bg-white shadow rounded-lg md:col-span-1">
             <div className="px-4 py-3 border-b border-gray-200 sm:px-6">
