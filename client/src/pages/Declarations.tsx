@@ -267,14 +267,16 @@ export default function Declarations() {
           </div>
           <div className="mt-4 flex gap-2 md:mt-0">
             <div className="relative group">
-              <Button 
-                variant="default" 
-                className="flex items-center"
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                Add Inbound Declaration
-                <ChevronRight className="ml-2 h-4 w-4" />
-              </Button>
+              <Link href="/add-declaration?type=inbound">
+                <Button 
+                  variant="default" 
+                  className="flex items-center"
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Inbound Declaration
+                  <ChevronRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
               
               <div className="absolute right-0 mt-2 w-60 bg-white rounded-md shadow-lg overflow-hidden z-20 border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
                 <div className="py-1">
@@ -295,14 +297,16 @@ export default function Declarations() {
             </div>
             
             <div className="relative group">
-              <Button 
-                variant="outline" 
-                className="flex items-center"
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                Add Outbound Declaration
-                <ChevronRight className="ml-2 h-4 w-4" />
-              </Button>
+              <Link href="/add-declaration?type=outbound">
+                <Button 
+                  variant="outline" 
+                  className="flex items-center"
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Outbound Declaration
+                  <ChevronRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
               
               <div className="absolute right-0 mt-2 w-60 bg-white rounded-md shadow-lg overflow-hidden z-20 border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
                 <div className="py-1">
