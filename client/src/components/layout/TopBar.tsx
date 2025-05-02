@@ -18,7 +18,7 @@ export const TopBar: React.FC<TopBarProps> = ({ title, toggleSidebar }) => {
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-20">
-      <div className={cn('flex items-center justify-between px-4 py-3 sm:px-6', isRTL && 'flex-row-reverse')}>
+      <div className={cn('flex items-center justify-between px-4 py-2 sm:px-6', isRTL && 'flex-row-reverse')}>
         {/* Left side: Page title and optionally mobile menu button */}
         <div className={cn('flex items-center', isRTL && 'flex-row-reverse')}>
           {/* Mobile menu button - only visible on mobile */}
@@ -34,7 +34,7 @@ export const TopBar: React.FC<TopBarProps> = ({ title, toggleSidebar }) => {
           )}
           
           {/* Page title */}
-          <h1 className="text-lg font-semibold text-gray-900">{title}</h1>
+          <h1 className="text-base font-medium text-gray-900">{title}</h1>
         </div>
         
         {/* Search - hidden on mobile */}

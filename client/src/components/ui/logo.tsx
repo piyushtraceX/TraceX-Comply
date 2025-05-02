@@ -20,14 +20,14 @@ export function Logo({
   
   const sizeClasses = {
     sm: 'w-6 h-6',
-    md: 'w-9 h-9',
-    lg: 'w-11 h-11',
+    md: 'w-8 h-8',
+    lg: 'w-10 h-10',
   };
 
   const textSizeClasses = {
     sm: 'text-sm',
-    md: 'text-lg',
-    lg: 'text-xl',
+    md: 'text-base',
+    lg: 'text-lg',
   };
 
   const iconColorClasses = {
@@ -49,7 +49,7 @@ export function Logo({
         </div>
         <div className={cn('flex flex-col', isRTL ? 'mr-2 items-end' : 'ml-2')}>
           <span className={cn('font-bold leading-tight', textSizeClasses[size])}>{t('app.name')}</span>
-          <span className="text-xs text-gray-500 leading-tight">EUDR Compliance Platform</span>
+          <span className="text-xs text-gray-500 leading-none">EUDR Compliance Platform</span>
         </div>
       </div>
     </Link>
