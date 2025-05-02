@@ -201,12 +201,20 @@
   "personaSwitcher": {
     "label": "Switch Persona",
     "admin": "Admin",
+    "adminDescription": "Full system access and controls",
     "complianceOfficer": "Compliance Officer",
+    "complianceOfficerDescription": "Focus on compliance and risk assessment",
     "supplierManager": "Supplier Manager",
+    "supplierManagerDescription": "Manage supplier relationships and onboarding",
     "declarationSpecialist": "Declaration Specialist",
+    "declarationSpecialistDescription": "Focus on managing EUDR declarations",
     "auditor": "Auditor",
+    "auditorDescription": "Review and audit compliance documentation",
     "supplier": "Supplier",
+    "supplierDescription": "External supplier view for document submission",
     "customer": "Customer",
-    "euOperator": "EU Operator"
+    "customerDescription": "View supplier compliance information",
+    "euOperator": "EU Operator",
+    "euOperatorDescription": "EU market operator focused on due diligence"
   }
 }

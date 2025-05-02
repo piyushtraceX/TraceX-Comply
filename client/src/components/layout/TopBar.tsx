@@ -57,7 +57,10 @@ export const TopBar: React.FC<TopBarProps> = ({ title, toggleSidebar }) => {
         <div className={cn('flex items-center gap-3', isRTL && 'flex-row-reverse')}>
           {/* Persona Switcher - hidden on mobile */}
           <div className="hidden md:block">
-            <PersonaSwitcher />
+            {/* Conditionally render PersonaSwitcher to handle potential errors */}
+            <React.Suspense fallback={<Button variant="outline" className="flex items-center gap-2 h-9">Administrator</Button>}>
+              <PersonaSwitcher />
+            </React.Suspense>
           </div>
           
           {/* Notifications */}

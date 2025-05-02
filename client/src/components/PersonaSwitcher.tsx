@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useTranslation } from '@/hooks/use-translation';
 import { 
   DropdownMenu,
@@ -9,90 +9,52 @@ import {
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { Check, ChevronDown, User, Shield, Briefcase, FileText, Search, Users, Building, ShieldCheck } from 'lucide-react';
-
-type Persona = {
-  id: string;
-  name: string;
-  icon: React.ReactNode;
-};
+import { Check, ChevronDown } from 'lucide-react';
+import { usePersona, PersonaId } from '@/contexts/PersonaContext';
+import { cn } from '@/lib/utils';
 
 export const PersonaSwitcher: React.FC = () => {
   const { t } = useTranslation();
-  const [activePersona, setActivePersona] = useState<string>('admin');
+  const { personas, activePersona, setActivePersona } = usePersona();
   
-  const personas: Persona[] = [
-    { 
-      id: 'admin', 
-      name: t('personaSwitcher.admin'), 
-      icon: <Shield className="h-4 w-4 mr-2" /> 
-    },
-    { 
-      id: 'complianceOfficer', 
-      name: t('personaSwitcher.complianceOfficer'), 
-      icon: <ShieldCheck className="h-4 w-4 mr-2" /> 
-    },
-    { 
-      id: 'supplierManager', 
-      name: t('personaSwitcher.supplierManager'), 
-      icon: <Users className="h-4 w-4 mr-2" /> 
-    },
-    { 
-      id: 'declarationSpecialist', 
-      name: t('personaSwitcher.declarationSpecialist'), 
-      icon: <FileText className="h-4 w-4 mr-2" /> 
-    },
-    { 
-      id: 'auditor', 
-      name: t('personaSwitcher.auditor'), 
-      icon: <Search className="h-4 w-4 mr-2" /> 
-    },
-    { 
-      id: 'supplier', 
-      name: t('personaSwitcher.supplier'), 
-      icon: <Building className="h-4 w-4 mr-2" /> 
-    },
-    { 
-      id: 'customer', 
-      name: t('personaSwitcher.customer'), 
-      icon: <User className="h-4 w-4 mr-2" /> 
-    },
-    { 
-      id: 'euOperator', 
-      name: t('personaSwitcher.euOperator'), 
-      icon: <Briefcase className="h-4 w-4 mr-2" /> 
-    },
-  ];
-  
-  const activePersonaObj = personas.find(p => p.id === activePersona);
-  
-  const handleSelectPersona = (id: string) => {
+  const handleSelectPersona = (id: PersonaId) => {
     setActivePersona(id);
   };
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="flex items-center gap-2 h-9">
-          {activePersonaObj?.icon}
-          <span>{activePersonaObj?.name}</span>
-          <ChevronDown className="h-4 w-4 ml-1" />
+        <Button 
+          variant="outline" 
+          className="flex items-center gap-2 h-9 px-3 py-2 border-gray-200 text-sm text-gray-700 hover:bg-gray-50"
+        >
+          <span className="mr-1">{React.cloneElement(activePersona.icon as React.ReactElement, { className: 'h-4 w-4' })}</span>
+          <span>{activePersona.name}</span>
+          <ChevronDown className="h-4 w-4 ml-1 text-gray-400" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56">
-        <DropdownMenuLabel>{t('personaSwitcher.label')}</DropdownMenuLabel>
-        <DropdownMenuSeparator />
+      <DropdownMenuContent className="w-56 p-1 shadow-lg border border-gray-200 rounded-md">
+        <DropdownMenuLabel className="px-3 py-2 text-xs font-semibold text-gray-500">
+          {t('personaSwitcher.label')}
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator className="my-1" />
         {personas.map((persona) => (
           <DropdownMenuItem 
             key={persona.id}
-            className="flex items-center justify-between cursor-pointer"
+            className={cn(
+              "flex items-center justify-between px-3 py-2 text-sm rounded-md",
+              activePersona.id === persona.id ? "bg-gray-100 text-primary-600 font-medium" : "text-gray-700 hover:bg-gray-50",
+              "cursor-pointer"
+            )}
             onClick={() => handleSelectPersona(persona.id)}
           >
             <div className="flex items-center">
-              {persona.icon}
+              <span className="mr-2">
+                {React.cloneElement(persona.icon as React.ReactElement, { className: 'h-4 w-4' })}
+              </span>
               <span>{persona.name}</span>
             </div>
-            {activePersona === persona.id && (
+            {activePersona.id === persona.id && (
               <Check className="h-4 w-4 ml-2 text-primary-600" />
             )}
           </DropdownMenuItem>

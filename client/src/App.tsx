@@ -16,6 +16,7 @@ import AddCustomer from "@/pages/AddCustomer";
 import Settings from "@/pages/Settings";
 import { ThemeProvider } from "next-themes";
 import { LanguageProvider } from "./contexts/LanguageContext";
+import { PersonaProvider } from "./contexts/PersonaContext";
 import { Layout } from "@/components/layout/Layout";
 import React, { Suspense } from "react";
 
@@ -83,10 +84,12 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <ThemeProvider attribute="class" defaultTheme="light">
           <LanguageProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Router />
-            </TooltipProvider>
+            <PersonaProvider>
+              <TooltipProvider>
+                <Toaster />
+                <Router />
+              </TooltipProvider>
+            </PersonaProvider>
           </LanguageProvider>
         </ThemeProvider>
       </QueryClientProvider>
