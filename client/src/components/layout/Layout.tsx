@@ -60,8 +60,10 @@ export const Layout: React.FC<LayoutProps> = ({ children, title }) => {
           title={title} 
           toggleSidebar={toggleSidebar} 
         />
-        <main className="flex-1 overflow-x-hidden p-4 sm:p-6">
-          {children}
+        <main className="flex-1 overflow-x-hidden p-3 sm:p-4 md:p-6 mx-auto w-full max-w-[1920px]">
+          <div className="mx-auto w-full">
+            {children}
+          </div>
         </main>
       </div>
     </div>

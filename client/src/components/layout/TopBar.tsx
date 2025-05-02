@@ -67,8 +67,10 @@ export const TopBar: React.FC<TopBarProps> = ({ title, toggleSidebar }) => {
             <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
           </Button>
           
-          {/* Language switcher */}
-          <LanguageSwitcher />
+          {/* Language switcher - more prominent */}
+          <div className="relative px-1">
+            <LanguageSwitcher />
+          </div>
         </div>
       </div>
     </header>
