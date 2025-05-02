@@ -56,13 +56,13 @@ export default function Dashboard() {
         <StatsCards />
         
         {/* Two-column layout for trends and risk assessment */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 mb-6">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 mb-5">
           <ComplianceTrendsChart />
           <RiskAssessmentCategories />
         </div>
         
         {/* Supplier Compliance Status */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 mb-6">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 mb-5">
           <div className="bg-white shadow rounded-lg">
             <div className="px-4 py-5 border-b border-gray-200 sm:px-6">
               <h3 className="text-lg leading-6 font-medium text-gray-900">
@@ -177,7 +177,7 @@ export default function Dashboard() {
         </div>
         
         {/* Three-column layout for additional content */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
           {/* Recent Suppliers */}
           <div className="bg-white shadow rounded-lg md:col-span-1">
             <div className="px-4 py-5 border-b border-gray-200 sm:px-6">
