@@ -46,7 +46,7 @@ export const LanguageSwitcher = () => {
           <svg
             xmlns="http://www.w3.org/2000/svg"
             className={cn(
-              "h-4 w-4 text-gray-400 transition-transform",
+              "h-3.5 w-3.5 text-gray-400 transition-transform",
               open ? "transform rotate-180" : "",
               isRTL && open ? "transform -rotate-180" : ""
             )}
@@ -61,7 +61,7 @@ export const LanguageSwitcher = () => {
           </svg>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48 p-1 shadow-lg border border-gray-200 rounded-md">
+      <DropdownMenuContent align="end" className="w-44 p-1 shadow-md border border-gray-200 rounded-md">
         {languages.map((lang) => (
           <DropdownMenuItem
             key={lang.code}

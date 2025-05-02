@@ -68,9 +68,9 @@ export const TopBar: React.FC<TopBarProps> = ({ title, toggleSidebar }) => {
           </div>
           
           {/* Notifications */}
-          <Button variant="ghost" size="icon" className="relative h-8 w-8">
+          <Button variant="ghost" size="icon" className="relative h-7 w-7">
             <span className="sr-only">{t('notifications.label')}</span>
-            <Bell className="h-4 w-4" />
+            <Bell className="h-3.5 w-3.5" />
             <span className="absolute top-0.5 right-0.5 block h-1.5 w-1.5 rounded-full bg-red-500 ring-1 ring-white"></span>
           </Button>
           

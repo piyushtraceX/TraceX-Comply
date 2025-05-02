@@ -38,10 +38,10 @@ export const PersonaSwitcher: React.FC = () => {
           </span>
           <span className="hidden sm:inline">{activePersona.name}</span>
           <span className="sm:hidden">Persona</span>
-          <ChevronDown className={cn("h-4 w-4 text-gray-400", isRTL ? "mr-1" : "ml-1")} />
+          <ChevronDown className={cn("h-3.5 w-3.5 text-gray-400", isRTL ? "mr-1" : "ml-1")} />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-64 p-1 shadow-lg border border-gray-200 rounded-md">
+      <DropdownMenuContent className="w-60 p-1 shadow-md border border-gray-200 rounded-md">
         <DropdownMenuLabel className="px-3 py-2 text-xs font-semibold text-gray-500">
           {t('personaSwitcher.label')}
         </DropdownMenuLabel>
@@ -73,7 +73,7 @@ export const PersonaSwitcher: React.FC = () => {
             </div>
             {activePersona.id === persona.id && (
               <Check className={cn(
-                "h-4 w-4 flex-shrink-0", 
+                "h-3.5 w-3.5 flex-shrink-0", 
                 isRTL ? "mr-2" : "ml-2"
               )} />
             )}

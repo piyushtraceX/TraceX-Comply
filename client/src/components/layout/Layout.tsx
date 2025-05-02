@@ -60,7 +60,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, title }) => {
           title={title} 
           toggleSidebar={toggleSidebar} 
         />
-        <main className="flex-1 overflow-x-hidden p-3 sm:p-4 md:p-5 mx-auto w-full max-w-[1920px]">
+        <main className="flex-1 overflow-x-hidden p-3 sm:p-4 md:p-4 mx-auto w-full max-w-[1800px]">
           <div className="mx-auto w-full">
             {children}
           </div>
