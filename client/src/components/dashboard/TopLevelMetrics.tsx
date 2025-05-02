@@ -29,7 +29,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
   const { isRTL } = useLanguage();
 
   return (
-    <div className="bg-white overflow-hidden shadow rounded-lg">
+    <div className="bg-white overflow-hidden shadow-sm rounded-md">
       <div className="px-4 py-4 sm:p-5">
         <div className={cn("flex items-center", isRTL && "flex-row-reverse")}>
           <div className={cn(`flex-shrink-0 ${iconBgColor} rounded-md p-2.5`)}>
@@ -104,7 +104,7 @@ export const TopLevelMetrics: React.FC = () => {
   ];
 
   return (
-    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-6">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-5">
       {metrics.map((metric, index) => (
         <MetricCard key={index} {...metric} />
       ))}

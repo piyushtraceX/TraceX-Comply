@@ -26,7 +26,7 @@ export const ComplianceTrendsChart: React.FC = () => {
   const [timeRange, setTimeRange] = React.useState('6m');
 
   return (
-    <div className="bg-white shadow rounded-lg">
+    <div className="bg-white shadow-sm rounded-md">
       <div className="px-4 py-3 border-b border-gray-200 sm:px-6">
         <div className="flex justify-between items-center">
           <h3 className="text-base font-medium text-gray-900">

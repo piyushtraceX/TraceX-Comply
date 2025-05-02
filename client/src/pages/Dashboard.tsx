@@ -63,9 +63,9 @@ export default function Dashboard() {
         
         {/* Supplier Compliance Status */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 mb-4">
-          <div className="bg-white shadow rounded-lg">
-            <div className="px-4 py-5 border-b border-gray-200 sm:px-6">
-              <h3 className="text-lg leading-6 font-medium text-gray-900">
+          <div className="bg-white shadow-sm rounded-md">
+            <div className="px-4 py-3 border-b border-gray-200 sm:px-6">
+              <h3 className="text-base font-medium text-gray-900">
                 Supplier Compliance Status
               </h3>
             </div>
@@ -114,9 +114,9 @@ export default function Dashboard() {
             </div>
           </div>
           
-          <div className="bg-white shadow rounded-lg">
-            <div className="px-4 py-5 border-b border-gray-200 sm:px-6">
-              <h3 className="text-lg leading-6 font-medium text-gray-900">
+          <div className="bg-white shadow-sm rounded-md">
+            <div className="px-4 py-3 border-b border-gray-200 sm:px-6">
+              <h3 className="text-base font-medium text-gray-900">
                 Compliance by Product Category
               </h3>
             </div>
@@ -179,7 +179,7 @@ export default function Dashboard() {
         {/* Three-column layout for additional content */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {/* Recent Suppliers */}
-          <div className="bg-white shadow rounded-lg md:col-span-1">
+          <div className="bg-white shadow-sm rounded-md md:col-span-1">
             <div className="px-4 py-3 border-b border-gray-200 sm:px-6">
               <h3 className="text-base font-medium text-gray-900">
                 {t('recentSuppliers.title')}
