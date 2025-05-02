@@ -30,13 +30,13 @@ export const LanguageSwitcher = () => {
           variant="outline" 
           size="sm" 
           className={cn(
-            "flex items-center gap-2 h-9 px-3 py-2 border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500",
+            "flex items-center gap-1.5 h-8 px-2.5 py-1.5 border-gray-200 text-xs font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-1 focus:ring-primary-500",
             isRTL && "flex-row-reverse"
           )}
         >
           <img
             src={getLanguageFlag(language)}
-            className="lang-flag w-5 h-4 object-cover border border-gray-200 rounded-sm shadow-sm"
+            className="lang-flag w-4 h-3 object-cover border border-gray-200 rounded-sm shadow-sm"
             alt={getLanguageName(language)}
             aria-hidden="true"
           />
@@ -79,7 +79,7 @@ export const LanguageSwitcher = () => {
             <img
               src={getLanguageFlag(lang.code)}
               className={cn(
-                "lang-flag w-5 h-4 object-cover border border-gray-200 rounded-sm shadow-sm",
+                "lang-flag w-4 h-3 object-cover border border-gray-200 rounded-sm shadow-sm",
                 isRTL ? "ml-2" : "mr-2"
               )}
               alt={lang.name}

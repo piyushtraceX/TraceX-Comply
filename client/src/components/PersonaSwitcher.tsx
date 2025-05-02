@@ -29,7 +29,7 @@ export const PersonaSwitcher: React.FC = () => {
         <Button 
           variant="outline" 
           className={cn(
-            "flex items-center gap-2 h-9 px-3 py-2 border-gray-200 text-sm text-gray-700 hover:bg-gray-50",
+            "flex items-center gap-1.5 h-8 px-2.5 py-1.5 border-gray-200 text-xs font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900",
             isRTL && "flex-row-reverse"
           )}
         >

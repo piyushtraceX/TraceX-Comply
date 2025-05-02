@@ -35,7 +35,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, title }) => {
   // Simple loading indicator while the layout is preparing
   if (!isLoaded) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-gray-50">
+      <div className="flex h-screen w-full items-center justify-center bg-gray-100">
         <div className="text-center">
           <div className="h-12 w-12 animate-spin rounded-full border-4 border-gray-200 border-t-primary-600 mx-auto"></div>
           <p className="mt-4 text-gray-700">Loading layout...</p>
@@ -45,7 +45,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, title }) => {
   }
 
   return (
-    <div className={cn("min-h-screen flex bg-gray-50", isRTL && "rtl")}>
+    <div className={cn("min-h-screen flex bg-gray-100", isRTL && "rtl")}>
       <Sidebar 
         isOpen={isMobileMenuOpen}
         onClose={() => setIsMobileMenuOpen(false)}
@@ -60,7 +60,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, title }) => {
           title={title} 
           toggleSidebar={toggleSidebar} 
         />
-        <main className="flex-1 overflow-x-hidden p-3 sm:p-4 md:p-6 mx-auto w-full max-w-[1920px]">
+        <main className="flex-1 overflow-x-hidden p-3 sm:p-4 md:p-5 mx-auto w-full max-w-[1920px]">
           <div className="mx-auto w-full">
             {children}
           </div>
