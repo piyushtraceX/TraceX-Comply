@@ -26,15 +26,19 @@ export const LanguageSwitcher = () => {
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className="flex items-center text-sm text-gray-700 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="flex items-center gap-2 h-9 px-3 py-2 border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+        >
           <img
             src={getLanguageFlag(language)}
-            className="lang-flag mr-2 w-6 h-4.5 object-cover border border-gray-200 rounded"
+            className="lang-flag w-5 h-4 object-cover border border-gray-200 rounded-sm shadow-sm"
             alt={getLanguageName(language)}
             aria-hidden="true"
           />
-          <span className="mr-1 text-sm font-medium">
-            {getLanguageName(language)}
+          <span className="hidden sm:inline">
+            {language.toUpperCase()}
           </span>
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -53,11 +57,15 @@ export const LanguageSwitcher = () => {
           </svg>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
+      <DropdownMenuContent align="end" className="w-48 p-1 shadow-lg border border-gray-200 rounded-md">
         {languages.map((lang) => (
           <DropdownMenuItem
             key={lang.code}
-            className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
+            className={cn(
+              "flex items-center px-3 py-2 text-sm rounded-md",
+              language === lang.code ? "bg-gray-100 text-primary-600 font-medium" : "text-gray-700 hover:bg-gray-50", 
+              "cursor-pointer"
+            )}
             onClick={() => {
               changeLanguage(lang.code);
               setOpen(false);
@@ -65,11 +73,11 @@ export const LanguageSwitcher = () => {
           >
             <img
               src={getLanguageFlag(lang.code)}
-              className="lang-flag mr-2 w-6 h-4.5 object-cover border border-gray-200 rounded"
+              className="lang-flag mr-2 w-5 h-4 object-cover border border-gray-200 rounded-sm shadow-sm"
               alt={lang.name}
               aria-hidden="true"
             />
-            <span>{lang.name}</span>
+            <span>{getLanguageName(lang.code)}</span>
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
