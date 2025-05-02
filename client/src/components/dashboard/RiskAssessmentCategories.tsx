@@ -86,21 +86,21 @@ export const RiskAssessmentCategories: React.FC = () => {
           {categories.map((category, index) => (
             <div 
               key={index} 
-              className="bg-white border rounded-md overflow-hidden hover:shadow-md transition-shadow duration-200"
+              className="bg-white border rounded-md overflow-hidden hover:shadow-md transition-shadow duration-200 flex"
             >
-              <div className="h-2" style={{ backgroundColor: category.color }}></div>
-              <div className="p-4">
+              <div className="w-2.5 flex-shrink-0" style={{ backgroundColor: category.color }}></div>
+              <div className="p-4 flex-1">
                 <div className="flex items-center justify-between mb-2">
                   <h4 className="font-medium text-gray-900">{category.name}</h4>
                   <div className={cn(
-                    "px-2 py-1 rounded-full text-xs font-medium", 
+                    "px-2 py-0.5 rounded-full text-xs font-medium", 
                     getStatusTextClass(category.status),
                     `bg-opacity-10 ${getStatusColorClass(category.status).replace('bg-', 'bg-')}`
                   )}>
                     {t(`riskCategories.status.${category.status}`)}
                   </div>
                 </div>
-                <p className="text-sm text-gray-500 mb-2">{category.description}</p>
+                <p className="text-sm text-gray-500 mb-3">{category.description}</p>
                 <div className="mt-2 flex items-center justify-between">
                   <div className="flex items-center">
                     <div className="text-2xl font-bold mr-1">{category.score}</div>
