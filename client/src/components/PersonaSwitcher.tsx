@@ -29,11 +29,12 @@ export const PersonaSwitcher: React.FC = () => {
           className="flex items-center gap-2 h-9 px-3 py-2 border-gray-200 text-sm text-gray-700 hover:bg-gray-50"
         >
           <span className="mr-1">{React.cloneElement(activePersona.icon as React.ReactElement, { className: 'h-4 w-4' })}</span>
-          <span>{activePersona.name}</span>
+          <span className="hidden sm:inline">{activePersona.name}</span>
+          <span className="sm:hidden">Persona</span>
           <ChevronDown className="h-4 w-4 ml-1 text-gray-400" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56 p-1 shadow-lg border border-gray-200 rounded-md">
+      <DropdownMenuContent className="w-64 p-1 shadow-lg border border-gray-200 rounded-md">
         <DropdownMenuLabel className="px-3 py-2 text-xs font-semibold text-gray-500">
           {t('personaSwitcher.label')}
         </DropdownMenuLabel>
@@ -48,14 +49,19 @@ export const PersonaSwitcher: React.FC = () => {
             )}
             onClick={() => handleSelectPersona(persona.id)}
           >
-            <div className="flex items-center">
-              <span className="mr-2">
-                {React.cloneElement(persona.icon as React.ReactElement, { className: 'h-4 w-4' })}
+            <div className="flex flex-col">
+              <div className="flex items-center">
+                <span className="mr-2">
+                  {React.cloneElement(persona.icon as React.ReactElement, { className: 'h-4 w-4' })}
+                </span>
+                <span>{persona.name}</span>
+              </div>
+              <span className="text-xs text-gray-500 ml-6 mt-0.5">
+                {t(`personaSwitcher.${persona.id}Description`)}
               </span>
-              <span>{persona.name}</span>
             </div>
             {activePersona.id === persona.id && (
-              <Check className="h-4 w-4 ml-2 text-primary-600" />
+              <Check className="h-4 w-4 ml-2 text-primary-600 flex-shrink-0" />
             )}
           </DropdownMenuItem>
         ))}
