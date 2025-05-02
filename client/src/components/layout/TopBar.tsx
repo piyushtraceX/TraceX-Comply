@@ -25,11 +25,11 @@ export const TopBar: React.FC<TopBarProps> = ({ title, toggleSidebar }) => {
           {toggleSidebar && (
             <button 
               type="button" 
-              className="md:hidden inline-flex items-center justify-center rounded-md p-2 text-gray-600 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500 transition-colors mr-3"
+              className="md:hidden inline-flex items-center justify-center rounded-md p-1.5 text-gray-600 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-1 focus:ring-inset focus:ring-primary-500 transition-colors mr-2.5"
               onClick={toggleSidebar}
               aria-label="Open sidebar menu"
             >
-              <Menu className="h-6 w-6" />
+              <Menu className="h-5 w-5" />
             </button>
           )}
           

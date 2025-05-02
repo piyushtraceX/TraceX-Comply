@@ -75,7 +75,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     {
       href: '/settings',
       label: t('nav.settings'),
-      icon: <Settings className={cn('h-5 w-5', isRTL ? 'ml-3 rtl-flip' : 'mr-3')} />,
+      icon: <Settings className={cn('h-4 w-4', isRTL ? 'ml-2.5 rtl-flip' : 'mr-2.5')} />,
     },
   ];
 
@@ -105,11 +105,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Mobile menu toggle button - independent of sidebar state */}
       {isMobile && !isOpen && (
         <button
-          className="fixed md:hidden top-4 left-4 z-50 p-2 bg-white rounded-md shadow-md"
+          className="fixed md:hidden top-3 left-3 z-50 p-1.5 bg-white rounded-md shadow-sm"
           onClick={onClose}
           aria-label="Open menu"
         >
-          <Menu className="h-6 w-6 text-gray-700" />
+          <Menu className="h-5 w-5 text-gray-700" />
         </button>
       )}
     
@@ -129,10 +129,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {isMobile && isOpen && onClose && (
               <button 
                 onClick={onClose}
-                className="rounded-md p-2 text-gray-500 hover:bg-gray-100"
+                className="rounded-md p-1.5 text-gray-500 hover:bg-gray-100"
                 aria-label="Close menu"
               >
-                <X className="h-5 w-5" />
+                <X className="h-4 w-4" />
               </button>
             )}
           </div>
@@ -215,8 +215,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <div className="border-t border-gray-200 p-4 mt-auto">
             <div className={cn('flex items-center', isRTL && 'flex-row-reverse')}>
               <div className="flex-shrink-0">
-                <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                  <User className="h-6 w-6 text-gray-500" />
+                <div className="h-9 w-9 rounded-full bg-gray-200 flex items-center justify-center">
+                  <User className="h-5 w-5 text-gray-500" />
                 </div>
               </div>
               <div className={cn('ml-3', isRTL && 'mr-3 ml-0 text-right')}>
@@ -224,7 +224,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <p className="text-xs font-medium text-gray-500">{t('user.email')}</p>
               </div>
               <button className={cn('ml-auto flex-shrink-0 bg-white rounded-full p-1 text-gray-400 hover:text-gray-500', isRTL && 'mr-auto ml-0')}>
-                <LogOut className="h-5 w-5" />
+                <LogOut className="h-4 w-4" />
               </button>
             </div>
           </div>

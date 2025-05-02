@@ -53,8 +53,8 @@ export const Layout: React.FC<LayoutProps> = ({ children, title }) => {
       
       <div className={cn(
         "flex-1 flex flex-col min-h-screen transition-all duration-300", 
-        !isMobile && "md:ml-64",
-        isRTL && !isMobile && "md:mr-64 md:ml-0"
+        !isMobile && "md:ml-60",
+        isRTL && !isMobile && "md:mr-60 md:ml-0"
       )}>
         <TopBar 
           title={title} 
