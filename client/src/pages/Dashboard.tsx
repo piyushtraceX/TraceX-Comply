@@ -214,7 +214,7 @@ export default function Dashboard() {
           </div>
           
           {/* Recent Activities */}
-          <div className="bg-white shadow rounded-lg md:col-span-1">
+          <div className="bg-white shadow-sm rounded-md md:col-span-1">
             <div className="px-4 py-3 border-b border-gray-200 sm:px-6">
               <h3 className="text-base font-medium text-gray-900">
                 Recent Activities
@@ -224,8 +224,8 @@ export default function Dashboard() {
               {[1, 2, 3, 4, 5].map((item) => (
                 <li key={item} className="px-4 py-4 sm:px-6">
                   <div className="flex items-center space-x-4">
-                    <div className="flex-shrink-0 h-8 w-8 rounded-full bg-primary-100 flex items-center justify-center">
-                      <FileText className="h-4 w-4 text-primary-600" />
+                    <div className="flex-shrink-0 h-7 w-7 rounded-full bg-primary-100 flex items-center justify-center">
+                      <FileText className="h-3.5 w-3.5 text-primary-600" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-900 truncate">
@@ -247,7 +247,7 @@ export default function Dashboard() {
           </div>
           
           {/* Upcoming Tasks */}
-          <div className="bg-white shadow rounded-lg md:col-span-2 lg:col-span-1">
+          <div className="bg-white shadow-sm rounded-md md:col-span-2 lg:col-span-1">
             <div className="px-4 py-3 border-b border-gray-200 sm:px-6">
               <h3 className="text-base font-medium text-gray-900">
                 Upcoming Tasks

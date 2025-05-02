@@ -74,19 +74,19 @@ export const RiskAssessmentCategories: React.FC = () => {
   };
   
   return (
-    <div className="bg-white shadow rounded-lg">
-      <div className="px-6 py-5 border-b border-gray-200">
-        <h3 className="text-lg font-medium text-gray-900">
+    <div className="bg-white shadow-sm rounded-md">
+      <div className="px-4 py-3 border-b border-gray-200 sm:px-6">
+        <h3 className="text-base font-medium text-gray-900">
           {t('riskCategories.title')}
         </h3>
       </div>
       
       <div className="p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {categories.map((category, index) => (
             <div 
               key={index} 
-              className="bg-white border rounded-md overflow-hidden hover:shadow-md transition-shadow duration-200 flex"
+              className="bg-white border border-gray-100 rounded-md overflow-hidden hover:shadow-sm transition-shadow duration-200 flex"
             >
               <div className="w-2.5 flex-shrink-0" style={{ backgroundColor: category.color }}></div>
               <div className="p-4 flex-1">

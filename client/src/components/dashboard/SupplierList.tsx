@@ -66,8 +66,8 @@ export const SupplierList: React.FC = () => {
                 <div className={cn("flex items-center justify-between", isRTL && "flex-row-reverse")}>
                   <div className={cn("flex items-center", isRTL && "flex-row-reverse")}>
                     <div className="flex-shrink-0">
-                      <span className="h-9 w-9 rounded-full bg-gray-100 flex items-center justify-center">
-                        <Building className="h-5 w-5 text-gray-500" />
+                      <span className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center">
+                        <Building className="h-4 w-4 text-gray-500" />
                       </span>
                     </div>
                     <div className={cn("ml-4", isRTL && "mr-4 ml-0 text-right")}>
@@ -83,7 +83,7 @@ export const SupplierList: React.FC = () => {
                 </div>
                 <div className={cn("mt-2 sm:flex sm:justify-between", isRTL && "flex-row-reverse")}>
                   <div className={cn("mt-2 flex items-center text-sm text-gray-500 sm:mt-0", isRTL && "flex-row-reverse")}>
-                    <Tag className={cn("flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400", isRTL && "ml-1.5 mr-0")} />
+                    <Tag className={cn("flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400", isRTL && "ml-1.5 mr-0")} />
                     <span>{supplier.productType}</span>
                   </div>
                 </div>
