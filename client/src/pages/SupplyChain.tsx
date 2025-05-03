@@ -128,6 +128,47 @@ export default function SupplyChain() {
       status: "Compliant"
     }
   ];
+  
+  // Action handlers for the buttons
+  const handleImport = () => {
+    console.log("Import button clicked");
+    alert("Import functionality would open a file selector");
+  };
+  
+  const handleAddSupplier = () => {
+    console.log("Add Supplier button clicked");
+    alert("Add Supplier form would open");
+  };
+  
+  const handleAddSingleSupplier = () => {
+    console.log("Add Single Supplier selected");
+    alert("Add Single Supplier form would open");
+  };
+  
+  const handleImportCSV = () => {
+    console.log("Import CSV selected");
+    alert("CSV import dialog would open");
+  };
+  
+  const handleBulkAdd = () => {
+    console.log("Bulk Add selected");
+    alert("Bulk Add interface would open");
+  };
+  
+  const handleSendSAQ = (supplierName: string) => {
+    console.log(`Send SAQ for ${supplierName}`);
+    alert(`SAQ would be sent to ${supplierName}`);
+  };
+  
+  const handleViewResponse = (supplierId: string, supplierName: string) => {
+    console.log(`View response for ${supplierName} (ID: ${supplierId})`);
+    alert(`Response details for ${supplierName} would open`);
+  };
+  
+  const handleExportResults = () => {
+    console.log("Export results clicked");
+    alert("Assessment results would be exported");
+  };
 
   const handleSelectRow = (id: string) => {
     setSelectedRows(prev => 
@@ -176,22 +217,37 @@ export default function SupplyChain() {
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-bold">Supplier Management</h2>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" className="gap-1">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="gap-1"
+                  onClick={handleImport}
+                >
                   <Upload className="h-4 w-4" />
                   Import
                 </Button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button size="sm" className="gap-1">
+                    <Button 
+                      size="sm" 
+                      className="gap-1"
+                      onClick={handleAddSupplier}
+                    >
                       <Plus className="h-4 w-4" />
                       Add Supplier
                       <ChevronDown className="h-4 w-4 ml-1" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem>Add Single Supplier</DropdownMenuItem>
-                    <DropdownMenuItem>Import CSV</DropdownMenuItem>
-                    <DropdownMenuItem>Bulk Add</DropdownMenuItem>
+                    <DropdownMenuItem onSelect={handleAddSingleSupplier}>
+                      Add Single Supplier
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={handleImportCSV}>
+                      Import CSV
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={handleBulkAdd}>
+                      Bulk Add
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
@@ -271,7 +327,12 @@ export default function SupplyChain() {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-center">
-                        <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-800 hover:bg-blue-50">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-blue-600 hover:text-blue-800 hover:bg-blue-50"
+                          onClick={() => handleSendSAQ(supplier.name)}
+                        >
                           <Copy className="mr-1 h-4 w-4" />
                           Send SAQ
                         </Button>
@@ -349,7 +410,12 @@ export default function SupplyChain() {
                       <TableCell>{supplier.address}</TableCell>
                       <TableCell>{supplier.industry}</TableCell>
                       <TableCell className="text-right">
-                        <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-800 hover:bg-blue-50">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-blue-600 hover:text-blue-800 hover:bg-blue-50"
+                          onClick={() => handleViewResponse(supplier.id, supplier.name)}
+                        >
                           <Eye className="mr-1 h-4 w-4" />
                           View Response
                         </Button>
@@ -363,7 +429,12 @@ export default function SupplyChain() {
             {/* Assessment Results Section */}
             <div className="flex justify-between items-center py-3 border-t border-gray-200">
               <h3 className="text-lg font-medium text-gray-900">Assessment Results</h3>
-              <Button variant="outline" size="sm" className="gap-1">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="gap-1"
+                onClick={handleExportResults}
+              >
                 <Download className="h-4 w-4" />
                 Export
               </Button>
