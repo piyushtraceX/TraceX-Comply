@@ -4,8 +4,10 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
+import HomePage from "@/pages/HomePage";
 import Dashboard from "@/pages/Dashboard";
 import SupplyChain from "@/pages/SupplyChain";
+import SourcingEntities from "@/pages/SourcingEntities";
 import AddSupplier from "@/pages/AddSupplier";
 import SupplierDetail from "@/pages/SupplierDetail";
 import Compliance from "@/pages/Compliance";
@@ -57,8 +59,12 @@ function Router() {
   return (
     <Suspense fallback={<Loading />}>
       <Switch>
-        <Route path="/" component={Dashboard} />
+        <Route path="/" component={HomePage} />
+        <Route path="/dashboard" component={Dashboard} />
         <Route path="/supply-chain" component={SupplyChain} />
+        <Route path="/sourcing-entities" component={SourcingEntities} />
+        <Route path="/import-sources" component={() => <Layout title="Import Sources">Import Sources Content</Layout>} />
+        <Route path="/supplier" component={() => <Layout title="Suppliers">Suppliers List</Layout>} />
         <Route path="/saq-management" component={() => <Layout title="SAQ Management">SAQ Management Content</Layout>} />
         <Route path="/add-supplier" component={AddSupplier} />
         <Route path="/supplier/:id" component={SupplierDetail} />
@@ -66,6 +72,7 @@ function Router() {
         <Route path="/declarations" component={Declarations} />
         <Route path="/add-declaration" component={AddDeclaration} />
         <Route path="/customers" component={Customers} />
+        <Route path="/customer" component={Customers} />
         <Route path="/add-customer" component={AddCustomer} />
         <Route path="/settings" component={Settings} />
         <Route path="/debug" component={() => <div className="p-10">Debug Page Working</div>} />
