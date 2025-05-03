@@ -95,9 +95,9 @@ export const RiskAssessmentCategories: React.FC = () => {
                   <div className={cn(
                     "px-2 py-0.5 rounded-full text-xs font-medium", 
                     getStatusTextClass(category.status),
-                    `bg-opacity-10 ${getStatusColorClass(category.status).replace('bg-', 'bg-')}`
+                    getStatusColorClass(category.status).replace('bg-', 'bg-opacity-10 bg-')
                   )}>
-                    {t(`riskCategories.status.${category.status}`)}
+                    {category.status === 'high' ? 'High' : category.status === 'medium' ? 'Medium' : 'Low'}
                   </div>
                 </div>
                 <p className="text-sm text-gray-500 mb-3">{category.description}</p>
@@ -120,10 +120,10 @@ export const RiskAssessmentCategories: React.FC = () => {
         
         <div className="mt-6 pt-4 border-t border-gray-200">
           <a href="#" className={cn(
-            "text-sm font-medium text-primary-600 hover:text-primary-500 flex items-center",
+            "text-sm font-medium text-blue-600 hover:text-blue-500 flex items-center",
             isRTL ? "flex-row-reverse" : ""
           )}>
-            {t('riskCategories.viewDetailedReport')}
+            View Detailed Risk Report
             <ArrowRight className={cn("h-4 w-4", isRTL ? "mr-1 rtl-flip" : "ml-1")} />
           </a>
         </div>

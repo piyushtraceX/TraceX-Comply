@@ -240,11 +240,21 @@ export default function SAQManagement() {
                       </td>
                       <td className="px-4 py-3 text-right whitespace-nowrap">
                         <div className="flex justify-end items-center space-x-2">
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="h-8 w-8 p-0"
+                            onClick={() => console.log(`Viewing SAQ with ID: ${saq.id}`)}
+                          >
                             <Eye className="h-4 w-4" />
                             <span className="sr-only">View</span>
                           </Button>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="h-8 w-8 p-0"
+                            onClick={() => console.log(`Editing SAQ with ID: ${saq.id}`)}
+                          >
                             <Edit className="h-4 w-4" />
                             <span className="sr-only">Edit</span>
                           </Button>

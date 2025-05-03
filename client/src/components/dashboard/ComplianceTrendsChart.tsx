@@ -1,94 +1,82 @@
 import React from 'react';
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend
-} from 'recharts';
 import { useTranslation } from '@/hooks/use-translation';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-const data = [
-  { month: 'Jan', overallCompliance: 65, supplierCompliance: 60, documentStatus: 70 },
-  { month: 'Feb', overallCompliance: 68, supplierCompliance: 62, documentStatus: 73 },
-  { month: 'Mar', overallCompliance: 70, supplierCompliance: 65, documentStatus: 75 },
-  { month: 'Apr', overallCompliance: 72, supplierCompliance: 69, documentStatus: 77 },
-  { month: 'May', overallCompliance: 75, supplierCompliance: 72, documentStatus: 80 },
-  { month: 'Jun', overallCompliance: 78, supplierCompliance: 75, documentStatus: 84 },
-];
-
+// Simplified version that doesn't rely on Recharts
 export const ComplianceTrendsChart: React.FC = () => {
   const { t } = useTranslation();
   const [timeRange, setTimeRange] = React.useState('6m');
 
   return (
-    <div className="bg-white shadow-sm rounded-md">
-      <div className="px-4 py-3 border-b border-gray-200 sm:px-6">
+    <Card>
+      <CardHeader className="px-4 py-3 border-b border-gray-200">
         <div className="flex justify-between items-center">
-          <h3 className="text-base font-medium text-gray-900">
-            {t('charts.complianceTrends')}
-          </h3>
+          <CardTitle className="text-base font-medium text-gray-900">
+            Compliance Trends
+          </CardTitle>
           <Select defaultValue={timeRange} onValueChange={setTimeRange}>
             <SelectTrigger className="w-[130px] h-7 text-xs py-0 px-3 border-gray-200">
-              <SelectValue placeholder={t('charts.selectTimeRange')} />
+              <SelectValue placeholder="Time Range" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="1m">{t('charts.timeRanges.oneMonth')}</SelectItem>
-              <SelectItem value="3m">{t('charts.timeRanges.threeMonths')}</SelectItem>
-              <SelectItem value="6m">{t('charts.timeRanges.sixMonths')}</SelectItem>
-              <SelectItem value="1y">{t('charts.timeRanges.oneYear')}</SelectItem>
+              <SelectItem value="1m">1 Month</SelectItem>
+              <SelectItem value="3m">3 Months</SelectItem>
+              <SelectItem value="6m">6 Months</SelectItem>
+              <SelectItem value="1y">1 Year</SelectItem>
             </SelectContent>
           </Select>
         </div>
-      </div>
+      </CardHeader>
       
-      <div className="p-5">
-        <div className="h-72">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart
-              data={data}
-              margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Area 
-                type="monotone" 
-                dataKey="overallCompliance" 
-                name={t('charts.series.overallCompliance')}
-                stackId="1" 
-                stroke="#3B82F6" 
-                fill="#3B82F6" 
-                fillOpacity={0.3} 
-              />
-              <Area 
-                type="monotone" 
-                dataKey="supplierCompliance" 
-                name={t('charts.series.supplierCompliance')}
-                stackId="2" 
-                stroke="#10B981" 
-                fill="#10B981" 
-                fillOpacity={0.3} 
-              />
-              <Area 
-                type="monotone" 
-                dataKey="documentStatus" 
-                name={t('charts.series.documentStatus')}
-                stackId="3" 
-                stroke="#FBBF24" 
-                fill="#FBBF24" 
-                fillOpacity={0.3} 
-              />
-            </AreaChart>
-          </ResponsiveContainer>
+      <CardContent className="p-5">
+        <div className="h-72 flex items-center justify-center">
+          <div className="flex flex-col space-y-6 w-full">
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium">Overall Compliance</span>
+                <span className="text-sm font-medium">78%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2.5">
+                <div className="bg-blue-500 h-2.5 rounded-full" style={{ width: '78%' }}></div>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium">Supplier Compliance</span>
+                <span className="text-sm font-medium">75%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2.5">
+                <div className="bg-green-500 h-2.5 rounded-full" style={{ width: '75%' }}></div>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium">Document Status</span>
+                <span className="text-sm font-medium">84%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2.5">
+                <div className="bg-yellow-500 h-2.5 rounded-full" style={{ width: '84%' }}></div>
+              </div>
+            </div>
+            
+            <div className="flex justify-between text-xs text-gray-500 mt-4">
+              <span>Jan</span>
+              <span>Feb</span>
+              <span>Mar</span>
+              <span>Apr</span>
+              <span>May</span>
+              <span>Jun</span>
+            </div>
+            
+            <div className="text-xs text-gray-500 text-center italic mt-2">
+              Displaying last 6 months compliance trends
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
