@@ -1,296 +1,199 @@
 import React, { useState } from 'react';
 import { Layout } from '@/components/layout/Layout';
 import { useTranslation } from '@/hooks/use-translation';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { cn } from '@/lib/utils';
-import { Link } from 'wouter';
 import { 
-  Search, 
-  Filter, 
-  Plus, 
-  Download, 
-  Eye, 
-  Edit, 
-  Trash2, 
-  Building, 
-  MapPin, 
-  PackageCheck 
+  Eye,
+  Download,
+  CheckCircle,
+  AlertCircle,
+  Mail,
+  User,
+  Building
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-interface Supplier {
-  id: number;
-  name: string;
-  location: string;
-  products: string[];
-  status: 'approved' | 'pending' | 'flagged';
-  risk: 'high' | 'medium' | 'low';
-  lastUpdate: string;
-}
-
+// Match the design in the reference app screenshot
 export default function SupplyChain() {
   const { t } = useTranslation();
-  const { isRTL } = useLanguage();
-  const [filter, setFilter] = useState('all');
-  
-  // Sample data - would come from API in real application
-  const suppliers: Supplier[] = [
+  const [selectedRows, setSelectedRows] = useState<string[]>([]);
+
+  const summaryCards = [
     {
-      id: 1,
-      name: "Eco Forestry Ltd.",
-      location: "Brazil",
-      products: ["Wood", "Paper"],
-      status: "approved",
-      risk: "low",
-      lastUpdate: "2023-04-15"
+      title: "Sent SAQs",
+      count: 156,
+      icon: <Mail className="h-5 w-5 text-amber-500" />,
+      color: "border-l-amber-500 bg-amber-50"
     },
     {
-      id: 2,
-      name: "Green Palm Farms",
-      location: "Indonesia",
-      products: ["Palm Oil"],
-      status: "pending",
-      risk: "medium",
-      lastUpdate: "2023-04-10"
+      title: "Responded",
+      count: 89,
+      icon: <CheckCircle className="h-5 w-5 text-green-500" />,
+      color: "border-l-green-500 bg-green-50"
     },
     {
-      id: 3,
-      name: "Cacao Harvest Co.",
-      location: "Ghana",
-      products: ["Cocoa"],
-      status: "approved",
-      risk: "low",
-      lastUpdate: "2023-04-08"
-    },
-    {
-      id: 4,
-      name: "Global Coffee Traders",
-      location: "Colombia",
-      products: ["Coffee Beans"],
-      status: "flagged",
-      risk: "high",
-      lastUpdate: "2023-04-05"
-    },
-    {
-      id: 5,
-      name: "Amazonia Rubber Inc.",
-      location: "Peru",
-      products: ["Rubber"],
-      status: "approved",
-      risk: "medium",
-      lastUpdate: "2023-04-01"
+      title: "Not Responded",
+      count: 67,
+      icon: <AlertCircle className="h-5 w-5 text-red-500" />,
+      color: "border-l-red-500 bg-red-50"
     }
   ];
-  
-  const filteredSuppliers = filter === 'all' 
-    ? suppliers 
-    : suppliers.filter(supplier => supplier.status === filter);
-  
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'approved':
-        return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Approved</Badge>;
-      case 'pending':
-        return <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">Pending</Badge>;
-      case 'flagged':
-        return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">Flagged</Badge>;
-      default:
-        return null;
+
+  const supplierResponses = [
+    {
+      id: "001",
+      name: "ABC Corp",
+      avatar: "AC",
+      address: "Berlin, Germany",
+      industry: "Wood Products"
+    },
+    {
+      id: "002",
+      name: "ABC Corp",
+      avatar: "AC",
+      address: "Berlin, Germany",
+      industry: "Wood Products"
+    },
+    {
+      id: "003",
+      name: "ABC Corp",
+      avatar: "AC",
+      address: "Berlin, Germany",
+      industry: "Wood Products"
     }
+  ];
+
+  const handleSelectRow = (id: string) => {
+    setSelectedRows(prev => 
+      prev.includes(id) 
+        ? prev.filter(rowId => rowId !== id)
+        : [...prev, id]
+    );
   };
-  
-  const getRiskBadge = (risk: string) => {
-    switch (risk) {
-      case 'high':
-        return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">High Risk</Badge>;
-      case 'medium':
-        return <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">Medium Risk</Badge>;
-      case 'low':
-        return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Low Risk</Badge>;
-      default:
-        return null;
+
+  const handleSelectAllRows = () => {
+    if (selectedRows.length === supplierResponses.length) {
+      setSelectedRows([]);
+    } else {
+      setSelectedRows(supplierResponses.map(sr => sr.id));
     }
   };
 
   return (
-    <Layout title={t('nav.supplyChain')}>
-      <div className="py-6 px-4 sm:px-6 lg:px-8">
-        {/* Page header */}
-        <div className="md:flex md:items-center md:justify-between mb-6">
-          <div className="flex-1 min-w-0">
-            <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
-              {t('nav.supplyChain')}
-            </h2>
-            <p className="mt-2 text-sm text-gray-500">
-              {t('pages.supplyChain.description')}
-            </p>
-          </div>
-          <div className={cn("mt-4 flex space-x-3 md:mt-0", isRTL && "flex-row-reverse")}>
-            <Button variant="outline" className={cn("flex items-center", isRTL && "flex-row-reverse")}>
-              <Download className={cn("mr-2 h-4 w-4", isRTL && "mr-0 ml-2")} />
-              Export
-            </Button>
-            <Link href="/add-supplier">
-              <Button className={cn("flex items-center", isRTL && "flex-row-reverse")}>
-                <Plus className={cn("mr-2 h-4 w-4", isRTL && "mr-0 ml-2")} />
-                Add Supplier
-              </Button>
-            </Link>
-          </div>
-        </div>
-        
-        {/* Supplier Onboarding Section */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>Supplier Onboarding</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid md:grid-cols-3 gap-6">
-              <div className="flex flex-col items-center p-4 border rounded-lg bg-blue-50 border-blue-200">
-                <Building className="h-8 w-8 text-blue-600 mb-2" />
-                <h3 className="font-medium">Invite Suppliers</h3>
-                <p className="text-sm text-center text-gray-500 mt-2">Send invitation to your suppliers to join the platform</p>
-                <Button variant="link" className="mt-2">Send Invites</Button>
-              </div>
-              
-              <div className="flex flex-col items-center p-4 border rounded-lg bg-green-50 border-green-200">
-                <PackageCheck className="h-8 w-8 text-green-600 mb-2" />
-                <h3 className="font-medium">Verify Documentation</h3>
-                <p className="text-sm text-center text-gray-500 mt-2">Review and approve supplier documentation</p>
-                <Button variant="link" className="mt-2">View Pending</Button>
-              </div>
-              
-              <div className="flex flex-col items-center p-4 border rounded-lg bg-purple-50 border-purple-200">
-                <MapPin className="h-8 w-8 text-purple-600 mb-2" />
-                <h3 className="font-medium">Map Supply Chain</h3>
-                <p className="text-sm text-center text-gray-500 mt-2">Visualize your end-to-end supply chain network</p>
-                <Button variant="link" className="mt-2">Open Map</Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+    <Layout title="Supply Chain">
+      <div className="space-y-6">
+        {/* Tabs at the top */}
+        <Tabs defaultValue="saq-management" className="w-full mb-6">
+          <TabsList className="inline-flex h-10 items-center rounded-md bg-gray-100 p-1 text-gray-600">
+            <TabsTrigger
+              value="onboarding"
+              className="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-2 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm"
+            >
+              <Building className="mr-2 h-4 w-4" />
+              Onboarding
+            </TabsTrigger>
+            <TabsTrigger
+              value="saq-management"
+              className="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-2 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm"
+            >
+              <User className="mr-2 h-4 w-4" />
+              SAQ Management
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
 
-        {/* Suppliers List */}
-        <div className="bg-white shadow rounded-lg">
-          <div className="px-4 py-5 border-b border-gray-200 sm:px-6">
-            <h3 className="text-lg leading-6 font-medium text-gray-900">
-              Suppliers
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {summaryCards.map((card, index) => (
+            <Card key={index} className={`border-l-4 ${card.color} shadow-sm`}>
+              <CardContent className="flex justify-between items-center p-4">
+                <div>
+                  <p className="text-sm font-medium text-gray-500">{card.title}</p>
+                  <h3 className="text-2xl font-bold mt-1">{card.count}</h3>
+                </div>
+                <div className="rounded-full bg-white p-2 shadow-sm">
+                  {card.icon}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Supplier Responses Table */}
+        <div className="bg-white rounded-lg border shadow-sm">
+          <div className="px-4 py-3 border-b border-gray-200">
+            <h3 className="text-lg font-medium text-gray-900">
+              Supplier Responses
             </h3>
-            <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between">
-              <div className="max-w-md w-full relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input 
-                  placeholder="Search suppliers" 
-                  className="pl-9 bg-white"
-                />
-              </div>
-              <div className="mt-3 sm:mt-0 flex items-center">
-                <Filter className="h-4 w-4 text-gray-500 mr-2" />
-                <Select value={filter} onValueChange={setFilter}>
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Filter by status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Status</SelectItem>
-                    <SelectItem value="approved">Approved</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="flagged">Flagged</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
           </div>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Supplier
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Location
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Products
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Risk Level
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredSuppliers.map((supplier) => (
-                  <tr key={supplier.id}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{supplier.name}</div>
-                      <div className="text-sm text-gray-500">Last updated: {supplier.lastUpdate}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{supplier.location}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{supplier.products.join(", ")}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {getStatusBadge(supplier.status)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {getRiskBadge(supplier.risk)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex justify-end space-x-2">
-                        <Link href={`/supplier/${supplier.id}`}>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                            <span className="sr-only">View</span>
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                        </Link>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                          <span className="sr-only">Edit</span>
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-red-600 hover:text-red-700">
-                          <span className="sr-only">Delete</span>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-gray-50 hover:bg-gray-50">
+                <TableHead className="w-12">
+                  <Checkbox 
+                    checked={selectedRows.length === supplierResponses.length && supplierResponses.length > 0}
+                    onCheckedChange={handleSelectAllRows}
+                    aria-label="Select all"
+                  />
+                </TableHead>
+                <TableHead className="w-20">Sr. No.</TableHead>
+                <TableHead>Supplier Name</TableHead>
+                <TableHead>Address</TableHead>
+                <TableHead>Industry/Product</TableHead>
+                <TableHead className="text-right">Action</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {supplierResponses.map((supplier) => (
+                <TableRow key={supplier.id} className="hover:bg-gray-50">
+                  <TableCell className="py-3">
+                    <Checkbox
+                      checked={selectedRows.includes(supplier.id)}
+                      onCheckedChange={() => handleSelectRow(supplier.id)}
+                      aria-label={`Select row ${supplier.id}`}
+                    />
+                  </TableCell>
+                  <TableCell>{supplier.id}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <div className="flex-shrink-0 bg-gray-200 rounded-full h-8 w-8 flex items-center justify-center text-sm text-gray-600">
+                        {supplier.avatar}
                       </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="bg-gray-50 px-4 py-4 sm:px-6 rounded-b-lg">
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-gray-500">
-                Showing {filteredSuppliers.length} of {suppliers.length} suppliers
-              </div>
-              <div className="flex-1 flex justify-center sm:justify-end">
-                <Button variant="outline" className="relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-gray-700 bg-white" disabled>
-                  Previous
-                </Button>
-                <Button variant="outline" className="ml-3 relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-gray-700 bg-white">
-                  Next
-                </Button>
-              </div>
-            </div>
-          </div>
+                      <span>{supplier.name}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>{supplier.address}</TableCell>
+                  <TableCell>{supplier.industry}</TableCell>
+                  <TableCell className="text-right">
+                    <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-800 hover:bg-blue-50">
+                      <Eye className="mr-1 h-4 w-4" />
+                      View Response
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+
+        {/* Assessment Results Section */}
+        <div className="flex justify-between items-center py-3 border-t border-gray-200">
+          <h3 className="text-lg font-medium text-gray-900">Assessment Results</h3>
+          <Button variant="outline" size="sm" className="gap-1">
+            <Download className="h-4 w-4" />
+            Export
+          </Button>
         </div>
       </div>
     </Layout>
