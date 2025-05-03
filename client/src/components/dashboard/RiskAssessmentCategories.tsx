@@ -2,132 +2,75 @@ import React from 'react';
 import { useTranslation } from '@/hooks/use-translation';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
-import { ArrowRight } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-interface RiskCategory {
-  name: string;
-  color: string;
-  score: number;
-  status: 'high' | 'medium' | 'low';
-  description: string;
-}
-
+// Match the design in the screenshot
 export const RiskAssessmentCategories: React.FC = () => {
-  const { t } = useTranslation();
   const { isRTL } = useLanguage();
   
-  const categories: RiskCategory[] = [
+  // Based on the screenshot data
+  const categories = [
     {
-      name: t('riskCategories.environmental'),
-      color: '#10B981', // green
-      score: 8,
-      status: 'medium',
-      description: 'Assessment of environmental impact and compliance'
-    },
-    {
-      name: t('riskCategories.social'),
-      color: '#3B82F6', // blue
-      score: 4,
-      status: 'low',
-      description: 'Human rights, labor practices, and community impact'
-    },
-    {
-      name: t('riskCategories.governance'),
+      name: 'Environmental',
+      percentage: 68,
       color: '#FBBF24', // yellow/amber
-      score: 7,
-      status: 'medium',
-      description: 'Corporate governance, ethics, and transparency'
+      dot: <span className="h-3 w-3 rounded-full bg-amber-400"></span>,
+      bar: <div className="bg-amber-400 h-2 rounded-full" style={{ width: '68%' }}></div>
     },
     {
-      name: t('riskCategories.deforestation'),
+      name: 'Social',
+      percentage: 82,
+      color: '#10B981', // green
+      dot: <span className="h-3 w-3 rounded-full bg-green-500"></span>,
+      bar: <div className="bg-green-500 h-2 rounded-full" style={{ width: '82%' }}></div>
+    },
+    {
+      name: 'Governance',
+      percentage: 59,
       color: '#EF4444', // red
-      score: 12,
-      status: 'high',
-      description: 'Specific assessment of deforestation risks'
+      dot: <span className="h-3 w-3 rounded-full bg-red-500"></span>,
+      bar: <div className="bg-red-500 h-2 rounded-full" style={{ width: '59%' }}></div>
+    },
+    {
+      name: 'Deforestation',
+      percentage: 76,
+      color: '#3B82F6', // blue
+      dot: <span className="h-3 w-3 rounded-full bg-blue-500"></span>,
+      bar: <div className="bg-blue-500 h-2 rounded-full" style={{ width: '76%' }}></div>
     }
   ];
   
-  const getStatusColorClass = (status: string) => {
-    switch (status) {
-      case 'high':
-        return 'bg-red-600';
-      case 'medium':
-        return 'bg-amber-500';
-      case 'low':
-        return 'bg-green-600';
-      default:
-        return 'bg-gray-400';
-    }
-  };
-  
-  const getStatusTextClass = (status: string) => {
-    switch (status) {
-      case 'high':
-        return 'text-red-600';
-      case 'medium':
-        return 'text-amber-600';
-      case 'low':
-        return 'text-green-600';
-      default:
-        return 'text-gray-600';
-    }
-  };
-  
   return (
-    <div className="bg-white shadow-sm rounded-md">
-      <div className="px-4 py-3 border-b border-gray-200 sm:px-6">
-        <h3 className="text-base font-medium text-gray-900">
-          {t('riskCategories.title')}
-        </h3>
-      </div>
-      
-      <div className="p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {categories.map((category, index) => (
-            <div 
-              key={index} 
-              className="bg-white border border-gray-100 rounded-md overflow-hidden hover:shadow-sm transition-shadow duration-200 flex"
-            >
-              <div className="w-2.5 flex-shrink-0" style={{ backgroundColor: category.color }}></div>
-              <div className="p-4 flex-1">
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-medium text-gray-900">{category.name}</h4>
-                  <div className={cn(
-                    "px-2 py-0.5 rounded-full text-xs font-medium", 
-                    getStatusTextClass(category.status),
-                    getStatusColorClass(category.status).replace('bg-', 'bg-opacity-10 bg-')
-                  )}>
-                    {category.status === 'high' ? 'High' : category.status === 'medium' ? 'Medium' : 'Low'}
-                  </div>
-                </div>
-                <p className="text-sm text-gray-500 mb-3">{category.description}</p>
-                <div className="mt-2 flex items-center justify-between">
-                  <div className="flex items-center">
-                    <div className="text-2xl font-bold mr-1">{category.score}</div>
-                    <div className="text-xs text-gray-500">/ 20</div>
-                  </div>
-                  <div className="w-24 bg-gray-200 rounded-full h-2">
-                    <div 
-                      className={getStatusColorClass(category.status)}
-                      style={{ width: `${(category.score / 20) * 100}%`, height: '100%', borderRadius: '9999px' }}
-                    ></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-        
-        <div className="mt-6 pt-4 border-t border-gray-200">
-          <a href="#" className={cn(
-            "text-sm font-medium text-blue-600 hover:text-blue-500 flex items-center",
-            isRTL ? "flex-row-reverse" : ""
-          )}>
-            View Detailed Risk Report
-            <ArrowRight className={cn("h-4 w-4", isRTL ? "mr-1 rtl-flip" : "ml-1")} />
+    <Card className="shadow-sm">
+      <CardHeader className="px-4 py-3 flex justify-between items-center border-b border-gray-200">
+        <CardTitle className="text-base font-medium text-gray-900">
+          Risk Assessment
+        </CardTitle>
+        <div className="flex items-center">
+          <a href="#" className="text-sm text-blue-600 hover:text-blue-700">
+            View All
           </a>
         </div>
-      </div>
-    </div>
+      </CardHeader>
+      
+      <CardContent className="p-5 space-y-4">
+        {categories.map((category, index) => (
+          <div key={index} className="flex items-center gap-4">
+            <div className="flex items-center gap-2 w-32">
+              {category.dot}
+              <span className="text-sm font-medium text-gray-700">{category.name}</span>
+            </div>
+            <div className="flex-1">
+              <div className="w-full bg-gray-100 rounded-full h-2">
+                {category.bar}
+              </div>
+            </div>
+            <div className="w-12 text-sm font-medium text-right text-gray-700">
+              {category.percentage}%
+            </div>
+          </div>
+        ))}
+      </CardContent>
+    </Card>
   );
 };
