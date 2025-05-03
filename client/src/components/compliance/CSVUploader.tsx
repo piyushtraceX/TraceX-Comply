@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import { FileUpload, UploadCloud } from 'lucide-react';
+import { Upload, UploadCloud } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -201,7 +201,7 @@ export const CSVUploader: React.FC<CSVUploaderProps> = ({
             className={cn("mt-2", isRTL && "flex-row-reverse")}
             disabled={isLoading}
           >
-            <FileUpload className={cn("h-4 w-4", isRTL ? "ml-2" : "mr-2")} />
+            <Upload className={cn("h-4 w-4", isRTL ? "ml-2" : "mr-2")} />
             Browse Files
           </Button>
         </div>

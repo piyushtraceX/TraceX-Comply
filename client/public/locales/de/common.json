@@ -5,8 +5,9 @@
   "nav": {
     "dashboard": "Dashboard",
     "supplyChain": "Lieferkette",
-    "compliance": "Konformität",
-    "eudrDeclarations": "EUDR Erklärungen",
+    "compliance": "Compliance",
+    "eudrDeclarations": "EUDR-Deklarationen",
+    "saqManagement": "SAQ-Management",
     "customers": "Kunden",
     "settings": "Einstellungen"
   },
@@ -18,8 +19,18 @@
     "title": "Dashboard",
     "lastUpdated": "Zuletzt aktualisiert: {{date}}",
     "exportBtn": "Exportieren",
-    "newDeclarationBtn": "Neue Erklärung",
+    "newDeclarationBtn": "Neue Deklaration",
     "userRoles": "Benutzerrollen"
+  },
+  "metrics": {
+    "overallCompliance": "Gesamte Compliance",
+    "lastUpdated": "Letzte Aktualisierung {{time}}",
+    "riskLevel": "Risikoniveau",
+    "highRiskItems": "{{count}} Hochrisiko-Elemente erfordern Aufmerksamkeit",
+    "documentStatus": "Dokumentenstatus",
+    "missingItems": "{{count}} Fehlend",
+    "supplierSummary": "Lieferantenübersicht",
+    "activeSuppliers": "{{count}} aktive Lieferanten"
   },
   "search": {
     "placeholder": "Suchen"
@@ -34,129 +45,101 @@
     "label": "Benachrichtigungen anzeigen"
   },
   "stats": {
-    "totalDeclarations": "Gesamte Erklärungen",
-    "compliantProducts": "Konforme Produkte",
-    "pendingReview": "Ausstehende Prüfung",
+    "totalDeclarations": "Gesamte Deklarationen",
+    "pendingApproval": "Ausstehende Genehmigung",
     "nonCompliant": "Nicht konform",
-    "totalSuppliers": "Anzahl der Lieferanten",
-    "highRiskSuppliers": "Hochrisiko-Lieferanten",
-    "pendingDeclarations": "Ausstehende Erklärungen"
+    "suppliers": "Lieferanten"
   },
-  "recentActivity": {
-    "title": "Neueste Aktivitäten",
-    "showing": "Zeige {{count}} von {{total}} Aktivitäten",
-    "viewAll": "Alle anzeigen"
-  },
-  "activity": {
-    "title": "Erklärung #{{id}} {{action}}",
-    "documentRequested": "Zusätzliche Dokumentation angefordert",
-    "product": "{{product}} - Lieferant: {{supplier}}",
-    "category": "Kategorie: {{category}}",
-    "date": "{{date}}"
-  },
-  "recentSuppliers": {
-    "title": "Neueste Lieferanten",
-    "viewAll": "Alle Lieferanten anzeigen"
-  },
-  "supplier": {
-    "status": {
-      "active": "Aktiv",
-      "pending": "Ausstehend",
-      "flagged": "Markiert"
-    },
-    "tabs": {
-      "profile": "Profil",
-      "saq": "Selbstbewertungsfragebogen",
-      "saqManagement": "SAQ-Verwaltung",
-      "onboarding": "Onboarding",
-      "declarations": "Erklärungen",
-      "documents": "Dokumente"
-    },
-    "saqManagement": {
-      "title": "SAQ-Verwaltung",
-      "description": "Selbstbewertungsfragebögen für diesen Lieferanten verwalten",
-      "createNew": "Neuen Fragebogen erstellen",
-      "exportTemplate": "Vorlage exportieren",
-      "table": {
-        "name": "Fragebogenname",
-        "type": "Typ",
-        "status": "Status",
-        "sentDate": "Sendedatum",
-        "dueDate": "Fälligkeitsdatum",
-        "completion": "Fertigstellung",
-        "actions": "Aktionen"
-      },
-      "status": {
-        "completed": "Abgeschlossen",
-        "pending": "In Bearbeitung",
-        "overdue": "Überfällig",
-        "draft": "Entwurf"
-      }
-    }
-  },
-  "complianceStatus": {
-    "title": "Konformitätsstatus",
-    "compliant": "Konform",
-    "pending": "Ausstehende Prüfung",
-    "nonCompliant": "Nicht konform",
-    "percentage": "Prozentsatz",
-    "totalLegend": "Gesamte Erklärungen",
-    "detailedReport": "Detaillierten Konformitätsbericht anzeigen"
-  },
-  "status": {
-    "compliant": "Konform",
+  "supplierStatus": {
+    "active": "Aktiv",
     "pending": "Ausstehend",
-    "non-compliant": "Nicht konform"
+    "inactive": "Inaktiv",
+    "flagged": "Markiert"
   },
-  "pages": {
-    "declarations": {
-      "description": "Verwalten Sie hier alle Ihre EUDR-Erklärungen."
-    },
-    "supplyChain": {
-      "description": "Sehen und verwalten Sie Ihr Lieferkettennetzwerk."
-    },
-    "compliance": {
-      "description": "Überwachen Sie den Konformitätsstatus in Ihrer Lieferkette."
-    },
-    "customers": {
-      "description": "Verwalten Sie Ihre Kundenbeziehungen und Kommunikation."
-    },
-    "settings": {
-      "description": "Konfigurieren Sie Ihre Konto- und Anwendungseinstellungen."
-    }
+  "actions": {
+    "add": "Hinzufügen",
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "upload": "Hochladen",
+    "download": "Herunterladen",
+    "submit": "Einreichen",
+    "viewDetails": "Details anzeigen",
+    "exportCsv": "CSV exportieren",
+    "filter": "Filtern",
+    "search": "Suchen",
+    "clear": "Löschen",
+    "close": "Schließen",
+    "confirm": "Bestätigen"
   },
-  "personas": {
-    "manufacturer": {
-      "title": "Hersteller",
-      "description": "Produzieren und verwalten Sie Waren, die der EUDR-Verordnung unterliegen",
-      "actions": {
-        "uploadDeclarations": "Erklärungen hochladen",
-        "viewSupplyChain": "Lieferkette anzeigen"
-      }
-    },
-    "trader": {
-      "title": "Händler",
-      "description": "Handeln und verteilen Sie regulierte Waren",
-      "actions": {
-        "submitReports": "Berichte einreichen",
-        "verifySuppliers": "Lieferanten überprüfen"
-      }
-    },
-    "importer": {
-      "title": "Importeur",
-      "description": "Importieren Sie Waren in den EU-Markt",
-      "actions": {
-        "verifyCompliance": "Konformität prüfen",
-        "submitDocuments": "EUDR-Dokumente einreichen"
-      }
-    },
-    "admin": {
-      "title": "Administrator",
-      "description": "Verwalten Sie die Compliance in Ihrer Organisation",
-      "actions": {
-        "viewAnalytics": "Analysen anzeigen",
-        "manageTeam": "Teamzugriff verwalten"
-      }
-    }
+  "forms": {
+    "required": "Erforderlich",
+    "optional": "Optional",
+    "invalidInput": "Ungültige Eingabe",
+    "errorMessage": "Bitte korrigieren Sie die Fehler vor dem Absenden"
+  },
+  "sourcingEntities": {
+    "title": "Beschaffungseinheiten",
+    "addEntity": "Einheit hinzufügen",
+    "entityName": "Einheitsname",
+    "region": "Region",
+    "status": "Status",
+    "actions": "Aktionen",
+    "confirmDelete": "Sind Sie sicher, dass Sie diese Einheit löschen möchten?",
+    "deleteWarning": "Diese Aktion kann nicht rückgängig gemacht werden.",
+    "nameLabel": "Name",
+    "namePlaceholder": "Einheitsname eingeben",
+    "regionLabel": "Region",
+    "regionPlaceholder": "Region auswählen",
+    "statusLabel": "Status",
+    "editEntity": "Einheit bearbeiten",
+    "viewEntity": "Einheitsdetails anzeigen"
+  },
+  "importSources": {
+    "title": "Importquellen",
+    "addSource": "Importquelle hinzufügen",
+    "sourceName": "Quellenname",
+    "sourceType": "Quellentyp",
+    "entityName": "Einheitsname",
+    "status": "Status",
+    "lastSync": "Letzte Synchronisierung",
+    "actions": "Aktionen",
+    "confirmDelete": "Sind Sie sicher, dass Sie diese Importquelle löschen möchten?",
+    "deleteWarning": "Diese Aktion kann nicht rückgängig gemacht werden.",
+    "nameLabel": "Name",
+    "namePlaceholder": "Quellenname eingeben",
+    "typeLabel": "Typ",
+    "typePlaceholder": "Quellentyp auswählen",
+    "entityLabel": "Einheit",
+    "entityPlaceholder": "Einheit auswählen",
+    "statusLabel": "Status",
+    "editSource": "Importquelle bearbeiten",
+    "viewSource": "Importquellendetails anzeigen",
+    "apiDetails": "API-Verbindungsdetails",
+    "apiKeyLabel": "API-Schlüssel",
+    "endpointLabel": "Endpunkt-URL",
+    "description": "Beschreibung",
+    "descriptionPlaceholder": "Beschreibung eingeben"
+  },
+  "compliance": {
+    "title": "Compliance",
+    "uploadCsv": "CSV hochladen",
+    "generateReport": "Bericht erstellen",
+    "riskAssessment": "Risikobewertung",
+    "documentVerification": "Dokumentenprüfung",
+    "importData": "Daten importieren",
+    "exportData": "Daten exportieren"
+  },
+  "test": {
+    "title": "Sprachtest",
+    "languageTest": "Sprachtest-Seite",
+    "currentLanguage": "Aktuelle Sprache",
+    "translatedTexts": "Übersetzte Textbeispiele",
+    "toggleLanguage": "Sprache umschalten (EN/DE)",
+    "toggleDescription": "Klicken Sie auf diese Schaltfläche, um zwischen Englisch und Deutsch umzuschalten",
+    "directionTest": "Textrichtungstest",
+    "currentDirection": "Aktuelle Textrichtung",
+    "directionDescription": "Dies testet die Richtung von Elementen in RTL- und LTR-Layouts"
   }
 }

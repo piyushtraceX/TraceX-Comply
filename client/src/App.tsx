@@ -17,6 +17,7 @@ import AddDeclaration from "@/pages/AddDeclaration";
 import Customers from "@/pages/Customers";
 import AddCustomer from "@/pages/AddCustomer";
 import Settings from "@/pages/Settings";
+import TestLanguage from "@/pages/TestLanguage";
 import { ThemeProvider } from "next-themes";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { PersonaProvider } from "./contexts/PersonaContext";
@@ -76,6 +77,7 @@ function Router() {
         <Route path="/customer" component={Customers} />
         <Route path="/add-customer" component={AddCustomer} />
         <Route path="/settings" component={Settings} />
+        <Route path="/test-language" component={TestLanguage} />
         <Route path="/debug" component={() => <div className="p-10">Debug Page Working</div>} />
         <Route component={NotFound} />
       </Switch>

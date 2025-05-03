@@ -46,175 +46,100 @@
   },
   "stats": {
     "totalDeclarations": "Total Declarations",
-    "compliantProducts": "Compliant Products",
-    "pendingReview": "Pending Review",
+    "pendingApproval": "Pending Approval",
     "nonCompliant": "Non-Compliant",
-    "totalSuppliers": "Number of Suppliers",
-    "highRiskSuppliers": "High-Risk Suppliers",
-    "pendingDeclarations": "Pending Declarations"
+    "suppliers": "Suppliers"
   },
-  "recentActivity": {
-    "title": "Recent Activity",
-    "showing": "Showing {{count}} of {{total}} activities",
-    "viewAll": "View all"
-  },
-  "activity": {
-    "title": "Declaration #{{id}} {{action}}",
-    "documentRequested": "Additional documentation requested",
-    "product": "{{product}} - Supplier: {{supplier}}",
-    "category": "Category: {{category}}",
-    "date": "{{date}}"
-  },
-  "recentSuppliers": {
-    "title": "Recent Suppliers",
-    "viewAll": "View all suppliers"
-  },
-  "supplier": {
-    "status": {
-      "active": "Active",
-      "pending": "Pending",
-      "flagged": "Flagged"
-    },
-    "tabs": {
-      "profile": "Profile",
-      "saq": "Self Assessment Questionnaire",
-      "saqManagement": "SAQ Management",
-      "onboarding": "Onboarding",
-      "declarations": "Declarations",
-      "documents": "Documents"
-    },
-    "saqManagement": {
-      "title": "SAQ Management",
-      "description": "Manage Self Assessment Questionnaires for this supplier",
-      "createNew": "Create New Questionnaire",
-      "exportTemplate": "Export Template",
-      "table": {
-        "name": "Questionnaire Name",
-        "type": "Type",
-        "status": "Status",
-        "sentDate": "Sent Date",
-        "dueDate": "Due Date",
-        "completion": "Completion",
-        "actions": "Actions"
-      },
-      "status": {
-        "completed": "Completed",
-        "pending": "Pending",
-        "overdue": "Overdue",
-        "draft": "Draft"
-      }
-    }
-  },
-  "complianceStatus": {
-    "title": "Compliance Status",
-    "compliant": "Compliant",
-    "pending": "Pending Review",
-    "nonCompliant": "Non-Compliant",
-    "percentage": "Percentage",
-    "totalLegend": "Total declarations",
-    "detailedReport": "View detailed compliance report"
-  },
-  "status": {
-    "compliant": "Compliant",
+  "supplierStatus": {
+    "active": "Active",
     "pending": "Pending",
-    "non-compliant": "Non-compliant"
+    "inactive": "Inactive",
+    "flagged": "Flagged"
   },
-  "pages": {
-    "declarations": {
-      "description": "Manage all your EUDR declarations here."
-    },
-    "supplyChain": {
-      "description": "View and manage your supply chain network."
-    },
-    "compliance": {
-      "description": "Monitor compliance status across your supply chain."
-    },
-    "customers": {
-      "description": "Manage your customer relationships and communications."
-    },
-    "settings": {
-      "description": "Configure your account and application settings."
-    }
+  "actions": {
+    "add": "Add",
+    "edit": "Edit",
+    "delete": "Delete",
+    "save": "Save",
+    "cancel": "Cancel",
+    "upload": "Upload",
+    "download": "Download",
+    "submit": "Submit",
+    "viewDetails": "View Details",
+    "exportCsv": "Export CSV",
+    "filter": "Filter",
+    "search": "Search",
+    "clear": "Clear",
+    "close": "Close",
+    "confirm": "Confirm"
   },
-  "personas": {
-    "manufacturer": {
-      "title": "Manufacturer",
-      "description": "Produce and manage commodities subject to EUDR regulation",
-      "actions": {
-        "uploadDeclarations": "Upload Declarations",
-        "viewSupplyChain": "View Supply Chain"
-      }
-    },
-    "trader": {
-      "title": "Trader",
-      "description": "Trade and distribute regulated commodities",
-      "actions": {
-        "submitReports": "Submit Reports",
-        "verifySuppliers": "Verify Suppliers"
-      }
-    },
-    "importer": {
-      "title": "Importer",
-      "description": "Import commodities to the EU market",
-      "actions": {
-        "verifyCompliance": "Verify Compliance",
-        "submitDocuments": "Submit EUDR Documents"
-      }
-    },
-    "admin": {
-      "title": "Admin",
-      "description": "Manage compliance across your organization",
-      "actions": {
-        "viewAnalytics": "View Analytics",
-        "manageTeam": "Manage Team Access"
-      }
-    }
+  "forms": {
+    "required": "Required",
+    "optional": "Optional",
+    "invalidInput": "Invalid input",
+    "errorMessage": "Please correct the errors before submitting"
   },
-  "charts": {
-    "complianceTrends": "Compliance Trends",
-    "selectTimeRange": "Select Time Range",
-    "timeRanges": {
-      "oneMonth": "Last 1 month",
-      "threeMonths": "Last 3 months",
-      "sixMonths": "Last 6 months",
-      "oneYear": "Last 1 year"
-    },
-    "series": {
-      "overallCompliance": "Overall Compliance",
-      "supplierCompliance": "Supplier Compliance",
-      "documentStatus": "Document Status"
-    }
+  "sourcingEntities": {
+    "title": "Sourcing Entities",
+    "addEntity": "Add Entity",
+    "entityName": "Entity Name",
+    "region": "Region",
+    "status": "Status",
+    "actions": "Actions",
+    "confirmDelete": "Are you sure you want to delete this entity?",
+    "deleteWarning": "This action cannot be undone.",
+    "nameLabel": "Name",
+    "namePlaceholder": "Enter entity name",
+    "regionLabel": "Region",
+    "regionPlaceholder": "Select region",
+    "statusLabel": "Status",
+    "editEntity": "Edit Entity",
+    "viewEntity": "View Entity Details"
   },
-  "riskCategories": {
-    "title": "Risk Assessment Categories",
-    "environmental": "Environmental",
-    "social": "Social",
-    "governance": "Governance",
-    "deforestation": "Deforestation",
-    "viewDetailedReport": "View detailed risk assessment report",
-    "status": {
-      "high": "High",
-      "medium": "Medium",
-      "low": "Low"
-    }
+  "importSources": {
+    "title": "Import Sources",
+    "addSource": "Add Import Source",
+    "sourceName": "Source Name",
+    "sourceType": "Source Type",
+    "entityName": "Entity Name",
+    "status": "Status",
+    "lastSync": "Last Sync",
+    "actions": "Actions",
+    "confirmDelete": "Are you sure you want to delete this import source?",
+    "deleteWarning": "This action cannot be undone.",
+    "nameLabel": "Name",
+    "namePlaceholder": "Enter source name",
+    "typeLabel": "Type",
+    "typePlaceholder": "Select source type",
+    "entityLabel": "Entity",
+    "entityPlaceholder": "Select entity",
+    "statusLabel": "Status",
+    "editSource": "Edit Import Source",
+    "viewSource": "View Import Source Details",
+    "apiDetails": "API Connection Details",
+    "apiKeyLabel": "API Key",
+    "endpointLabel": "Endpoint URL",
+    "description": "Description",
+    "descriptionPlaceholder": "Enter description"
   },
-  "personaSwitcher": {
-    "label": "Switch Persona",
-    "admin": "Admin",
-    "adminDescription": "Full system access and controls",
-    "complianceOfficer": "Compliance Officer",
-    "complianceOfficerDescription": "Focus on compliance and risk assessment",
-    "supplierManager": "Supplier Manager",
-    "supplierManagerDescription": "Manage supplier relationships and onboarding",
-    "declarationSpecialist": "Declaration Specialist",
-    "declarationSpecialistDescription": "Focus on managing EUDR declarations",
-    "auditor": "Auditor",
-    "auditorDescription": "Review and audit compliance documentation",
-    "supplier": "Supplier",
-    "supplierDescription": "External supplier view for document submission",
-    "customer": "Customer",
-    "customerDescription": "View supplier compliance information",
-    "euOperator": "EU Operator",
-    "euOperatorDescription": "EU market operator focused on due diligence"
+  "compliance": {
+    "title": "Compliance",
+    "uploadCsv": "Upload CSV",
+    "generateReport": "Generate Report",
+    "riskAssessment": "Risk Assessment",
+    "documentVerification": "Document Verification",
+    "importData": "Import Data",
+    "exportData": "Export Data"
+  },
+  "test": {
+    "title": "Language Test",
+    "languageTest": "Language Test Page",
+    "currentLanguage": "Current Language",
+    "translatedTexts": "Translated Text Samples",
+    "toggleLanguage": "Toggle Language (EN/DE)",
+    "toggleDescription": "Click this button to toggle between English and German",
+    "directionTest": "Text Direction Test",
+    "currentDirection": "Current Text Direction",
+    "directionDescription": "This tests the direction of elements in RTL and LTR layouts"
   }
 }
