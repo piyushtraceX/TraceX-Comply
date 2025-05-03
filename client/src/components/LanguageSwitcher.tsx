@@ -18,9 +18,19 @@ const languages = [
 ];
 
 export const LanguageSwitcher = () => {
-  const { language, changeLanguage, isRTL } = useLanguage();
+  const { language, changeLanguage, toggleLanguage, isRTL } = useLanguage();
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+
+  // Handle direct toggle on click of flag or language code
+  const handleQuickToggle = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (target.tagName === 'IMG' || target.classList.contains('lang-code')) {
+      e.stopPropagation();
+      toggleLanguage();
+      return;
+    }
+  };
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -28,6 +38,7 @@ export const LanguageSwitcher = () => {
         <Button 
           variant="outline" 
           size="sm" 
+          onClick={handleQuickToggle}
           className={cn(
             "flex items-center gap-1.5 h-8 px-2.5 py-1.5 border-gray-200 text-xs font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-1 focus:ring-primary-500",
             isRTL && "flex-row-reverse"
@@ -39,7 +50,7 @@ export const LanguageSwitcher = () => {
             alt={getLanguageName(language)}
             aria-hidden="true"
           />
-          <span className="hidden sm:inline">
+          <span className="hidden sm:inline lang-code">
             {language.toUpperCase()}
           </span>
           <svg
