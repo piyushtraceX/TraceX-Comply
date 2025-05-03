@@ -78,10 +78,15 @@ const mockSuppliers: Supplier[] = [
 ];
 
 export default function SAQManagement() {
+  console.log("SAQManagement component rendering");
+  
   const { t } = useTranslation();
   const [saqs] = useState<SAQ[]>(mockSAQs);
   const [suppliers] = useState<Supplier[]>(mockSuppliers);
   const [activeTab, setActiveTab] = useState('all');
+  
+  console.log("Saqs:", saqs);
+  console.log("Active tab:", activeTab);
 
   // Filter SAQs based on active tab
   const filteredSAQs = saqs.filter(saq => {
