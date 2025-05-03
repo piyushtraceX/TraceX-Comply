@@ -49,7 +49,10 @@
     "lastUpdated": "Zuletzt aktualisiert: {{date}}",
     "exportBtn": "Exportieren",
     "newDeclarationBtn": "Neue Deklaration",
-    "userRoles": "Benutzerrollen"
+    "userRoles": "Benutzerrollen",
+    "currentRole": "Aktuelle Rolle",
+    "personaWelcome": "Willkommen, {{role}}",
+    "personaViewDescription": "Sie sehen Ihr {{role}}-Dashboard"
   },
   "metrics": {
     "overallCompliance": "Gesamte Compliance",

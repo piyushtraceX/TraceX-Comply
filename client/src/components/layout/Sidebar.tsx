@@ -39,7 +39,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   // Navigation items in the order specified by the reference app
   const navItems: NavItem[] = [
     {
-      href: '/',
+      href: '/dashboard',
       label: t('nav.dashboard'),
       icon: <LayoutDashboard className={cn('h-4 w-4', isRTL ? 'ml-2.5 rtl-flip' : 'mr-2.5')} />,
     },
