@@ -482,17 +482,174 @@ export default function SupplyChain() {
             </div>
 
             {/* Assessment Results Section */}
-            <div className="flex justify-between items-center py-3 border-t border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900">Assessment Results</h3>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="gap-1"
-                onClick={handleExportResults}
-              >
-                <Download className="h-4 w-4" />
-                Export
-              </Button>
+            <div className="py-3 border-t border-gray-200">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-medium text-gray-900">Assessment Results</h3>
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="gap-1"
+                    onClick={handleExportResults}
+                  >
+                    <Download className="h-4 w-4" />
+                    Export
+                  </Button>
+                  <Button size="sm" className="gap-1">
+                    <Plus className="h-4 w-4" />
+                    New Questionnaire
+                  </Button>
+                </div>
+              </div>
+              
+              {/* SAQ Management Table */}
+              <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden mt-4">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 border-b border-gray-200">
+                  <div className="relative w-full sm:w-72">
+                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+                    <Input
+                      type="search"
+                      placeholder="Search questionnaires..."
+                      className="w-full pl-9"
+                    />
+                  </div>
+                  
+                  <Select defaultValue="all">
+                    <SelectTrigger className="w-full sm:w-48">
+                      <SelectValue placeholder="Filter by status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Statuses</SelectItem>
+                      <SelectItem value="published">Published</SelectItem>
+                      <SelectItem value="draft">Draft</SelectItem>
+                      <SelectItem value="archived">Archived</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="bg-gray-50 border-b border-gray-200">
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Questionnaire Title</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Status</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Deadline</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Assigned Suppliers</th>
+                        <th className="px-4 py-3 text-right text-sm font-medium text-gray-600">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr className="border-b border-gray-200 hover:bg-gray-50">
+                        <td className="px-4 py-3">
+                          <div>
+                            <div className="font-medium">EUDR Basic Compliance Assessment</div>
+                            <div className="text-sm text-gray-500">Basic assessment for suppliers to verify compliance with EU Deforestation Regulation</div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <Badge className="bg-green-100 text-green-800 hover:bg-green-200">
+                            <CheckCircle className="h-3 w-3 mr-1" />
+                            Published
+                          </Badge>
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          2023-12-31
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex flex-wrap gap-1">
+                            <Badge variant="outline" className="bg-gray-100 text-xs">
+                              Eco Timber Solutions
+                            </Badge>
+                            <Badge variant="outline" className="bg-gray-100 text-xs">
+                              Green Forest Products
+                            </Badge>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-right whitespace-nowrap">
+                          <div className="flex justify-end items-center space-x-2">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-8 w-8 p-0"
+                            >
+                              <Eye className="h-4 w-4" />
+                              <span className="sr-only">View</span>
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-8 w-8 p-0"
+                            >
+                              <Eye className="h-4 w-4" />
+                              <span className="sr-only">Edit</span>
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-8 w-8 p-0 text-red-500 hover:text-red-600 hover:bg-red-50"
+                            >
+                              <Eye className="h-4 w-4" />
+                              <span className="sr-only">Delete</span>
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr className="border-b border-gray-200 hover:bg-gray-50">
+                        <td className="px-4 py-3">
+                          <div>
+                            <div className="font-medium">Supply Chain Due Diligence Questionnaire</div>
+                            <div className="text-sm text-gray-500">Detailed assessment for supply chain transparency and traceability</div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <Badge variant="outline" className="bg-gray-100 text-gray-800 hover:bg-gray-200">
+                            <AlertCircle className="h-3 w-3 mr-1" />
+                            Draft
+                          </Badge>
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          2024-01-15
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex flex-wrap gap-1">
+                            <Badge variant="outline" className="bg-gray-100 text-xs">
+                              Sustainable Woods Inc.
+                            </Badge>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-right whitespace-nowrap">
+                          <div className="flex justify-end items-center space-x-2">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-8 w-8 p-0"
+                            >
+                              <Eye className="h-4 w-4" />
+                              <span className="sr-only">View</span>
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-8 w-8 p-0"
+                            >
+                              <Eye className="h-4 w-4" />
+                              <span className="sr-only">Edit</span>
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-8 w-8 p-0 text-red-500 hover:text-red-600 hover:bg-red-50"
+                            >
+                              <Eye className="h-4 w-4" />
+                              <span className="sr-only">Delete</span>
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
           </TabsContent>
         </Tabs>
