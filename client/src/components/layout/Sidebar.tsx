@@ -5,7 +5,7 @@ import { useTranslation } from '@/hooks/use-translation';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Logo } from '@/components/ui/logo';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { X, Menu, LayoutDashboard, Network, ShieldCheck, FileText, Users, Settings, User, LogOut, ClipboardList } from 'lucide-react';
+import { X, Menu, LayoutDashboard, Network, ShieldCheck, FileText, Users, Settings, User, LogOut, ClipboardList, Globe } from 'lucide-react';
 
 // Navigation item type
 type NavItem = {
@@ -76,6 +76,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
       href: '/settings',
       label: t('nav.settings'),
       icon: <Settings className={cn('h-4 w-4', isRTL ? 'ml-2.5 rtl-flip' : 'mr-2.5')} />,
+    },
+    {
+      href: '/test-language',
+      label: t('test.title') || 'Language Test',
+      icon: <Globe className={cn('h-4 w-4', isRTL ? 'ml-2.5 rtl-flip' : 'mr-2.5')} />,
+    },
+    {
+      href: '/test-persona',
+      label: t('personaTest.title') || 'Persona Test',
+      icon: <User className={cn('h-4 w-4', isRTL ? 'ml-2.5 rtl-flip' : 'mr-2.5')} />,
     },
   ];
 

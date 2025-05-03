@@ -170,5 +170,17 @@
     "directionTest": "Textrichtungstest",
     "currentDirection": "Aktuelle Textrichtung",
     "directionDescription": "Dies testet die Richtung von Elementen in RTL- und LTR-Layouts"
+  },
+  "personaTest": {
+    "title": "Rollentest",
+    "currentPersona": "Aktuelle Rolle",
+    "changed": "Gerade geändert!",
+    "active": "Aktiv",
+    "changedFrom": "Geändert von {{role}}",
+    "availableFeatures": "Verfügbare Funktionen",
+    "dashboardRedirect": "Dashboard-Weiterleitungstest",
+    "dashboardDescription": "Bei Rollenwechsel mit aktivierter Weiterleitung werden Sie automatisch zum Standarddashboard dieser Rolle weitergeleitet. Probieren Sie es mit den Schaltflächen unten aus.",
+    "dashboardPath": "Dashboard: {{path}}",
+    "switchWithRedirect": "Wechseln & Weiterleiten"
   }
 }
