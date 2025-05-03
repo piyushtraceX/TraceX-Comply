@@ -47,13 +47,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       href: '/supply-chain',
       label: t('nav.supplyChain'),
       icon: <Network className={cn('h-4 w-4', isRTL ? 'ml-2.5 rtl-flip' : 'mr-2.5')} />,
-      children: [
-        {
-          href: '/saq-management',
-          label: t('nav.saqManagement') || 'SAQ Management',
-          icon: <ClipboardList className={cn('h-4 w-4', isRTL ? 'ml-2.5 rtl-flip' : 'mr-2.5')} />,
-        },
-      ]
+      // SAQ Management is now part of Supply Chain page
     },
     {
       href: '/compliance',

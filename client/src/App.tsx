@@ -17,7 +17,7 @@ import AddDeclaration from "@/pages/AddDeclaration";
 import Customers from "@/pages/Customers";
 import AddCustomer from "@/pages/AddCustomer";
 import Settings from "@/pages/Settings";
-import SAQManagement from "@/pages/SAQManagement";
+// SAQ Management is now part of the Supply Chain page
 import TestLanguage from "@/pages/TestLanguage";
 import TestPersona from "@/pages/TestPersona";
 import { ThemeProvider } from "next-themes";
@@ -69,7 +69,11 @@ function Router() {
         <Route path="/sourcing-entities" component={SourcingEntities} />
         <Route path="/import-sources" component={ImportSources} />
         <Route path="/supplier" component={() => <Layout title="Suppliers">Suppliers List</Layout>} />
-        <Route path="/saq-management" component={SAQManagement} />
+        {/* Redirect SAQ Management to Supply Chain page */}
+        <Route path="/saq-management" component={() => {
+          window.location.href = '/supply-chain';
+          return <div>Redirecting to Supply Chain...</div>;
+        }} />
         <Route path="/add-supplier" component={AddSupplier} />
         <Route path="/supplier/:id" component={SupplierDetail} />
         <Route path="/compliance" component={Compliance} />
