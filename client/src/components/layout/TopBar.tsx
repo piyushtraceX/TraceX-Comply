@@ -17,7 +17,7 @@ export const TopBar: React.FC<TopBarProps> = ({ title, toggleSidebar }) => {
   const { isRTL } = useLanguage();
 
   return (
-    <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-20">
+    <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30 backdrop-blur-sm bg-white/95">
       <div className={cn('flex items-center justify-between px-4 py-2 sm:px-6', isRTL && 'flex-row-reverse')}>
         {/* Left side: Page title and optionally mobile menu button */}
         <div className={cn('flex items-center', isRTL && 'flex-row-reverse')}>
@@ -55,7 +55,16 @@ export const TopBar: React.FC<TopBarProps> = ({ title, toggleSidebar }) => {
         </div>
         
         {/* Right navigation */}
-        <div className={cn('flex items-center gap-2', isRTL && 'flex-row-reverse')}>
+        <div className={cn('flex items-center gap-3', isRTL && 'flex-row-reverse')}>
+          {/* Book a Demo button */}
+          <Button 
+            variant="default" 
+            size="sm" 
+            className="hidden md:flex items-center h-8 px-4 py-1.5 bg-primary-600 hover:bg-primary-700 text-white text-xs font-medium rounded-md"
+          >
+            {t('cta.bookDemo') || 'Book a Demo'}
+          </Button>
+          
           {/* Persona Switcher */}
           <div className="block">
             {/* Conditionally render PersonaSwitcher to handle potential errors */}

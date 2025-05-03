@@ -11,11 +11,10 @@ import {
 import { useTranslation } from '@/hooks/use-translation';
 import { cn } from '@/lib/utils';
 
+// Simplified language options as per reference app
 const languages = [
   { code: 'en', name: 'English' },
-  { code: 'fr', name: 'French' },
   { code: 'de', name: 'German' },
-  { code: 'ar', name: 'Arabic' },
 ];
 
 export const LanguageSwitcher = () => {
