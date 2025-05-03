@@ -2,6 +2,13 @@
   "app": {
     "name": "EUDR Comply"
   },
+  "common": {
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "delete": "Löschen", 
+    "processing": "Verarbeitung...",
+    "loading": "Laden..."
+  },
   "nav": {
     "dashboard": "Dashboard",
     "supplyChain": "Lieferkette",
@@ -185,5 +192,86 @@
     "dashboardDescription": "Bei Rollenwechsel mit aktivierter Weiterleitung werden Sie automatisch zum Standarddashboard dieser Rolle weitergeleitet. Probieren Sie es mit den Schaltflächen unten aus.",
     "dashboardPath": "Dashboard: {{path}}",
     "switchWithRedirect": "Wechseln & Weiterleiten"
+  },
+  "saq": {
+    "title": "SAQ-Management",
+    "actions": {
+      "addSAQ": "SAQ hinzufügen",
+      "edit": "Bearbeiten",
+      "delete": "Löschen",
+      "uploadQuestions": "Fragen hochladen",
+      "filterActive": "Nur aktive anzeigen",
+      "showAll": "Alle anzeigen"
+    },
+    "tabs": {
+      "all": "Alle",
+      "draft": "Entwurf",
+      "published": "Veröffentlicht",
+      "completed": "Abgeschlossen",
+      "expired": "Abgelaufen"
+    },
+    "fields": {
+      "title": "Titel",
+      "description": "Beschreibung",
+      "status": "Status",
+      "deadline": "Frist",
+      "assignedSuppliers": "Zugewiesene Lieferanten",
+      "assignSuppliers": "Lieferanten zuweisen"
+    },
+    "status": {
+      "draft": "Entwurf",
+      "published": "Veröffentlicht",
+      "completed": "Abgeschlossen",
+      "expired": "Abgelaufen"
+    },
+    "placeholders": {
+      "title": "SAQ-Titel eingeben",
+      "description": "Beschreibung eingeben",
+      "status": "Status auswählen",
+      "deadline": "Frist auswählen",
+      "selectSuppliers": "Lieferanten auswählen"
+    },
+    "validation": {
+      "titleRequired": "Titel ist erforderlich",
+      "pleaseEnterTitle": "Bitte geben Sie einen Titel für den SAQ ein"
+    },
+    "notifications": {
+      "created": "SAQ erstellt",
+      "saqCreatedSuccess": "SAQ wurde erfolgreich erstellt",
+      "updated": "SAQ aktualisiert",
+      "saqUpdatedSuccess": "SAQ wurde erfolgreich aktualisiert",
+      "deleted": "SAQ gelöscht",
+      "saqDeletedSuccess": "SAQ wurde erfolgreich gelöscht",
+      "questionsUploaded": "Fragen hochgeladen",
+      "questionsUploadedSuccess": "Erfolgreich {{count}} Fragen hochgeladen",
+      "questionsSaved": "Fragen gespeichert",
+      "questionsSavedSuccess": "Fragen wurden im SAQ gespeichert"
+    },
+    "dialogs": {
+      "add": {
+        "title": "Neuen SAQ hinzufügen",
+        "description": "Erstellen Sie einen neuen Selbstbewertungsfragebogen"
+      },
+      "edit": {
+        "title": "SAQ bearbeiten",
+        "description": "SAQ-Details aktualisieren"
+      },
+      "delete": {
+        "title": "SAQ löschen",
+        "description": "Sind Sie sicher, dass Sie diesen SAQ löschen möchten?",
+        "warning": "Diese Aktion kann nicht rückgängig gemacht werden."
+      },
+      "upload": {
+        "title": "SAQ-Fragen hochladen",
+        "description": "Laden Sie Fragen aus einer CSV-Datei hoch. Die CSV sollte eine Kopfzeile mit Spalten für Frage-ID, Fragetext, Kategorie und Typ haben.",
+        "preview": "Fragenvorschau"
+      }
+    },
+    "emptyState": {
+      "title": "Keine SAQs gefunden",
+      "description": "Keine Selbstbewertungsfragebögen mit dem aktuellen Filter gefunden. Erstellen Sie Ihren ersten SAQ, um zu beginnen."
+    },
+    "noDescription": "Keine Beschreibung angegeben",
+    "noSuppliersAssigned": "Keine Lieferanten zugewiesen"
   }
 }

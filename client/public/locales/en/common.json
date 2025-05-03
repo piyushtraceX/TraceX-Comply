@@ -2,6 +2,13 @@
   "app": {
     "name": "EUDR Comply"
   },
+  "common": {
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete", 
+    "processing": "Processing...",
+    "loading": "Loading..."
+  },
   "nav": {
     "dashboard": "Dashboard",
     "supplyChain": "Supply Chain",
