@@ -43,11 +43,24 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+// Import our custom forms
+import { AddSupplierForm, type SupplierFormData } from '@/components/suppliers/AddSupplierForm';
+import { SendSAQForm, type SAQFormData } from '@/components/suppliers/SendSAQForm';
+import { ViewResponseForm } from '@/components/suppliers/ViewResponseForm';
+
 // Match the design in the reference app screenshots
 export default function SupplyChain() {
   const { t } = useTranslation();
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState('onboarding');
+  
+  // Form states
+  const [addSupplierOpen, setAddSupplierOpen] = useState(false);
+  const [addSupplierType, setAddSupplierType] = useState<'single' | 'bulk' | 'csv'>('single');
+  const [sendSAQOpen, setSendSAQOpen] = useState(false);
+  const [currentSupplier, setCurrentSupplier] = useState('');
+  const [viewResponseOpen, setViewResponseOpen] = useState(false);
+  const [currentSupplierId, setCurrentSupplierId] = useState('');
 
   // SAQ Management Tab Data
   const summaryCards = [
@@ -81,17 +94,17 @@ export default function SupplyChain() {
     },
     {
       id: "002",
-      name: "ABC Corp",
-      avatar: "AC",
-      address: "Berlin, Germany",
-      industry: "Wood Products"
+      name: "XYZ Industries",
+      avatar: "XI",
+      address: "Paris, France",
+      industry: "Sustainable Timber"
     },
     {
       id: "003",
-      name: "ABC Corp",
-      avatar: "AC",
-      address: "Berlin, Germany",
-      industry: "Wood Products"
+      name: "EcoGlobal",
+      avatar: "EG",
+      address: "Madrid, Spain",
+      industry: "Rubber Products"
     }
   ];
 
@@ -132,42 +145,60 @@ export default function SupplyChain() {
   // Action handlers for the buttons
   const handleImport = () => {
     console.log("Import button clicked");
-    alert("Import functionality would open a file selector");
+    setAddSupplierType('csv');
+    setAddSupplierOpen(true);
   };
   
   const handleAddSupplier = () => {
     console.log("Add Supplier button clicked");
-    alert("Add Supplier form would open");
+    setAddSupplierType('single');
+    setAddSupplierOpen(true);
   };
   
   const handleAddSingleSupplier = () => {
     console.log("Add Single Supplier selected");
-    alert("Add Single Supplier form would open");
+    setAddSupplierType('single');
+    setAddSupplierOpen(true);
   };
   
   const handleImportCSV = () => {
     console.log("Import CSV selected");
-    alert("CSV import dialog would open");
+    setAddSupplierType('csv');
+    setAddSupplierOpen(true);
   };
   
   const handleBulkAdd = () => {
     console.log("Bulk Add selected");
-    alert("Bulk Add interface would open");
+    setAddSupplierType('bulk');
+    setAddSupplierOpen(true);
   };
   
   const handleSendSAQ = (supplierName: string) => {
     console.log(`Send SAQ for ${supplierName}`);
-    alert(`SAQ would be sent to ${supplierName}`);
+    setCurrentSupplier(supplierName);
+    setSendSAQOpen(true);
   };
   
   const handleViewResponse = (supplierId: string, supplierName: string) => {
     console.log(`View response for ${supplierName} (ID: ${supplierId})`);
-    alert(`Response details for ${supplierName} would open`);
+    setCurrentSupplierId(supplierId);
+    setCurrentSupplier(supplierName);
+    setViewResponseOpen(true);
   };
   
   const handleExportResults = () => {
     console.log("Export results clicked");
     alert("Assessment results would be exported");
+  };
+  
+  const handleSupplierSubmit = (data: SupplierFormData) => {
+    console.log("Supplier form submitted:", data);
+    alert(`Supplier ${data.name} added successfully!`);
+  };
+  
+  const handleSAQSubmit = (data: SAQFormData) => {
+    console.log("SAQ form submitted:", data);
+    alert(`SAQ "${data.title}" sent to ${data.suppliers.join(", ")} with deadline ${data.deadline.toLocaleDateString()}`);
   };
 
   const handleSelectRow = (id: string) => {
@@ -189,6 +220,30 @@ export default function SupplyChain() {
   return (
     <Layout title="Supply Chain">
       <div className="space-y-6">
+        {/* Add Supplier Form Dialog */}
+        <AddSupplierForm
+          open={addSupplierOpen}
+          onOpenChange={setAddSupplierOpen}
+          onSubmit={handleSupplierSubmit}
+          formType={addSupplierType}
+        />
+        
+        {/* Send SAQ Form Dialog */}
+        <SendSAQForm
+          open={sendSAQOpen}
+          onOpenChange={setSendSAQOpen}
+          supplierName={currentSupplier}
+          onSubmit={handleSAQSubmit}
+        />
+        
+        {/* View Response Dialog */}
+        <ViewResponseForm
+          open={viewResponseOpen}
+          onOpenChange={setViewResponseOpen}
+          supplierId={currentSupplierId}
+          supplierName={currentSupplier}
+        />
+        
         {/* Tabs at the top */}
         <Tabs 
           defaultValue="onboarding" 
