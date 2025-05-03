@@ -11,6 +11,35 @@
     "customers": "Customers",
     "settings": "Settings"
   },
+  "personaSwitcher": {
+    "label": "Switch Role",
+    "role": "Role",
+    "admin": "Administrator",
+    "adminDescription": "Full access to all system features",
+    "complianceOfficer": "Compliance Officer",
+    "complianceOfficerDescription": "Manages compliance documentation and audits",
+    "supplierManager": "Supplier Manager",
+    "supplierManagerDescription": "Manages supplier relationships and onboarding",
+    "declarationSpecialist": "Declaration Specialist",
+    "declarationSpecialistDescription": "Handles EUDR declarations and documentation",
+    "auditor": "Auditor",
+    "auditorDescription": "Reviews compliance status and generates reports",
+    "supplier": "Supplier",
+    "supplierDescription": "External supplier providing declarations",
+    "customer": "Customer",
+    "customerDescription": "Product buyer requiring compliance verification",
+    "euOperator": "EU Operator",
+    "euOperatorDescription": "EU entity subject to EUDR regulations",
+    "switchedTo": "Switched to {{role}} role",
+    "switchOnly": "Switch role only",
+    "switchAndRedirect": "Switch and go to dashboard",
+    "visibleFeatures": "Features",
+    "featureAccessHint": "Number of features available with this role",
+    "roleDescription": "Choose a role to change your permissions and view"
+  },
+  "cta": {
+    "bookDemo": "Book a Demo"
+  },
   "user": {
     "name": "Jane Cooper",
     "email": "jane@example.com"
@@ -141,5 +170,17 @@
     "directionTest": "Text Direction Test",
     "currentDirection": "Current Text Direction",
     "directionDescription": "This tests the direction of elements in RTL and LTR layouts"
+  },
+  "personaTest": {
+    "title": "Persona Test",
+    "currentPersona": "Current Role",
+    "changed": "Just Changed!",
+    "active": "Active",
+    "changedFrom": "Changed from {{role}}",
+    "availableFeatures": "Available Features",
+    "dashboardRedirect": "Dashboard Redirection Test",
+    "dashboardDescription": "When switching personas with redirection enabled, you'll be automatically redirected to the default dashboard for that role. Try it by clicking the buttons below.",
+    "dashboardPath": "Dashboard: {{path}}",
+    "switchWithRedirect": "Switch & Redirect"
   }
 }

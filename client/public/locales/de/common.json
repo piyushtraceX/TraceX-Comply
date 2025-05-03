@@ -11,6 +11,35 @@
     "customers": "Kunden",
     "settings": "Einstellungen"
   },
+  "personaSwitcher": {
+    "label": "Rolle wechseln",
+    "role": "Rolle",
+    "admin": "Administrator",
+    "adminDescription": "Vollzugriff auf alle Systemfunktionen",
+    "complianceOfficer": "Compliance-Beauftragter",
+    "complianceOfficerDescription": "Verwaltet Compliance-Dokumentation und Audits",
+    "supplierManager": "Lieferantenmanager",
+    "supplierManagerDescription": "Verwaltet Lieferantenbeziehungen und Onboarding",
+    "declarationSpecialist": "Deklarationsspezialist",
+    "declarationSpecialistDescription": "Bearbeitet EUDR-Deklarationen und Dokumentation",
+    "auditor": "Prüfer",
+    "auditorDescription": "Überprüft Compliance-Status und erstellt Berichte",
+    "supplier": "Lieferant",
+    "supplierDescription": "Externer Lieferant, der Deklarationen bereitstellt",
+    "customer": "Kunde",
+    "customerDescription": "Produktkäufer, der Compliance-Überprüfung benötigt",
+    "euOperator": "EU-Betreiber",
+    "euOperatorDescription": "EU-Unternehmen, das den EUDR-Vorschriften unterliegt",
+    "switchedTo": "Zu Rolle {{role}} gewechselt",
+    "switchOnly": "Nur Rolle wechseln",
+    "switchAndRedirect": "Wechseln und zum Dashboard gehen",
+    "visibleFeatures": "Funktionen",
+    "featureAccessHint": "Anzahl der mit dieser Rolle verfügbaren Funktionen",
+    "roleDescription": "Wählen Sie eine Rolle, um Ihre Berechtigungen und Ansicht zu ändern"
+  },
+  "cta": {
+    "bookDemo": "Demo buchen"
+  },
   "user": {
     "name": "Jane Cooper",
     "email": "jane@example.com"
