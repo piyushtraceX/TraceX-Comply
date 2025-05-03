@@ -4,7 +4,7 @@ import { useTranslation } from '@/hooks/use-translation';
 import { usePersona } from '@/contexts/PersonaContext';
 import { Button } from '@/components/ui/button';
 import { Plus, FileQuestion, ListFilter, Pencil, Trash2, Upload, Download, CheckCircle, AlertCircle, Clock, X } from 'lucide-react';
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -19,6 +19,7 @@ import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { CSVUploader, CSVTable } from '@/components/compliance/CSVUploader';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 // Define the SAQ interface
 interface SAQ {
@@ -32,7 +33,7 @@ interface SAQ {
   assignedSuppliers: number[]; // IDs of assigned suppliers
 }
 
-// Define the Supplier interface
+// Define the supplier interface
 interface Supplier {
   id: number;
   name: string;
@@ -80,6 +81,16 @@ const initialSAQs: SAQ[] = [
     updatedAt: new Date(2023, 7, 28),
     assignedSuppliers: [1, 4, 5],
   },
+  {
+    id: 4,
+    title: 'Supplier EUDR Readiness Check',
+    description: 'Quick assessment to evaluate supplier readiness for EUDR compliance',
+    status: 'expired',
+    deadline: new Date(2023, 4, 15),
+    createdAt: new Date(2023, 2, 1),
+    updatedAt: new Date(2023, 2, 1),
+    assignedSuppliers: [],
+  },
 ];
 
 export default function SAQManagement() {
@@ -121,7 +132,7 @@ export default function SAQManagement() {
     setFormAssignedSuppliers([]);
   };
 
-  // Initialize form for editing
+  // Initialize edit form
   const initEditForm = (saq: SAQ) => {
     setFormTitle(saq.title);
     setFormDescription(saq.description);
@@ -132,20 +143,20 @@ export default function SAQManagement() {
     setIsEditDialogOpen(true);
   };
 
-  // Handle SAQ creation
-  const handleCreateSAQ = () => {
+  // Handle form submission
+  const handleAddSAQ = () => {
+    // Validate form
     if (!formTitle.trim()) {
       toast({
+        variant: 'destructive',
         title: t('saq.validation.titleRequired'),
         description: t('saq.validation.pleaseEnterTitle'),
-        variant: "destructive",
       });
       return;
     }
-
-    setIsLoading(true);
     
     // Simulate API call
+    setIsLoading(true);
     setTimeout(() => {
       const newSAQ: SAQ = {
         id: Math.max(...saqs.map(s => s.id), 0) + 1,
@@ -167,40 +178,37 @@ export default function SAQManagement() {
         title: t('saq.notifications.created'),
         description: t('saq.notifications.saqCreatedSuccess'),
       });
-    }, 800);
+    }, 500);
   };
 
-  // Handle SAQ update
-  const handleUpdateSAQ = () => {
+  // Handle edit submission
+  const handleEditSAQ = () => {
     if (!selectedSAQ) return;
+    
+    // Validate form
     if (!formTitle.trim()) {
       toast({
+        variant: 'destructive',
         title: t('saq.validation.titleRequired'),
         description: t('saq.validation.pleaseEnterTitle'),
-        variant: "destructive",
       });
       return;
     }
-
-    setIsLoading(true);
     
     // Simulate API call
+    setIsLoading(true);
     setTimeout(() => {
-      const updatedSAQs = saqs.map(saq => {
-        if (saq.id === selectedSAQ.id) {
-          return {
-            ...saq,
-            title: formTitle,
-            description: formDescription,
-            status: formStatus,
-            deadline: formDeadline || saq.deadline,
-            updatedAt: new Date(),
-            assignedSuppliers: formAssignedSuppliers,
-          };
-        }
-        return saq;
-      });
+      const updatedSAQ: SAQ = {
+        ...selectedSAQ,
+        title: formTitle,
+        description: formDescription,
+        status: formStatus,
+        deadline: formDeadline || selectedSAQ.deadline,
+        updatedAt: new Date(),
+        assignedSuppliers: formAssignedSuppliers,
+      };
       
+      const updatedSAQs = saqs.map(s => s.id === selectedSAQ.id ? updatedSAQ : s);
       setSaqs(updatedSAQs);
       setIsLoading(false);
       setIsEditDialogOpen(false);
@@ -211,18 +219,17 @@ export default function SAQManagement() {
         title: t('saq.notifications.updated'),
         description: t('saq.notifications.saqUpdatedSuccess'),
       });
-    }, 800);
+    }, 500);
   };
 
-  // Handle SAQ deletion
+  // Handle delete
   const handleDeleteSAQ = () => {
     if (!selectedSAQ) return;
     
-    setIsLoading(true);
-    
     // Simulate API call
+    setIsLoading(true);
     setTimeout(() => {
-      const updatedSAQs = saqs.filter(saq => saq.id !== selectedSAQ.id);
+      const updatedSAQs = saqs.filter(s => s.id !== selectedSAQ.id);
       setSaqs(updatedSAQs);
       setIsLoading(false);
       setIsDeleteDialogOpen(false);
@@ -232,10 +239,10 @@ export default function SAQManagement() {
         title: t('saq.notifications.deleted'),
         description: t('saq.notifications.saqDeletedSuccess'),
       });
-    }, 800);
+    }, 500);
   };
 
-  // Handle CSV data upload for SAQ questions
+  // Handle CSV upload
   const handleCSVUpload = (data: { headers: string[]; rows: string[][] }) => {
     setCsvData(data);
     
@@ -245,56 +252,48 @@ export default function SAQManagement() {
     });
   };
 
-  // Filter SAQs based on status
-  const filteredSAQs = filter === 'all' ? saqs : saqs.filter(saq => saq.status === filter);
+  // Filter SAQs based on active tab
+  const [activeTab, setActiveTab] = useState('all');
+  
+  const filteredSAQs = saqs.filter(saq => {
+    if (activeTab === 'all') return true;
+    return saq.status === activeTab;
+  });
 
-  // Get supplier names from IDs
-  const getSupplierNames = (supplierIds: number[]): string => {
-    if (supplierIds.length === 0) return t('saq.noSuppliersAssigned');
-    
-    const names = supplierIds.map(id => {
-      const supplier = suppliers.find(s => s.id === id);
-      return supplier ? supplier.name : `Unknown (ID: ${id})`;
-    });
-    
-    return names.join(', ');
-  };
-
-  // Render status badge
+  // Status badge renderer
   const renderStatusBadge = (status: SAQ['status']) => {
-    let variant: "default" | "secondary" | "destructive" | "outline" = "outline";
-    let icon = null;
-    let statusText = '';
-    
     switch (status) {
       case 'draft':
-        variant = "outline";
-        icon = <Clock className="h-3.5 w-3.5 mr-1" />;
-        statusText = t('saq.status.draft');
-        break;
+        return (
+          <Badge variant="outline" className="bg-gray-100 text-gray-800 flex items-center gap-1.5">
+            <Clock className="h-3 w-3" />
+            {t('saq.status.draft')}
+          </Badge>
+        );
       case 'published':
-        variant = "default";
-        icon = <FileQuestion className="h-3.5 w-3.5 mr-1" />;
-        statusText = t('saq.status.published');
-        break;
+        return (
+          <Badge variant="outline" className="bg-green-100 text-green-800 flex items-center gap-1.5">
+            <CheckCircle className="h-3 w-3" />
+            {t('saq.status.published')}
+          </Badge>
+        );
       case 'completed':
-        variant = "secondary";
-        icon = <CheckCircle className="h-3.5 w-3.5 mr-1" />;
-        statusText = t('saq.status.completed');
-        break;
+        return (
+          <Badge variant="outline" className="bg-blue-100 text-blue-800 flex items-center gap-1.5">
+            <CheckCircle className="h-3 w-3" />
+            {t('saq.status.completed')}
+          </Badge>
+        );
       case 'expired':
-        variant = "destructive";
-        icon = <AlertCircle className="h-3.5 w-3.5 mr-1" />;
-        statusText = t('saq.status.expired');
-        break;
+        return (
+          <Badge variant="outline" className="bg-red-100 text-red-800 flex items-center gap-1.5">
+            <AlertCircle className="h-3 w-3" />
+            {t('saq.status.expired')}
+          </Badge>
+        );
+      default:
+        return null;
     }
-    
-    return (
-      <Badge variant={variant} className="flex items-center">
-        {icon}
-        <span>{statusText}</span>
-      </Badge>
-    );
   };
 
   // Check if user can edit/delete
@@ -345,8 +344,8 @@ export default function SAQManagement() {
           </div>
         </div>
         
-        {/* Tabs for status filtering */}
-        <Tabs defaultValue="all" className="mb-6" onValueChange={setFilter}>
+        {/* Tabs */}
+        <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="mb-6">
           <TabsList className="mb-4">
             <TabsTrigger value="all">{t('saq.tabs.all')}</TabsTrigger>
             <TabsTrigger value="draft">{t('saq.tabs.draft')}</TabsTrigger>
@@ -381,123 +380,131 @@ export default function SAQManagement() {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 gap-4">
-            {filteredSAQs.map((saq) => (
-              <Card key={saq.id} className="overflow-hidden">
-                <CardHeader className="bg-gray-50 pb-4">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
-                    <CardTitle className="text-lg font-medium">
-                      {saq.title}
-                    </CardTitle>
-                    <div className="flex items-center gap-2">
-                      {renderStatusBadge(saq.status)}
-                      
-                      <div className="flex items-center gap-1">
-                        {canEdit && (
-                          <Button 
-                            size="sm" 
-                            variant="ghost"
-                            className="h-8 w-8 p-0"
-                            onClick={() => initEditForm(saq)}
-                          >
-                            <Pencil className="h-4 w-4" />
-                            <span className="sr-only">{t('saq.actions.edit')}</span>
-                          </Button>
+          <Card>
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[300px]">{t('saq.fields.title')}</TableHead>
+                    <TableHead>{t('saq.fields.status')}</TableHead>
+                    <TableHead>{t('saq.fields.deadline')}</TableHead>
+                    <TableHead>{t('saq.fields.assignedSuppliers')}</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredSAQs.map((saq) => (
+                    <TableRow key={saq.id}>
+                      <TableCell className="font-medium">
+                        <div>
+                          <div className="font-medium">{saq.title}</div>
+                          <div className="text-sm text-gray-500 truncate max-w-[250px]">
+                            {saq.description || t('saq.noDescription')}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {renderStatusBadge(saq.status)}
+                      </TableCell>
+                      <TableCell>{format(saq.deadline, 'PPP')}</TableCell>
+                      <TableCell>
+                        {saq.assignedSuppliers.length === 0 ? (
+                          <span className="text-sm text-gray-500 italic">
+                            {t('saq.noSuppliersAssigned')}
+                          </span>
+                        ) : (
+                          <div className="flex flex-wrap gap-1">
+                            {saq.assignedSuppliers.slice(0, 2).map(supplierId => {
+                              const supplier = suppliers.find(s => s.id === supplierId);
+                              return supplier ? (
+                                <Badge key={supplierId} variant="secondary" className="text-xs">
+                                  {supplier.name}
+                                </Badge>
+                              ) : null;
+                            })}
+                            
+                            {saq.assignedSuppliers.length > 2 && (
+                              <Badge variant="outline" className="text-xs">
+                                +{saq.assignedSuppliers.length - 2}
+                              </Badge>
+                            )}
+                          </div>
                         )}
-                        
-                        {canDelete && (
-                          <Button 
-                            size="sm" 
-                            variant="ghost"
-                            className="h-8 w-8 p-0 text-red-500 hover:text-red-600 hover:bg-red-50"
-                            onClick={() => { setSelectedSAQ(saq); setIsDeleteDialogOpen(true); }}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                            <span className="sr-only">{t('saq.actions.delete')}</span>
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </CardHeader>
-                
-                <CardContent className="py-4">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-900 mb-1">
-                        {t('saq.fields.description')}
-                      </h4>
-                      <p className="text-sm text-gray-600">
-                        {saq.description || t('saq.noDescription')}
-                      </p>
-                    </div>
-                    
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-900 mb-1">
-                        {t('saq.fields.deadline')}
-                      </h4>
-                      <p className="text-sm text-gray-600">
-                        {format(saq.deadline, 'PPP')}
-                      </p>
-                    </div>
-                    
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-900 mb-1">
-                        {t('saq.fields.assignedSuppliers')}
-                      </h4>
-                      <p className="text-sm text-gray-600">
-                        {getSupplierNames(saq.assignedSuppliers)}
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end items-center gap-2">
+                          {canEdit && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-8 px-2"
+                              onClick={() => initEditForm(saq)}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                          )}
+                          
+                          {canDelete && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-8 px-2 text-red-600 hover:text-red-700"
+                              onClick={() => { setSelectedSAQ(saq); setIsDeleteDialogOpen(true); }}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
         )}
-        
-        {/* Add SAQ Dialog */}
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-          <DialogContent className="sm:max-w-[600px]">
-            <DialogHeader>
-              <DialogTitle>{t('saq.dialogs.add.title')}</DialogTitle>
-              <DialogDescription>
-                {t('saq.dialogs.add.description')}
-              </DialogDescription>
-            </DialogHeader>
+      </div>
+      
+      {/* Add SAQ Dialog */}
+      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>{t('saq.dialogs.add.title')}</DialogTitle>
+            <DialogDescription>
+              {t('saq.dialogs.add.description')}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="title">{t('saq.fields.title')} *</Label>
+              <Input
+                id="title"
+                placeholder={t('saq.placeholders.title')}
+                value={formTitle}
+                onChange={(e) => setFormTitle(e.target.value)}
+              />
+            </div>
             
-            <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="description">{t('saq.fields.description')}</Label>
+              <Textarea
+                id="description"
+                placeholder={t('saq.placeholders.description')}
+                value={formDescription}
+                onChange={(e) => setFormDescription(e.target.value)}
+                rows={3}
+              />
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="title" className="required">
-                  {t('saq.fields.title')}
-                </Label>
-                <Input
-                  id="title"
-                  placeholder={t('saq.placeholders.title')}
-                  value={formTitle}
-                  onChange={(e) => setFormTitle(e.target.value)}
-                />
-              </div>
-              
-              <div className="grid gap-2">
-                <Label htmlFor="description">
-                  {t('saq.fields.description')}
-                </Label>
-                <Textarea
-                  id="description"
-                  placeholder={t('saq.placeholders.description')}
-                  rows={3}
-                  value={formDescription}
-                  onChange={(e) => setFormDescription(e.target.value)}
-                />
-              </div>
-              
-              <div className="grid gap-2">
-                <Label htmlFor="status">
-                  {t('saq.fields.status')}
-                </Label>
-                <Select value={formStatus} onValueChange={(value) => setFormStatus(value as SAQ['status'])}>
-                  <SelectTrigger>
+                <Label htmlFor="status">{t('saq.fields.status')}</Label>
+                <Select
+                  value={formStatus}
+                  onValueChange={(value: SAQ['status']) => setFormStatus(value)}
+                >
+                  <SelectTrigger id="status">
                     <SelectValue placeholder={t('saq.placeholders.status')} />
                   </SelectTrigger>
                   <SelectContent>
@@ -510,22 +517,23 @@ export default function SAQManagement() {
               </div>
               
               <div className="grid gap-2">
-                <Label htmlFor="deadline">
-                  {t('saq.fields.deadline')}
-                </Label>
+                <Label htmlFor="deadline">{t('saq.fields.deadline')}</Label>
                 <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                   <PopoverTrigger asChild>
                     <Button
-                      variant="outline"
+                      id="deadline"
+                      variant={"outline"}
                       className={cn(
-                        "w-full justify-start text-left font-normal",
+                        "justify-start text-left font-normal",
                         !formDeadline && "text-muted-foreground"
                       )}
                     >
-                      {formDeadline ? format(formDeadline, 'PPP') : <span>{t('saq.placeholders.deadline')}</span>}
+                      {formDeadline ? format(formDeadline, "PPP") : (
+                        <span>{t('saq.placeholders.deadline')}</span>
+                      )}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
+                  <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
                       mode="single"
                       selected={formDeadline}
@@ -538,310 +546,313 @@ export default function SAQManagement() {
                   </PopoverContent>
                 </Popover>
               </div>
-              
-              <div className="grid gap-2">
-                <Label htmlFor="suppliers">
-                  {t('saq.fields.assignSuppliers')}
-                </Label>
-                <Select 
-                  onValueChange={(value) => {
-                    const supplierId = parseInt(value);
-                    if (formAssignedSuppliers.includes(supplierId)) {
-                      setFormAssignedSuppliers(formAssignedSuppliers.filter(id => id !== supplierId));
-                    } else {
-                      setFormAssignedSuppliers([...formAssignedSuppliers, supplierId]);
-                    }
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t('saq.placeholders.selectSuppliers')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {suppliers.map((supplier) => (
+            </div>
+            
+            <div className="grid gap-2">
+              <Label htmlFor="suppliers">{t('saq.fields.assignSuppliers')}</Label>
+              <Select
+                value=""
+                onValueChange={(value: string) => {
+                  const supplierId = parseInt(value, 10);
+                  if (!formAssignedSuppliers.includes(supplierId)) {
+                    setFormAssignedSuppliers([...formAssignedSuppliers, supplierId]);
+                  }
+                }}
+              >
+                <SelectTrigger id="suppliers">
+                  <SelectValue placeholder={t('saq.placeholders.selectSuppliers')} />
+                </SelectTrigger>
+                <SelectContent>
+                  {suppliers
+                    .filter(s => s.status === 'active')
+                    .filter(s => !formAssignedSuppliers.includes(s.id))
+                    .map((supplier) => (
                       <SelectItem key={supplier.id} value={supplier.id.toString()}>
                         {supplier.name} ({supplier.location})
                       </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                
-                {formAssignedSuppliers.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {formAssignedSuppliers.map(supplierId => {
-                      const supplier = suppliers.find(s => s.id === supplierId);
-                      return supplier ? (
-                        <Badge key={supplierId} variant="secondary" className="flex items-center gap-1">
-                          {supplier.name}
-                          <button
-                            type="button"
-                            className="ml-1 rounded-full hover:bg-gray-200 p-0.5"
-                            onClick={() => setFormAssignedSuppliers(formAssignedSuppliers.filter(id => id !== supplierId))}
-                          >
-                            <X className="h-3 w-3" />
-                            <span className="sr-only">{t('actions.remove')}</span>
-                          </button>
-                        </Badge>
-                      ) : null;
-                    })}
-                  </div>
-                )}
-              </div>
-            </div>
-            
-            <DialogFooter className={cn(isRTL && "flex-row-reverse")}>
-              <Button 
-                variant="outline" 
-                onClick={() => setIsAddDialogOpen(false)}
-                disabled={isLoading}
-              >
-                {t('actions.cancel')}
-              </Button>
-              <Button
-                onClick={handleCreateSAQ}
-                disabled={isLoading}
-              >
-                {isLoading ? t('actions.creating') : t('actions.create')}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-        
-        {/* Edit SAQ Dialog */}
-        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-          <DialogContent className="sm:max-w-[600px]">
-            <DialogHeader>
-              <DialogTitle>{t('saq.dialogs.edit.title')}</DialogTitle>
-              <DialogDescription>
-                {t('saq.dialogs.edit.description')}
-              </DialogDescription>
-            </DialogHeader>
-            
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="edit-title" className="required">
-                  {t('saq.fields.title')}
-                </Label>
-                <Input
-                  id="edit-title"
-                  placeholder={t('saq.placeholders.title')}
-                  value={formTitle}
-                  onChange={(e) => setFormTitle(e.target.value)}
-                />
-              </div>
+                    ))
+                  }
+                </SelectContent>
+              </Select>
               
-              <div className="grid gap-2">
-                <Label htmlFor="edit-description">
-                  {t('saq.fields.description')}
-                </Label>
-                <Textarea
-                  id="edit-description"
-                  placeholder={t('saq.placeholders.description')}
-                  rows={3}
-                  value={formDescription}
-                  onChange={(e) => setFormDescription(e.target.value)}
-                />
-              </div>
-              
-              <div className="grid gap-2">
-                <Label htmlFor="edit-status">
-                  {t('saq.fields.status')}
-                </Label>
-                <Select value={formStatus} onValueChange={(value) => setFormStatus(value as SAQ['status'])}>
-                  <SelectTrigger>
-                    <SelectValue placeholder={t('saq.placeholders.status')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="draft">{t('saq.status.draft')}</SelectItem>
-                    <SelectItem value="published">{t('saq.status.published')}</SelectItem>
-                    <SelectItem value="completed">{t('saq.status.completed')}</SelectItem>
-                    <SelectItem value="expired">{t('saq.status.expired')}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="grid gap-2">
-                <Label htmlFor="edit-deadline">
-                  {t('saq.fields.deadline')}
-                </Label>
-                <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !formDeadline && "text-muted-foreground"
-                      )}
-                    >
-                      {formDeadline ? format(formDeadline, 'PPP') : <span>{t('saq.placeholders.deadline')}</span>}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={formDeadline}
-                      onSelect={(date) => {
-                        setFormDeadline(date);
-                        setIsCalendarOpen(false);
-                      }}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-              
-              <div className="grid gap-2">
-                <Label htmlFor="edit-suppliers">
-                  {t('saq.fields.assignSuppliers')}
-                </Label>
-                <Select 
-                  onValueChange={(value) => {
-                    const supplierId = parseInt(value);
-                    if (formAssignedSuppliers.includes(supplierId)) {
-                      setFormAssignedSuppliers(formAssignedSuppliers.filter(id => id !== supplierId));
-                    } else {
-                      setFormAssignedSuppliers([...formAssignedSuppliers, supplierId]);
-                    }
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t('saq.placeholders.selectSuppliers')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {suppliers.map((supplier) => (
-                      <SelectItem key={supplier.id} value={supplier.id.toString()}>
-                        {supplier.name} ({supplier.location})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                
-                {formAssignedSuppliers.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {formAssignedSuppliers.map(supplierId => {
-                      const supplier = suppliers.find(s => s.id === supplierId);
-                      return supplier ? (
-                        <Badge key={supplierId} variant="secondary" className="flex items-center gap-1">
-                          {supplier.name}
-                          <button
-                            type="button"
-                            className="ml-1 rounded-full hover:bg-gray-200 p-0.5"
-                            onClick={() => setFormAssignedSuppliers(formAssignedSuppliers.filter(id => id !== supplierId))}
-                          >
-                            <X className="h-3 w-3" />
-                            <span className="sr-only">{t('actions.remove')}</span>
-                          </button>
-                        </Badge>
-                      ) : null;
-                    })}
-                  </div>
-                )}
-              </div>
-            </div>
-            
-            <DialogFooter className={cn(isRTL && "flex-row-reverse")}>
-              <Button 
-                variant="outline" 
-                onClick={() => setIsEditDialogOpen(false)}
-                disabled={isLoading}
-              >
-                {t('actions.cancel')}
-              </Button>
-              <Button
-                onClick={handleUpdateSAQ}
-                disabled={isLoading}
-              >
-                {isLoading ? t('actions.saving') : t('actions.save')}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-        
-        {/* Delete Confirmation Dialog */}
-        <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-          <DialogContent className="sm:max-w-[500px]">
-            <DialogHeader>
-              <DialogTitle>{t('saq.dialogs.delete.title')}</DialogTitle>
-              <DialogDescription>
-                {t('saq.dialogs.delete.description')}
-              </DialogDescription>
-            </DialogHeader>
-            
-            {selectedSAQ && (
-              <div className="py-4">
-                <p className="font-medium text-gray-900 mb-2">
-                  {selectedSAQ.title}
-                </p>
-                <p className="text-sm text-gray-600">
-                  {t('saq.dialogs.delete.warning')}
-                </p>
-              </div>
-            )}
-            
-            <DialogFooter className={cn(isRTL && "flex-row-reverse")}>
-              <Button 
-                variant="outline" 
-                onClick={() => setIsDeleteDialogOpen(false)}
-                disabled={isLoading}
-              >
-                {t('actions.cancel')}
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={handleDeleteSAQ}
-                disabled={isLoading}
-              >
-                {isLoading ? t('actions.deleting') : t('actions.delete')}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-        
-        {/* Upload SAQ Questions Dialog */}
-        <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
-          <DialogContent className="sm:max-w-[700px]">
-            <DialogHeader>
-              <DialogTitle>{t('saq.dialogs.upload.title')}</DialogTitle>
-              <DialogDescription>
-                {t('saq.dialogs.upload.description')}
-              </DialogDescription>
-            </DialogHeader>
-            
-            <div className="py-4">
-              <CSVUploader onDataLoaded={handleCSVUpload} />
-              
-              {csvData && (
-                <div className="mt-6">
-                  <h3 className="text-sm font-medium mb-2">
-                    {t('saq.dialogs.upload.preview')}
-                  </h3>
-                  <CSVTable data={csvData} />
+              {formAssignedSuppliers.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {formAssignedSuppliers.map(supplierId => {
+                    const supplier = suppliers.find(s => s.id === supplierId);
+                    return supplier ? (
+                      <Badge 
+                        key={supplierId} 
+                        variant="secondary"
+                        className="flex items-center gap-1 px-2 py-1"
+                      >
+                        <span>{supplier.name}</span>
+                        <X
+                          className="h-3 w-3 cursor-pointer"
+                          onClick={() => setFormAssignedSuppliers(
+                            formAssignedSuppliers.filter(id => id !== supplierId)
+                          )}
+                        />
+                      </Badge>
+                    ) : null;
+                  })}
                 </div>
               )}
             </div>
+          </div>
+          
+          <DialogFooter className={isRTL ? 'justify-start' : ''}>
+            <Button type="button" variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button type="button" onClick={handleAddSAQ} disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  {t('common.processing')}
+                </>
+              ) : (
+                t('common.save')
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Edit SAQ Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>{t('saq.dialogs.edit.title')}</DialogTitle>
+            <DialogDescription>
+              {t('saq.dialogs.edit.description')}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="edit-title">{t('saq.fields.title')} *</Label>
+              <Input
+                id="edit-title"
+                placeholder={t('saq.placeholders.title')}
+                value={formTitle}
+                onChange={(e) => setFormTitle(e.target.value)}
+              />
+            </div>
             
-            <DialogFooter className={cn(isRTL && "flex-row-reverse")}>
-              <Button 
-                variant="outline" 
-                onClick={() => setIsUploadDialogOpen(false)}
-              >
-                {t('actions.close')}
-              </Button>
-              <Button
-                disabled={!csvData}
-                onClick={() => {
-                  setIsUploadDialogOpen(false);
-                  toast({
-                    title: t('saq.notifications.questionsSaved'),
-                    description: t('saq.notifications.questionsSavedSuccess'),
-                  });
+            <div className="grid gap-2">
+              <Label htmlFor="edit-description">{t('saq.fields.description')}</Label>
+              <Textarea
+                id="edit-description"
+                placeholder={t('saq.placeholders.description')}
+                value={formDescription}
+                onChange={(e) => setFormDescription(e.target.value)}
+                rows={3}
+              />
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="edit-status">{t('saq.fields.status')}</Label>
+                <Select
+                  value={formStatus}
+                  onValueChange={(value: SAQ['status']) => setFormStatus(value)}
+                >
+                  <SelectTrigger id="edit-status">
+                    <SelectValue placeholder={t('saq.placeholders.status')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="draft">{t('saq.status.draft')}</SelectItem>
+                    <SelectItem value="published">{t('saq.status.published')}</SelectItem>
+                    <SelectItem value="completed">{t('saq.status.completed')}</SelectItem>
+                    <SelectItem value="expired">{t('saq.status.expired')}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="grid gap-2">
+                <Label htmlFor="edit-deadline">{t('saq.fields.deadline')}</Label>
+                <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      id="edit-deadline"
+                      variant={"outline"}
+                      className={cn(
+                        "justify-start text-left font-normal",
+                        !formDeadline && "text-muted-foreground"
+                      )}
+                    >
+                      {formDeadline ? format(formDeadline, "PPP") : (
+                        <span>{t('saq.placeholders.deadline')}</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={formDeadline}
+                      onSelect={(date) => {
+                        setFormDeadline(date);
+                        setIsCalendarOpen(false);
+                      }}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+            
+            <div className="grid gap-2">
+              <Label htmlFor="edit-suppliers">{t('saq.fields.assignSuppliers')}</Label>
+              <Select
+                value=""
+                onValueChange={(value: string) => {
+                  const supplierId = parseInt(value, 10);
+                  if (!formAssignedSuppliers.includes(supplierId)) {
+                    setFormAssignedSuppliers([...formAssignedSuppliers, supplierId]);
+                  }
                 }}
               >
-                {t('actions.saveQuestions')}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
+                <SelectTrigger id="edit-suppliers">
+                  <SelectValue placeholder={t('saq.placeholders.selectSuppliers')} />
+                </SelectTrigger>
+                <SelectContent>
+                  {suppliers
+                    .filter(s => s.status === 'active')
+                    .filter(s => !formAssignedSuppliers.includes(s.id))
+                    .map((supplier) => (
+                      <SelectItem key={supplier.id} value={supplier.id.toString()}>
+                        {supplier.name} ({supplier.location})
+                      </SelectItem>
+                    ))
+                  }
+                </SelectContent>
+              </Select>
+              
+              {formAssignedSuppliers.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {formAssignedSuppliers.map(supplierId => {
+                    const supplier = suppliers.find(s => s.id === supplierId);
+                    return supplier ? (
+                      <Badge 
+                        key={supplierId} 
+                        variant="secondary"
+                        className="flex items-center gap-1 px-2 py-1"
+                      >
+                        <span>{supplier.name}</span>
+                        <X
+                          className="h-3 w-3 cursor-pointer"
+                          onClick={() => setFormAssignedSuppliers(
+                            formAssignedSuppliers.filter(id => id !== supplierId)
+                          )}
+                        />
+                      </Badge>
+                    ) : null;
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+          
+          <DialogFooter className={isRTL ? 'justify-start' : ''}>
+            <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button type="button" onClick={handleEditSAQ} disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  {t('common.processing')}
+                </>
+              ) : (
+                t('common.save')
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Delete SAQ Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>{t('saq.dialogs.delete.title')}</DialogTitle>
+            <DialogDescription>
+              {t('saq.dialogs.delete.description')}
+              <p className="mt-2 text-red-500 font-medium">
+                {t('saq.dialogs.delete.warning')}
+              </p>
+            </DialogDescription>
+          </DialogHeader>
+          
+          <DialogFooter className={isRTL ? 'justify-start' : ''}>
+            <Button type="button" variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button 
+              type="button" 
+              variant="destructive" 
+              onClick={handleDeleteSAQ} 
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  {t('common.processing')}
+                </>
+              ) : (
+                t('common.delete')
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Upload Questions Dialog */}
+      <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
+        <DialogContent className="sm:max-w-[800px]">
+          <DialogHeader>
+            <DialogTitle>{t('saq.dialogs.upload.title')}</DialogTitle>
+            <DialogDescription>
+              {t('saq.dialogs.upload.description')}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4">
+            <CSVUploader
+              onDataLoaded={handleCSVUpload}
+              allowedExtensions={['.csv']}
+              className="mb-6"
+            />
+            
+            {csvData && (
+              <div className="mt-4">
+                <h3 className="text-sm font-medium mb-2">{t('saq.dialogs.upload.preview')}</h3>
+                <CSVTable data={csvData} className="max-h-[300px] overflow-auto" />
+              </div>
+            )}
+          </div>
+          
+          <DialogFooter className={isRTL ? 'justify-start' : ''}>
+            <Button type="button" variant="outline" onClick={() => setIsUploadDialogOpen(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button 
+              type="button" 
+              disabled={!csvData} 
+              onClick={() => {
+                setIsUploadDialogOpen(false);
+                setCsvData(null);
+                toast({
+                  title: t('saq.notifications.questionsSaved'),
+                  description: t('saq.notifications.questionsSavedSuccess'),
+                });
+              }}
+            >
+              {t('common.save')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 }
