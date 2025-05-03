@@ -8,6 +8,7 @@ import HomePage from "@/pages/HomePage";
 import Dashboard from "@/pages/Dashboard";
 import SupplyChain from "@/pages/SupplyChain";
 import SourcingEntities from "@/pages/SourcingEntities";
+import ImportSources from "@/pages/ImportSources";
 import AddSupplier from "@/pages/AddSupplier";
 import SupplierDetail from "@/pages/SupplierDetail";
 import Compliance from "@/pages/Compliance";
@@ -63,7 +64,7 @@ function Router() {
         <Route path="/dashboard" component={Dashboard} />
         <Route path="/supply-chain" component={SupplyChain} />
         <Route path="/sourcing-entities" component={SourcingEntities} />
-        <Route path="/import-sources" component={() => <Layout title="Import Sources">Import Sources Content</Layout>} />
+        <Route path="/import-sources" component={ImportSources} />
         <Route path="/supplier" component={() => <Layout title="Suppliers">Suppliers List</Layout>} />
         <Route path="/saq-management" component={() => <Layout title="SAQ Management">SAQ Management Content</Layout>} />
         <Route path="/add-supplier" component={AddSupplier} />
