@@ -175,6 +175,20 @@
     "importData": "Import Data",
     "exportData": "Export Data"
   },
+  "pages": {
+    "compliance": {
+      "description": "Monitor and manage your company's compliance with EUDR regulations"
+    },
+    "declarations": {
+      "description": "Create and track EUDR declarations for your products and suppliers"
+    },
+    "customers": {
+      "description": "Manage customer relationships and compliance documentation"
+    },
+    "settings": {
+      "description": "Configure your account and application settings"
+    }
+  },
   "test": {
     "title": "Language Test",
     "languageTest": "Language Test Page",

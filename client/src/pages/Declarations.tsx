@@ -250,15 +250,15 @@ export default function Declarations() {
     <Layout title={t('nav.eudrDeclarations')}>
       <div className="py-6 px-4 sm:px-6 lg:px-8">
         {/* Page header */}
-        <div className="md:flex md:items-center md:justify-between mb-6">
+        <div className={cn("md:flex md:items-center md:justify-between mb-6", isRTL && "md:flex-row-reverse")}>
           <div className="flex-1 min-w-0">
-            <div className="flex items-center">
-              <Link href="/compliance" className="text-primary-600 hover:text-primary-700 flex items-center mr-2">
-                <ChevronLeft className="h-5 w-5" />
+            <div className={cn("flex items-center", isRTL && "flex-row-reverse")}>
+              <Link href="/compliance" className={cn("text-primary-600 hover:text-primary-700 flex items-center", isRTL ? "mr-0 ml-2" : "mr-2")}>
+                <ChevronLeft className={cn("h-4 w-4", isRTL ? "ml-1 rtl-flip" : "mr-1")} />
                 <span>Compliance</span>
               </Link>
               <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
-                EUDR Declarations
+                {t('nav.eudrDeclarations')}
               </h2>
             </div>
             <p className="mt-2 text-sm text-gray-500">
@@ -330,55 +330,55 @@ export default function Declarations() {
         
         {/* Declaration Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <Card className="border-0 shadow-sm">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-medium flex items-center">
-                <FileText className="h-5 w-5 mr-2 text-primary-600" />
+          <Card className="border border-gray-200 shadow-sm overflow-hidden">
+            <CardHeader className="px-4 py-3 bg-white border-b border-gray-200">
+              <CardTitle className="text-base font-semibold text-gray-900 flex items-center">
+                <FileText className="h-4 w-4 mr-2 text-primary-600" />
                 Total Declarations
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{declarations.length}</div>
-              <p className="text-sm text-gray-500">Last updated: Today</p>
+            <CardContent className="px-4 py-4 bg-white">
+              <div className="text-2xl font-bold text-gray-900">{declarations.length}</div>
+              <p className="text-xs text-gray-500 mt-1">Last updated: Today</p>
             </CardContent>
           </Card>
           
-          <Card className="border-0 shadow-sm">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-medium flex items-center">
-                <Building className="h-5 w-5 mr-2 text-blue-600" />
+          <Card className="border border-gray-200 shadow-sm overflow-hidden">
+            <CardHeader className="px-4 py-3 bg-white border-b border-gray-200">
+              <CardTitle className="text-base font-semibold text-gray-900 flex items-center">
+                <Building className="h-4 w-4 mr-2 text-blue-600" />
                 Suppliers Covered
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{new Set(inboundDeclarations.map(d => d.supplier)).size}</div>
-              <p className="text-sm text-gray-500">Across {inboundDeclarations.length} declarations</p>
+            <CardContent className="px-4 py-4 bg-white">
+              <div className="text-2xl font-bold text-gray-900">{new Set(inboundDeclarations.map(d => d.supplier)).size}</div>
+              <p className="text-xs text-gray-500 mt-1">Across {inboundDeclarations.length} declarations</p>
             </CardContent>
           </Card>
           
-          <Card className="border-0 shadow-sm">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-medium flex items-center">
-                <Calendar className="h-5 w-5 mr-2 text-green-600" />
+          <Card className="border border-gray-200 shadow-sm overflow-hidden">
+            <CardHeader className="px-4 py-3 bg-white border-b border-gray-200">
+              <CardTitle className="text-base font-semibold text-gray-900 flex items-center">
+                <Calendar className="h-4 w-4 mr-2 text-green-600" />
                 Due This Month
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">4</div>
-              <p className="text-sm text-gray-500">Renewals required</p>
+            <CardContent className="px-4 py-4 bg-white">
+              <div className="text-2xl font-bold text-gray-900">4</div>
+              <p className="text-xs text-gray-500 mt-1">Renewals required</p>
             </CardContent>
           </Card>
           
-          <Card className="border-0 shadow-sm">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-medium flex items-center">
-                <AlertTriangle className="h-5 w-5 mr-2 text-red-600" />
+          <Card className="border border-gray-200 shadow-sm overflow-hidden">
+            <CardHeader className="px-4 py-3 bg-white border-b border-gray-200">
+              <CardTitle className="text-base font-semibold text-gray-900 flex items-center">
+                <AlertTriangle className="h-4 w-4 mr-2 text-red-600" />
                 Compliance Issues
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{declarations.filter(d => d.status === 'non-compliant').length}</div>
-              <p className="text-sm text-gray-500">Require attention</p>
+            <CardContent className="px-4 py-4 bg-white">
+              <div className="text-2xl font-bold text-gray-900">{declarations.filter(d => d.status === 'non-compliant').length}</div>
+              <p className="text-xs text-gray-500 mt-1">Require attention</p>
             </CardContent>
           </Card>
         </div>
