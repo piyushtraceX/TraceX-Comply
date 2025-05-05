@@ -3,30 +3,24 @@ import { Layout } from '@/components/layout/Layout';
 import { useTranslation } from '@/hooks/use-translation';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 import { 
-  User, 
-  Building, 
-  Settings as SettingsIcon, 
-  Globe, 
-  Bell, 
-  Lock,
-  Calendar,
-  Mail,
-  Save,
-  Shield,
-  Briefcase,
-  CreditCard,
-  FileText,
-  HardDrive,
-  KeyRound,
-  Database,
-  Palette,
-  ChevronRight,
   Check,
-  ArrowRight
+  Save,
+  Undo,
+  User,
+  Globe,
+  Bell,
+  Moon,
+  Sun,
+  Info,
+  Lock,
+  Mail,
+  Trash2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { 
   Select, 
   SelectContent, 
@@ -34,603 +28,591 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
-import { useToast } from '@/hooks/use-toast';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 export default function Settings() {
   const { t } = useTranslation();
   const { language, changeLanguage, isRTL } = useLanguage();
-  const [activeTab, setActiveTab] = useState('account');
+  const [activeTab, setActiveTab] = useState("profile");
   const { toast } = useToast();
-  
-  const timezones = [
-    { value: 'UTC', label: 'UTC (Coordinated Universal Time)' },
-    { value: 'Europe/London', label: 'London (GMT+0/BST)' },
-    { value: 'Europe/Paris', label: 'Paris, Berlin, Rome (CET/CEST)' },
-    { value: 'America/New_York', label: 'New York (EST/EDT)' },
-    { value: 'America/Los_Angeles', label: 'Los Angeles (PST/PDT)' },
-    { value: 'Asia/Tokyo', label: 'Tokyo (JST)' },
-    { value: 'Asia/Shanghai', label: 'Beijing, Shanghai (CST)' }
-  ];
-  
-  const handleSave = (section: string) => {
+
+  const handleSaveSettings = (section: string) => {
     toast({
       title: "Settings saved",
       description: `Your ${section} settings have been updated successfully.`,
       duration: 3000,
     });
   };
-  
-  const handleLanguageChange = (value: string) => {
-    changeLanguage(value);
-    toast({
-      title: "Language changed",
-      description: `Interface language has been changed.`,
-      duration: 3000,
-    });
-  };
-  
+
   return (
     <Layout title={t('nav.settings')}>
-      <div className="py-6 px-4 sm:px-6 lg:px-8">
-        <div className={cn("md:flex md:items-center md:justify-between mb-6", isRTL && "md:flex-row-reverse")}>
-          <div className="flex-1 min-w-0">
-            <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
-              {t('nav.settings')}
-            </h2>
-            <p className="mt-2 text-sm text-gray-500">
-              {t('pages.settings.description')}
-            </p>
+      <div className="container py-6">
+        <div className={cn("flex justify-between items-center mb-8", isRTL && "flex-row-reverse")}>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
+            <p className="text-sm text-gray-500 mt-1">{t('pages.settings.description')}</p>
           </div>
         </div>
-        
-        <div className="mt-4">
-          <Tabs defaultValue="account" className="w-full" value={activeTab} onValueChange={setActiveTab}>
-            <div className="flex flex-col md:flex-row gap-6">
-              <div className="w-full md:w-64 flex-shrink-0">
-                <Card className="border border-gray-200 shadow-sm overflow-hidden">
-                  <CardContent className="p-0">
-                    <div className="py-3 px-4 bg-gray-50 border-b border-gray-200">
-                      <h3 className="text-base font-medium text-gray-900">Settings</h3>
-                    </div>
-                    <TabsList className="flex flex-col w-full rounded-none p-0 bg-white">
-                      <TabsTrigger 
-                        value="account" 
-                        className={cn(
-                          "flex items-center justify-start rounded-none border-b border-gray-200 px-4 py-3 font-normal h-auto",
-                          activeTab === "account" ? "bg-gray-50 border-r-4 border-r-primary-600" : "bg-white"
-                        )}
-                      >
-                        <User className="h-4 w-4 mr-2 text-gray-500" />
-                        <span>Account</span>
-                      </TabsTrigger>
-                      <TabsTrigger 
-                        value="security" 
-                        className={cn(
-                          "flex items-center justify-start rounded-none border-b border-gray-200 px-4 py-3 font-normal h-auto",
-                          activeTab === "security" ? "bg-gray-50 border-r-4 border-r-primary-600" : "bg-white"
-                        )}
-                      >
-                        <Shield className="h-4 w-4 mr-2 text-gray-500" />
-                        <span>Security</span>
-                      </TabsTrigger>
-                      <TabsTrigger 
-                        value="organization" 
-                        className={cn(
-                          "flex items-center justify-start rounded-none border-b border-gray-200 px-4 py-3 font-normal h-auto",
-                          activeTab === "organization" ? "bg-gray-50 border-r-4 border-r-primary-600" : "bg-white"
-                        )}
-                      >
-                        <Building className="h-4 w-4 mr-2 text-gray-500" />
-                        <span>Organization</span>
-                      </TabsTrigger>
-                      <TabsTrigger 
-                        value="billing" 
-                        className={cn(
-                          "flex items-center justify-start rounded-none border-b border-gray-200 px-4 py-3 font-normal h-auto",
-                          activeTab === "billing" ? "bg-gray-50 border-r-4 border-r-primary-600" : "bg-white"
-                        )}
-                      >
-                        <CreditCard className="h-4 w-4 mr-2 text-gray-500" />
-                        <span>Billing</span>
-                      </TabsTrigger>
-                      <TabsTrigger 
-                        value="notifications" 
-                        className={cn(
-                          "flex items-center justify-start rounded-none border-b border-gray-200 px-4 py-3 font-normal h-auto",
-                          activeTab === "notifications" ? "bg-gray-50 border-r-4 border-r-primary-600" : "bg-white"
-                        )}
-                      >
-                        <Bell className="h-4 w-4 mr-2 text-gray-500" />
-                        <span>Notifications</span>
-                      </TabsTrigger>
-                      <TabsTrigger 
-                        value="integrations" 
-                        className={cn(
-                          "flex items-center justify-start rounded-none border-b border-gray-200 px-4 py-3 font-normal h-auto",
-                          activeTab === "integrations" ? "bg-gray-50 border-r-4 border-r-primary-600" : "bg-white"
-                        )}
-                      >
-                        <Database className="h-4 w-4 mr-2 text-gray-500" />
-                        <span>Integrations</span>
-                      </TabsTrigger>
-                      <TabsTrigger 
-                        value="appearance" 
-                        className={cn(
-                          "flex items-center justify-start rounded-none border-b border-gray-200 px-4 py-3 font-normal h-auto",
-                          activeTab === "appearance" ? "bg-gray-50 border-r-4 border-r-primary-600" : "bg-white"
-                        )}
-                      >
-                        <Palette className="h-4 w-4 mr-2 text-gray-500" />
-                        <span>Appearance</span>
-                      </TabsTrigger>
-                      <TabsTrigger 
-                        value="language" 
-                        className={cn(
-                          "flex items-center justify-start rounded-none border-b border-gray-200 px-4 py-3 font-normal h-auto",
-                          activeTab === "language" ? "bg-gray-50 border-r-4 border-r-primary-600" : "bg-white"
-                        )}
-                      >
-                        <Globe className="h-4 w-4 mr-2 text-gray-500" />
-                        <span>Language</span>
-                      </TabsTrigger>
-                      <TabsTrigger 
-                        value="api" 
-                        className={cn(
-                          "flex items-center justify-start rounded-none px-4 py-3 font-normal h-auto",
-                          activeTab === "api" ? "bg-gray-50 border-r-4 border-r-primary-600" : "bg-white"
-                        )}
-                      >
-                        <KeyRound className="h-4 w-4 mr-2 text-gray-500" />
-                        <span>API Keys</span>
-                      </TabsTrigger>
-                    </TabsList>
-                  </CardContent>
-                </Card>
-              </div>
-              
-              <div className="flex-1">
-                {/* Account Tab */}
-                <TabsContent value="account" className="mt-0">
-                  <Card className="border border-gray-200 shadow-sm overflow-hidden">
-                    <CardHeader className="px-6 py-4 bg-white border-b border-gray-200">
-                      <CardTitle className="text-xl font-semibold text-gray-900">Account Settings</CardTitle>
-                      <CardDescription className="text-sm text-gray-500">
-                        Manage your account information and preferences
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="p-6 space-y-6">
-                      <div className="flex items-center gap-4">
-                        <div className="h-16 w-16 rounded-full bg-gray-100 flex items-center justify-center border border-gray-200">
-                          <User className="h-8 w-8 text-gray-400" />
-                        </div>
-                        <div>
-                          <h3 className="text-base font-medium text-gray-900">Profile Picture</h3>
-                          <div className="mt-2 flex space-x-3">
-                            <Button variant="outline" size="sm" className="h-8">
-                              Change
-                            </Button>
-                            <Button variant="ghost" size="sm" className="h-8 text-gray-600">
-                              Remove
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <Separator />
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                          <Label htmlFor="firstName">First name</Label>
-                          <Input id="firstName" defaultValue="Jane" className="bg-white" />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="lastName">Last name</Label>
-                          <Input id="lastName" defaultValue="Cooper" className="bg-white" />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="email">Email address</Label>
-                          <Input id="email" type="email" defaultValue="jane@example.com" className="bg-white" />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="phone">Phone number</Label>
-                          <Input id="phone" type="tel" defaultValue="+1 (555) 123-4567" className="bg-white" />
-                        </div>
-                      </div>
-                      
-                      <Separator />
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="jobTitle">Job title</Label>
-                        <Input id="jobTitle" defaultValue="Compliance Manager" className="bg-white" />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="department">Department</Label>
-                        <Select defaultValue="compliance">
-                          <SelectTrigger className="bg-white">
-                            <SelectValue placeholder="Select department" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="compliance">Compliance</SelectItem>
-                            <SelectItem value="legal">Legal</SelectItem>
-                            <SelectItem value="operations">Operations</SelectItem>
-                            <SelectItem value="supplyChain">Supply Chain</SelectItem>
-                            <SelectItem value="management">Management</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </CardContent>
-                    <CardFooter className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end">
-                      <Button onClick={() => handleSave('account')}>
-                        Save changes
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                  
-                  <Card className="border border-gray-200 shadow-sm overflow-hidden mt-6">
-                    <CardHeader className="px-6 py-4 bg-white border-b border-gray-200">
-                      <CardTitle className="text-xl font-semibold text-gray-900">Time Zone & Regional Settings</CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-6 space-y-6">
-                      <div className="space-y-2">
-                        <Label htmlFor="timezone">Time zone</Label>
-                        <Select defaultValue="Europe/Paris">
-                          <SelectTrigger className="bg-white">
-                            <SelectValue placeholder="Select time zone" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {timezones.map(tz => (
-                              <SelectItem key={tz.value} value={tz.value}>{tz.label}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="dateFormat">Date format</Label>
-                        <Select defaultValue="dd/MM/yyyy">
-                          <SelectTrigger className="bg-white">
-                            <SelectValue placeholder="Select date format" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="MM/dd/yyyy">MM/DD/YYYY (01/31/2025)</SelectItem>
-                            <SelectItem value="dd/MM/yyyy">DD/MM/YYYY (31/01/2025)</SelectItem>
-                            <SelectItem value="yyyy-MM-dd">YYYY-MM-DD (2025-01-31)</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="currency">Currency</Label>
-                        <Select defaultValue="EUR">
-                          <SelectTrigger className="bg-white">
-                            <SelectValue placeholder="Select currency" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="EUR">Euro (€)</SelectItem>
-                            <SelectItem value="USD">US Dollar ($)</SelectItem>
-                            <SelectItem value="GBP">British Pound (£)</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </CardContent>
-                    <CardFooter className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end">
-                      <Button onClick={() => handleSave('regional settings')}>
-                        Save changes
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                </TabsContent>
-                
-                {/* Language Tab */}
-                <TabsContent value="language" className="mt-0">
-                  <Card className="border border-gray-200 shadow-sm overflow-hidden">
-                    <CardHeader className="px-6 py-4 bg-white border-b border-gray-200">
-                      <CardTitle className="text-xl font-semibold text-gray-900">Language Settings</CardTitle>
-                      <CardDescription className="text-sm text-gray-500">
-                        Choose your preferred language for the interface
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="p-6">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="col-span-2">
-                          <Label htmlFor="language" className="text-base font-medium text-gray-900 mb-1 block">Interface Language</Label>
-                          <p className="text-sm text-gray-500 mb-3">Select the language you want to use for the application interface</p>
-                          <div className="space-y-4">
-                            <div className={cn("flex items-center px-4 py-3 border rounded-lg", 
-                              language === "en" ? "border-primary-500 bg-primary-50" : "border-gray-200 bg-white"
-                            )}>
-                              <div className="flex-1">
-                                <div className="flex items-center">
-                                  <span className="mr-2 text-base font-medium">English</span>
-                                  <Badge variant="outline" className="bg-gray-100 text-gray-800 px-2 py-0.5 text-xs">Default</Badge>
-                                </div>
-                                <p className="text-sm text-gray-500">English (United States)</p>
-                              </div>
-                              {language === "en" ? (
-                                <div className="flex-shrink-0 h-6 w-6 bg-primary-500 rounded-full flex items-center justify-center">
-                                  <Check className="h-4 w-4 text-white" />
-                                </div>
-                              ) : (
-                                <Button 
-                                  variant="outline" 
-                                  size="sm" 
-                                  className="h-8"
-                                  onClick={() => handleLanguageChange('en')}
-                                >
-                                  Select
-                                </Button>
-                              )}
-                            </div>
-                            
-                            <div className={cn("flex items-center px-4 py-3 border rounded-lg", 
-                              language === "fr" ? "border-primary-500 bg-primary-50" : "border-gray-200 bg-white"
-                            )}>
-                              <div className="flex-1">
-                                <div className="flex items-center">
-                                  <span className="mr-2 text-base font-medium">French</span>
-                                </div>
-                                <p className="text-sm text-gray-500">Français</p>
-                              </div>
-                              {language === "fr" ? (
-                                <div className="flex-shrink-0 h-6 w-6 bg-primary-500 rounded-full flex items-center justify-center">
-                                  <Check className="h-4 w-4 text-white" />
-                                </div>
-                              ) : (
-                                <Button 
-                                  variant="outline" 
-                                  size="sm" 
-                                  className="h-8"
-                                  onClick={() => handleLanguageChange('fr')}
-                                >
-                                  Select
-                                </Button>
-                              )}
-                            </div>
-                            
-                            <div className={cn("flex items-center px-4 py-3 border rounded-lg", 
-                              language === "de" ? "border-primary-500 bg-primary-50" : "border-gray-200 bg-white"
-                            )}>
-                              <div className="flex-1">
-                                <div className="flex items-center">
-                                  <span className="mr-2 text-base font-medium">German</span>
-                                </div>
-                                <p className="text-sm text-gray-500">Deutsch</p>
-                              </div>
-                              {language === "de" ? (
-                                <div className="flex-shrink-0 h-6 w-6 bg-primary-500 rounded-full flex items-center justify-center">
-                                  <Check className="h-4 w-4 text-white" />
-                                </div>
-                              ) : (
-                                <Button 
-                                  variant="outline" 
-                                  size="sm" 
-                                  className="h-8"
-                                  onClick={() => handleLanguageChange('de')}
-                                >
-                                  Select
-                                </Button>
-                              )}
-                            </div>
-                            
-                            <div className={cn("flex items-center px-4 py-3 border rounded-lg", 
-                              language === "ar" ? "border-primary-500 bg-primary-50" : "border-gray-200 bg-white"
-                            )}>
-                              <div className="flex-1">
-                                <div className="flex items-center">
-                                  <span className="mr-2 text-base font-medium">Arabic</span>
-                                  <Badge variant="outline" className="bg-blue-50 text-blue-800 px-2 py-0.5 text-xs">RTL</Badge>
-                                </div>
-                                <p className="text-sm text-gray-500">العربية</p>
-                              </div>
-                              {language === "ar" ? (
-                                <div className="flex-shrink-0 h-6 w-6 bg-primary-500 rounded-full flex items-center justify-center">
-                                  <Check className="h-4 w-4 text-white" />
-                                </div>
-                              ) : (
-                                <Button 
-                                  variant="outline" 
-                                  size="sm" 
-                                  className="h-8"
-                                  onClick={() => handleLanguageChange('ar')}
-                                >
-                                  Select
-                                </Button>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card className="border border-gray-200 shadow-sm overflow-hidden mt-6">
-                    <CardHeader className="px-6 py-4 bg-white border-b border-gray-200">
-                      <CardTitle className="text-xl font-semibold text-gray-900">Export Language</CardTitle>
-                      <CardDescription className="text-sm text-gray-500">
-                        Choose the language for exported documents and reports
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="p-6 space-y-6">
-                      <div className="space-y-2">
-                        <Label htmlFor="exportLanguage" className="text-base font-medium text-gray-900">Export Language</Label>
-                        <p className="text-sm text-gray-500 mb-3">Documents and reports will be exported in this language</p>
-                        <Select defaultValue="follow-interface">
-                          <SelectTrigger className="bg-white">
-                            <SelectValue placeholder="Select export language" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="follow-interface">Follow interface language</SelectItem>
-                            <SelectItem value="en">Always English</SelectItem>
-                            <SelectItem value="fr">Always French</SelectItem>
-                            <SelectItem value="de">Always German</SelectItem>
-                            <SelectItem value="ar">Always Arabic</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </CardContent>
-                    <CardFooter className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end">
-                      <Button onClick={() => handleSave('export language')}>
-                        Save changes
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                </TabsContent>
-                
-                {/* Appearance Tab */}
-                <TabsContent value="appearance" className="mt-0">
-                  <Card className="border border-gray-200 shadow-sm overflow-hidden">
-                    <CardHeader className="px-6 py-4 bg-white border-b border-gray-200">
-                      <CardTitle className="text-xl font-semibold text-gray-900">Display Preferences</CardTitle>
-                      <CardDescription className="text-sm text-gray-500">
-                        Customize the appearance of your EUDR Comply interface
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="p-6 space-y-6">
-                      <div className="space-y-6">
-                        <div>
-                          <Label className="text-base font-medium text-gray-900 mb-1 block">Theme</Label>
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3">
-                            <div className="flex flex-col items-center border border-primary-500 rounded-lg p-4 bg-primary-50">
-                              <div className="h-20 w-full bg-white border border-gray-200 rounded mb-3 relative overflow-hidden">
-                                <div className="absolute top-0 left-0 right-0 h-4 bg-primary-500"></div>
-                                <div className="absolute top-4 bottom-0 left-0 w-10 bg-gray-100"></div>
-                              </div>
-                              <div className="text-sm font-medium text-gray-900">Light</div>
-                              <div className="text-xs text-gray-500 mt-1">Default</div>
-                              <div className="mt-2">
-                                <Badge variant="outline" className="bg-primary-100 text-primary-800 border-0">
-                                  Active
-                                </Badge>
-                              </div>
-                            </div>
-                            
-                            <div className="flex flex-col items-center border border-gray-200 rounded-lg p-4 bg-white">
-                              <div className="h-20 w-full bg-gray-900 border border-gray-700 rounded mb-3 relative overflow-hidden">
-                                <div className="absolute top-0 left-0 right-0 h-4 bg-primary-600"></div>
-                                <div className="absolute top-4 bottom-0 left-0 w-10 bg-gray-800"></div>
-                              </div>
-                              <div className="text-sm font-medium text-gray-900">Dark</div>
-                              <div className="text-xs text-gray-500 mt-1">Coming soon</div>
-                              <div className="mt-2">
-                                <Badge variant="outline" className="bg-gray-100 text-gray-600 border-gray-200">
-                                  Disabled
-                                </Badge>
-                              </div>
-                            </div>
-                            
-                            <div className="flex flex-col items-center border border-gray-200 rounded-lg p-4 bg-white">
-                              <div className="h-20 w-full rounded mb-3 relative overflow-hidden" style={{ background: 'linear-gradient(to right, white 50%, #1e293b 50%)' }}>
-                                <div className="absolute top-0 left-0 right-0 h-4 bg-primary-500" style={{ background: 'linear-gradient(to right, #0891b2 50%, #06b6d4 50%)' }}></div>
-                                <div className="absolute top-4 bottom-0 left-0 w-10 bg-gray-100" style={{ background: 'linear-gradient(to right, #f1f5f9 50%, #334155 50%)' }}></div>
-                              </div>
-                              <div className="text-sm font-medium text-gray-900">System</div>
-                              <div className="text-xs text-gray-500 mt-1">Coming soon</div>
-                              <div className="mt-2">
-                                <Badge variant="outline" className="bg-gray-100 text-gray-600 border-gray-200">
-                                  Disabled
-                                </Badge>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <Separator />
-                        
-                        <div className="space-y-4">
-                          <Label className="text-base font-medium text-gray-900 mb-1 block">Density</Label>
-                          <div className="flex flex-col space-y-4">
-                            <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                              <div>
-                                <div className="text-sm font-medium text-gray-900">Comfortable</div>
-                                <div className="text-xs text-gray-500">More space between items (default)</div>
-                              </div>
-                              <div className="h-5 w-5 rounded-full border-2 border-primary-500 flex items-center justify-center">
-                                <div className="h-2.5 w-2.5 rounded-full bg-primary-500"></div>
-                              </div>
-                            </div>
-                            
-                            <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                              <div>
-                                <div className="text-sm font-medium text-gray-900">Compact</div>
-                                <div className="text-xs text-gray-500">Reduced spacing to fit more content</div>
-                              </div>
-                              <div className="h-5 w-5 rounded-full border-2 border-gray-300"></div>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <Separator />
-                        
-                        <div className="space-y-4">
-                          <Label className="text-base font-medium text-gray-900 mb-1 block">Home Page</Label>
-                          <div className="space-y-2">
-                            <Label htmlFor="homePage">Default page after login</Label>
-                            <Select defaultValue="dashboard">
-                              <SelectTrigger className="bg-white">
-                                <SelectValue placeholder="Select default page" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="dashboard">Dashboard</SelectItem>
-                                <SelectItem value="supply-chain">Supply Chain</SelectItem>
-                                <SelectItem value="compliance">Compliance</SelectItem>
-                                <SelectItem value="declarations">EUDR Declarations</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                    <CardFooter className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end">
-                      <Button onClick={() => handleSave('appearance')}>
-                        Save changes
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                </TabsContent>
-                
-                {/* Placeholder for other tabs */}
-                {["security", "organization", "billing", "notifications", "integrations", "api"].map((tab) => (
-                  <TabsContent key={tab} value={tab} className="mt-0">
-                    <Card className="border border-gray-200 shadow-sm overflow-hidden">
-                      <CardHeader className="px-6 py-4 bg-white border-b border-gray-200">
-                        <CardTitle className="text-xl font-semibold text-gray-900">{tab.charAt(0).toUpperCase() + tab.slice(1)} Settings</CardTitle>
-                        <CardDescription className="text-sm text-gray-500">
-                          Manage your {tab} settings and preferences
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="p-6 min-h-[300px] flex items-center justify-center">
-                        <div className="text-center">
-                          <div className="mb-4 border border-gray-200 rounded-full p-4 inline-block">
-                            {tab === "security" && <Shield className="h-8 w-8 text-primary-500" />}
-                            {tab === "organization" && <Building className="h-8 w-8 text-primary-500" />}
-                            {tab === "billing" && <CreditCard className="h-8 w-8 text-primary-500" />}
-                            {tab === "notifications" && <Bell className="h-8 w-8 text-primary-500" />}
-                            {tab === "integrations" && <Database className="h-8 w-8 text-primary-500" />}
-                            {tab === "api" && <KeyRound className="h-8 w-8 text-primary-500" />}
-                          </div>
-                          <h3 className="text-lg font-medium text-gray-900 mb-2">
-                            {tab.charAt(0).toUpperCase() + tab.slice(1)} settings will be available soon
-                          </h3>
-                          <p className="text-gray-500 mb-4">
-                            This section is currently under development and will be available in a future update.
-                          </p>
-                          <Button variant="outline">
-                            Request early access
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </TabsContent>
-                ))}
-              </div>
+
+        <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
+          <Tabs defaultValue="profile" className="w-full" value={activeTab} onValueChange={setActiveTab}>
+            <div className="border-b border-gray-200">
+              <TabsList className="flex w-full p-0 bg-transparent border-0">
+                <TabsTrigger 
+                  value="profile" 
+                  className={cn(
+                    "data-[state=active]:bg-transparent data-[state=active]:shadow-none flex-1 rounded-none py-3 px-4 font-medium text-sm border-b-2 border-transparent data-[state=active]:border-primary-600 data-[state=active]:text-primary-600"
+                  )}
+                >
+                  Profile
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="account" 
+                  className={cn(
+                    "data-[state=active]:bg-transparent data-[state=active]:shadow-none flex-1 rounded-none py-3 px-4 font-medium text-sm border-b-2 border-transparent data-[state=active]:border-primary-600 data-[state=active]:text-primary-600"
+                  )}
+                >
+                  Account
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="appearance" 
+                  className={cn(
+                    "data-[state=active]:bg-transparent data-[state=active]:shadow-none flex-1 rounded-none py-3 px-4 font-medium text-sm border-b-2 border-transparent data-[state=active]:border-primary-600 data-[state=active]:text-primary-600"
+                  )}
+                >
+                  Appearance
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="notifications" 
+                  className={cn(
+                    "data-[state=active]:bg-transparent data-[state=active]:shadow-none flex-1 rounded-none py-3 px-4 font-medium text-sm border-b-2 border-transparent data-[state=active]:border-primary-600 data-[state=active]:text-primary-600"
+                  )}
+                >
+                  Notifications
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="language" 
+                  className={cn(
+                    "data-[state=active]:bg-transparent data-[state=active]:shadow-none flex-1 rounded-none py-3 px-4 font-medium text-sm border-b-2 border-transparent data-[state=active]:border-primary-600 data-[state=active]:text-primary-600"
+                  )}
+                >
+                  Language
+                </TabsTrigger>
+              </TabsList>
             </div>
+
+            {/* Profile Tab */}
+            <TabsContent value="profile" className="p-6">
+              <div className="max-w-3xl mx-auto">
+                <div className="mb-8">
+                  <h2 className="text-lg font-medium text-gray-900 mb-1">Personal Information</h2>
+                  <p className="text-sm text-gray-500">Update your personal details</p>
+                </div>
+                
+                <div className="flex items-center gap-4 mb-8">
+                  <div className="h-20 w-20 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200">
+                    <User className="h-10 w-10 text-gray-400" />
+                  </div>
+                  <div>
+                    <div className="flex space-x-2">
+                      <Button variant="outline" size="sm" className="h-9">
+                        Change
+                      </Button>
+                      <Button variant="ghost" size="sm" className="h-9 text-gray-600">
+                        Remove
+                      </Button>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      JPG, GIF or PNG. Max size 1MB.
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                  <div>
+                    <Label htmlFor="firstName" className="text-sm font-medium">
+                      First name
+                    </Label>
+                    <Input 
+                      id="firstName" 
+                      placeholder="Enter your first name" 
+                      defaultValue="Jane" 
+                      className="mt-1 bg-white"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="lastName" className="text-sm font-medium">
+                      Last name
+                    </Label>
+                    <Input 
+                      id="lastName" 
+                      placeholder="Enter your last name" 
+                      defaultValue="Cooper" 
+                      className="mt-1 bg-white"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="email" className="text-sm font-medium">
+                      Email address
+                    </Label>
+                    <Input 
+                      id="email" 
+                      type="email" 
+                      placeholder="you@example.com" 
+                      defaultValue="jane@example.com" 
+                      className="mt-1 bg-white"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="role" className="text-sm font-medium">
+                      Role
+                    </Label>
+                    <Input 
+                      id="role" 
+                      placeholder="Your job title" 
+                      defaultValue="Compliance Officer" 
+                      className="mt-1 bg-white"
+                    />
+                  </div>
+                </div>
+                
+                <div className="mb-8">
+                  <Label htmlFor="bio" className="text-sm font-medium">
+                    Bio
+                  </Label>
+                  <Textarea 
+                    id="bio" 
+                    placeholder="Write a short bio..." 
+                    defaultValue="I manage EUDR compliance for my organization and work with suppliers to ensure adherence to regulations." 
+                    className="mt-1 h-24 bg-white"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Brief description for your profile.
+                  </p>
+                </div>
+                
+                <Separator className="my-8" />
+                
+                <div className="flex justify-end">
+                  <Button variant="outline" className="mr-2">Cancel</Button>
+                  <Button onClick={() => handleSaveSettings('profile')}>
+                    Save changes
+                  </Button>
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* Account Tab */}
+            <TabsContent value="account" className="p-6">
+              <div className="max-w-3xl mx-auto">
+                <div className="mb-8">
+                  <h2 className="text-lg font-medium text-gray-900 mb-1">Account Settings</h2>
+                  <p className="text-sm text-gray-500">Manage your account preferences</p>
+                </div>
+                
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-8">
+                  <div className="flex items-start">
+                    <Info className="h-5 w-5 text-blue-500 mr-3 mt-0.5" />
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-900">Your account is connected to EUDR Comply</h3>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Your organization's account is managed by your administrator.
+                        Contact them for any account-related questions.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-6 mb-8">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-900">Two-factor authentication</h3>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Add an extra layer of security to your account
+                      </p>
+                    </div>
+                    <Button variant="outline" size="sm">
+                      Enable
+                    </Button>
+                  </div>
+                  
+                  <Separator />
+                  
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-900">Account activity log</h3>
+                      <p className="text-sm text-gray-500 mt-1">
+                        View a log of activities and events related to your account
+                      </p>
+                    </div>
+                    <Button variant="outline" size="sm">
+                      View log
+                    </Button>
+                  </div>
+                  
+                  <Separator />
+                  
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-900">Change password</h3>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Update your password for improved security
+                      </p>
+                    </div>
+                    <Button variant="outline" size="sm">
+                      Change
+                    </Button>
+                  </div>
+                </div>
+                
+                <div className="border border-red-200 rounded-lg p-4 mb-8">
+                  <h3 className="text-sm font-medium text-red-600 flex items-center">
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete Account
+                  </h3>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Permanently delete your account and all associated data.
+                    This action cannot be undone.
+                  </p>
+                  <div className="mt-3">
+                    <Button variant="outline" size="sm" className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700">
+                      Delete account
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* Appearance Tab */}
+            <TabsContent value="appearance" className="p-6">
+              <div className="max-w-3xl mx-auto">
+                <div className="mb-8">
+                  <h2 className="text-lg font-medium text-gray-900 mb-1">Appearance Settings</h2>
+                  <p className="text-sm text-gray-500">Customize how the application looks</p>
+                </div>
+                
+                <div className="mb-8">
+                  <h3 className="text-sm font-medium text-gray-900 mb-4">Theme</h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="border border-primary-600 rounded-lg p-4 bg-primary-50">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center">
+                          <Sun className="h-5 w-5 text-gray-600 mr-2" />
+                          <span className="text-sm font-medium text-gray-900">Light</span>
+                        </div>
+                        <div className="h-5 w-5 bg-primary-600 rounded-full flex items-center justify-center">
+                          <Check className="h-3 w-3 text-white" />
+                        </div>
+                      </div>
+                      <div className="h-24 bg-white border border-gray-200 rounded-md"></div>
+                    </div>
+                    
+                    <div className="border border-gray-200 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center">
+                          <Moon className="h-5 w-5 text-gray-600 mr-2" />
+                          <span className="text-sm font-medium text-gray-900">Dark</span>
+                        </div>
+                      </div>
+                      <div className="h-24 bg-gray-800 border border-gray-700 rounded-md"></div>
+                      <div className="mt-2 text-center text-xs text-gray-500">Coming soon</div>
+                    </div>
+                    
+                    <div className="border border-gray-200 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center">
+                          <div className="mr-2 h-5 w-5 rounded-full overflow-hidden bg-gradient-to-tr from-gray-50 to-gray-900 flex items-center justify-center">
+                            <Sun className="h-3 w-3 text-gray-800" />
+                          </div>
+                          <span className="text-sm font-medium text-gray-900">System</span>
+                        </div>
+                      </div>
+                      <div className="h-24 rounded-md overflow-hidden">
+                        <div className="h-12 bg-white border-b border-gray-200"></div>
+                        <div className="h-12 bg-gray-800"></div>
+                      </div>
+                      <div className="mt-2 text-center text-xs text-gray-500">Coming soon</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <Separator className="my-8" />
+                
+                <div className="mb-8">
+                  <h3 className="text-sm font-medium text-gray-900 mb-4">Density</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center">
+                      <div className="h-4 w-4 rounded-full border border-gray-300 flex items-center justify-center mr-3">
+                        <div className="h-2 w-2 rounded-full bg-primary-600"></div>
+                      </div>
+                      <div>
+                        <span className="text-sm font-medium text-gray-900">Comfortable</span>
+                        <p className="text-xs text-gray-500">Default spacing between elements</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center">
+                      <div className="h-4 w-4 rounded-full border border-gray-300 mr-3"></div>
+                      <div>
+                        <span className="text-sm font-medium text-gray-900">Compact</span>
+                        <p className="text-xs text-gray-500">Reduced spacing to fit more content</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <Separator className="my-8" />
+                
+                <div className="flex justify-end">
+                  <Button variant="outline" className="mr-2">Cancel</Button>
+                  <Button onClick={() => handleSaveSettings('appearance')}>
+                    Save changes
+                  </Button>
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* Notifications Tab */}
+            <TabsContent value="notifications" className="p-6">
+              <div className="max-w-3xl mx-auto">
+                <div className="mb-8">
+                  <h2 className="text-lg font-medium text-gray-900 mb-1">Notification Preferences</h2>
+                  <p className="text-sm text-gray-500">Control when and how you receive notifications</p>
+                </div>
+                
+                <div className="mb-8">
+                  <h3 className="text-sm font-medium text-gray-900 mb-4">Email Notifications</h3>
+                  
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="text-sm font-medium text-gray-900">Compliance alerts</span>
+                        <p className="text-xs text-gray-500">Receive emails about compliance status changes</p>
+                      </div>
+                      <Switch defaultChecked id="compliance-email" />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="text-sm font-medium text-gray-900">Document updates</span>
+                        <p className="text-xs text-gray-500">Receive emails when documents are uploaded or modified</p>
+                      </div>
+                      <Switch defaultChecked id="document-email" />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="text-sm font-medium text-gray-900">Supplier responses</span>
+                        <p className="text-xs text-gray-500">Receive emails when suppliers respond to questionnaires</p>
+                      </div>
+                      <Switch defaultChecked id="supplier-email" />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="text-sm font-medium text-gray-900">System updates</span>
+                        <p className="text-xs text-gray-500">Receive emails about system changes and maintenance</p>
+                      </div>
+                      <Switch id="system-email" />
+                    </div>
+                  </div>
+                </div>
+                
+                <Separator className="my-8" />
+                
+                <div className="mb-8">
+                  <h3 className="text-sm font-medium text-gray-900 mb-4">In-App Notifications</h3>
+                  
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="text-sm font-medium text-gray-900">Compliance alerts</span>
+                        <p className="text-xs text-gray-500">Receive in-app notifications about compliance status changes</p>
+                      </div>
+                      <Switch defaultChecked id="compliance-app" />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="text-sm font-medium text-gray-900">Document updates</span>
+                        <p className="text-xs text-gray-500">Receive in-app notifications when documents are uploaded or modified</p>
+                      </div>
+                      <Switch defaultChecked id="document-app" />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="text-sm font-medium text-gray-900">Supplier responses</span>
+                        <p className="text-xs text-gray-500">Receive in-app notifications when suppliers respond to questionnaires</p>
+                      </div>
+                      <Switch defaultChecked id="supplier-app" />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="text-sm font-medium text-gray-900">System notifications</span>
+                        <p className="text-xs text-gray-500">Receive in-app notifications about system status</p>
+                      </div>
+                      <Switch defaultChecked id="system-app" />
+                    </div>
+                  </div>
+                </div>
+                
+                <Separator className="my-8" />
+                
+                <div className="flex justify-end">
+                  <Button variant="outline" className="mr-2">Cancel</Button>
+                  <Button onClick={() => handleSaveSettings('notifications')}>
+                    Save changes
+                  </Button>
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* Language Tab */}
+            <TabsContent value="language" className="p-6">
+              <div className="max-w-3xl mx-auto">
+                <div className="mb-8">
+                  <h2 className="text-lg font-medium text-gray-900 mb-1">Language Settings</h2>
+                  <p className="text-sm text-gray-500">Choose your preferred language for the interface</p>
+                </div>
+                
+                <div className="mb-8">
+                  <h3 className="text-sm font-medium text-gray-900 mb-4">Application Language</h3>
+                  
+                  <div className="grid gap-3">
+                    <div 
+                      className={cn(
+                        "flex items-center justify-between p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors",
+                        language === "en" ? "border-primary-500 bg-primary-50" : "border-gray-200"
+                      )}
+                      onClick={() => changeLanguage("en")}
+                    >
+                      <div>
+                        <div className="flex items-center">
+                          <span className="font-medium">English</span>
+                          <span className="ml-2 px-1.5 py-0.5 bg-gray-100 text-gray-800 text-xs rounded">Default</span>
+                        </div>
+                        <p className="text-sm text-gray-500">English (United States)</p>
+                      </div>
+                      {language === "en" && (
+                        <Check className="h-5 w-5 text-primary-600" />
+                      )}
+                    </div>
+                    
+                    <div 
+                      className={cn(
+                        "flex items-center justify-between p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors",
+                        language === "fr" ? "border-primary-500 bg-primary-50" : "border-gray-200"
+                      )}
+                      onClick={() => changeLanguage("fr")}
+                    >
+                      <div>
+                        <span className="font-medium">French</span>
+                        <p className="text-sm text-gray-500">Français</p>
+                      </div>
+                      {language === "fr" && (
+                        <Check className="h-5 w-5 text-primary-600" />
+                      )}
+                    </div>
+                    
+                    <div 
+                      className={cn(
+                        "flex items-center justify-between p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors",
+                        language === "de" ? "border-primary-500 bg-primary-50" : "border-gray-200"
+                      )}
+                      onClick={() => changeLanguage("de")}
+                    >
+                      <div>
+                        <span className="font-medium">German</span>
+                        <p className="text-sm text-gray-500">Deutsch</p>
+                      </div>
+                      {language === "de" && (
+                        <Check className="h-5 w-5 text-primary-600" />
+                      )}
+                    </div>
+                    
+                    <div 
+                      className={cn(
+                        "flex items-center justify-between p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors",
+                        language === "ar" ? "border-primary-500 bg-primary-50" : "border-gray-200"
+                      )}
+                      onClick={() => changeLanguage("ar")}
+                    >
+                      <div>
+                        <div className="flex items-center">
+                          <span className="font-medium">Arabic</span>
+                          <span className="ml-2 px-1.5 py-0.5 bg-blue-50 text-blue-700 text-xs rounded">RTL</span>
+                        </div>
+                        <p className="text-sm text-gray-500">العربية</p>
+                      </div>
+                      {language === "ar" && (
+                        <Check className="h-5 w-5 text-primary-600" />
+                      )}
+                    </div>
+                  </div>
+                </div>
+                
+                <Separator className="my-8" />
+                
+                <div className="mb-8">
+                  <h3 className="text-sm font-medium text-gray-900 mb-4">Date and Number Formats</h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <Label htmlFor="dateFormat" className="text-sm font-medium">
+                        Date format
+                      </Label>
+                      <Select defaultValue="dd/MM/yyyy">
+                        <SelectTrigger className="mt-1 bg-white">
+                          <SelectValue placeholder="Select date format" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="MM/dd/yyyy">MM/DD/YYYY (01/31/2025)</SelectItem>
+                          <SelectItem value="dd/MM/yyyy">DD/MM/YYYY (31/01/2025)</SelectItem>
+                          <SelectItem value="yyyy-MM-dd">YYYY-MM-DD (2025-01-31)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="numberFormat" className="text-sm font-medium">
+                        Number format
+                      </Label>
+                      <Select defaultValue="1,234.56">
+                        <SelectTrigger className="mt-1 bg-white">
+                          <SelectValue placeholder="Select number format" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="1,234.56">1,234.56 (US/UK)</SelectItem>
+                          <SelectItem value="1.234,56">1.234,56 (Europe)</SelectItem>
+                          <SelectItem value="1 234,56">1 234,56 (France)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex justify-end">
+                  <Button variant="outline" className="mr-2">Reset to defaults</Button>
+                  <Button onClick={() => handleSaveSettings('language')}>
+                    Save changes
+                  </Button>
+                </div>
+              </div>
+            </TabsContent>
           </Tabs>
         </div>
       </div>
