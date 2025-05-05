@@ -7,16 +7,24 @@ import { useToast } from '@/hooks/use-toast';
 import { 
   Check,
   Save,
-  Undo,
   User,
   Globe,
   Bell,
-  Moon,
-  Sun,
-  Info,
+  Settings as SettingsIcon,
   Lock,
   Mail,
-  Trash2
+  Calendar,
+  FileText,
+  Key,
+  Plus,
+  DownloadCloud,
+  Copy,
+  RefreshCw,
+  Clipboard,
+  Trash2,
+  Edit,
+  ChevronDown,
+  AlertTriangle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -40,6 +48,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 export default function Settings() {
   const { t } = useTranslation();
@@ -57,561 +66,817 @@ export default function Settings() {
 
   return (
     <Layout title={t('nav.settings')}>
-      <div className="container py-6">
-        <div className={cn("flex justify-between items-center mb-8", isRTL && "flex-row-reverse")}>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
-            <p className="text-sm text-gray-500 mt-1">{t('pages.settings.description')}</p>
+      <div className="py-6 px-4 sm:px-6 lg:px-8">
+        <div className={cn("md:flex md:items-center md:justify-between mb-6", isRTL && "md:flex-row-reverse")}>
+          <div className="flex-1 min-w-0">
+            <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
+              {t('nav.settings')}
+            </h2>
+            <p className="mt-2 text-sm text-gray-500">
+              {t('pages.settings.description')}
+            </p>
           </div>
         </div>
-
-        <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
+        
+        <div className="mt-6">
           <Tabs defaultValue="profile" className="w-full" value={activeTab} onValueChange={setActiveTab}>
-            <div className="border-b border-gray-200">
-              <TabsList className="flex w-full p-0 bg-transparent border-0">
-                <TabsTrigger 
-                  value="profile" 
-                  className={cn(
-                    "data-[state=active]:bg-transparent data-[state=active]:shadow-none flex-1 rounded-none py-3 px-4 font-medium text-sm border-b-2 border-transparent data-[state=active]:border-primary-600 data-[state=active]:text-primary-600"
-                  )}
-                >
-                  Profile
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="account" 
-                  className={cn(
-                    "data-[state=active]:bg-transparent data-[state=active]:shadow-none flex-1 rounded-none py-3 px-4 font-medium text-sm border-b-2 border-transparent data-[state=active]:border-primary-600 data-[state=active]:text-primary-600"
-                  )}
-                >
-                  Account
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="appearance" 
-                  className={cn(
-                    "data-[state=active]:bg-transparent data-[state=active]:shadow-none flex-1 rounded-none py-3 px-4 font-medium text-sm border-b-2 border-transparent data-[state=active]:border-primary-600 data-[state=active]:text-primary-600"
-                  )}
-                >
-                  Appearance
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="notifications" 
-                  className={cn(
-                    "data-[state=active]:bg-transparent data-[state=active]:shadow-none flex-1 rounded-none py-3 px-4 font-medium text-sm border-b-2 border-transparent data-[state=active]:border-primary-600 data-[state=active]:text-primary-600"
-                  )}
-                >
-                  Notifications
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="language" 
-                  className={cn(
-                    "data-[state=active]:bg-transparent data-[state=active]:shadow-none flex-1 rounded-none py-3 px-4 font-medium text-sm border-b-2 border-transparent data-[state=active]:border-primary-600 data-[state=active]:text-primary-600"
-                  )}
-                >
-                  Language
-                </TabsTrigger>
-              </TabsList>
-            </div>
-
+            <TabsList className="grid w-full md:w-auto grid-cols-3 lg:grid-cols-6 md:inline-flex overflow-auto bg-gray-100 p-1 rounded-md">
+              <TabsTrigger 
+                value="profile" 
+                className="flex items-center"
+              >
+                <User className="h-4 w-4 mr-2" />
+                <span>Profile</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="notifications" 
+                className="flex items-center"
+              >
+                <Bell className="h-4 w-4 mr-2" />
+                <span>Notifications</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="api" 
+                className="flex items-center"
+              >
+                <Key className="h-4 w-4 mr-2" />
+                <span>API Access</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="display" 
+                className="flex items-center"
+              >
+                <Globe className="h-4 w-4 mr-2" />
+                <span>Display & Language</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="questionnaire" 
+                className="flex items-center"
+              >
+                <Calendar className="h-4 w-4 mr-2" />
+                <span>Questionnaire Config</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="roles" 
+                className="flex items-center"
+              >
+                <Lock className="h-4 w-4 mr-2" />
+                <span>Roles & Access</span>
+              </TabsTrigger>
+            </TabsList>
+            
             {/* Profile Tab */}
-            <TabsContent value="profile" className="p-6">
-              <div className="max-w-3xl mx-auto">
-                <div className="mb-8">
-                  <h2 className="text-lg font-medium text-gray-900 mb-1">Personal Information</h2>
-                  <p className="text-sm text-gray-500">Update your personal details</p>
-                </div>
-                
-                <div className="flex items-center gap-4 mb-8">
-                  <div className="h-20 w-20 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200">
-                    <User className="h-10 w-10 text-gray-400" />
-                  </div>
-                  <div>
-                    <div className="flex space-x-2">
-                      <Button variant="outline" size="sm" className="h-9">
-                        Change
-                      </Button>
-                      <Button variant="ghost" size="sm" className="h-9 text-gray-600">
-                        Remove
-                      </Button>
+            <TabsContent value="profile">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Profile Information</CardTitle>
+                  <CardDescription>
+                    Update your personal information and contact details
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="h-20 w-20 rounded-full bg-gray-200 flex items-center justify-center">
+                      <User className="h-10 w-10 text-gray-500" />
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">
-                      JPG, GIF or PNG. Max size 1MB.
+                    <div>
+                      <Button variant="outline" size="sm">
+                        Change Avatar
+                      </Button>
+                      <p className="text-sm text-gray-500 mt-1">
+                        JPG, GIF or PNG. Max size 2MB.
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="firstName">First name</Label>
+                      <Input id="firstName" defaultValue="Jane" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="lastName">Last name</Label>
+                      <Input id="lastName" defaultValue="Cooper" />
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email address</Label>
+                    <Input id="email" type="email" defaultValue="jane@example.com" />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="title">Job title</Label>
+                    <Input id="title" defaultValue="Compliance Manager" />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="bio">Bio</Label>
+                    <Textarea 
+                      id="bio" 
+                      placeholder="Write a short bio about yourself..." 
+                      defaultValue="I manage EUDR compliance for our organization and help suppliers comply with regulations."
+                      className="h-24"
+                    />
+                    <p className="text-xs text-gray-500">
+                      Brief description of your role and responsibilities.
                     </p>
                   </div>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                  <div>
-                    <Label htmlFor="firstName" className="text-sm font-medium">
-                      First name
-                    </Label>
-                    <Input 
-                      id="firstName" 
-                      placeholder="Enter your first name" 
-                      defaultValue="Jane" 
-                      className="mt-1 bg-white"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="lastName" className="text-sm font-medium">
-                      Last name
-                    </Label>
-                    <Input 
-                      id="lastName" 
-                      placeholder="Enter your last name" 
-                      defaultValue="Cooper" 
-                      className="mt-1 bg-white"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="email" className="text-sm font-medium">
-                      Email address
-                    </Label>
-                    <Input 
-                      id="email" 
-                      type="email" 
-                      placeholder="you@example.com" 
-                      defaultValue="jane@example.com" 
-                      className="mt-1 bg-white"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="role" className="text-sm font-medium">
-                      Role
-                    </Label>
-                    <Input 
-                      id="role" 
-                      placeholder="Your job title" 
-                      defaultValue="Compliance Officer" 
-                      className="mt-1 bg-white"
-                    />
-                  </div>
-                </div>
-                
-                <div className="mb-8">
-                  <Label htmlFor="bio" className="text-sm font-medium">
-                    Bio
-                  </Label>
-                  <Textarea 
-                    id="bio" 
-                    placeholder="Write a short bio..." 
-                    defaultValue="I manage EUDR compliance for my organization and work with suppliers to ensure adherence to regulations." 
-                    className="mt-1 h-24 bg-white"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Brief description for your profile.
-                  </p>
-                </div>
-                
-                <Separator className="my-8" />
-                
-                <div className="flex justify-end">
-                  <Button variant="outline" className="mr-2">Cancel</Button>
+                </CardContent>
+                <CardFooter className="flex justify-end">
                   <Button onClick={() => handleSaveSettings('profile')}>
-                    Save changes
+                    <Save className="h-4 w-4 mr-2" />
+                    Save Changes
                   </Button>
-                </div>
-              </div>
+                </CardFooter>
+              </Card>
             </TabsContent>
-
-            {/* Account Tab */}
-            <TabsContent value="account" className="p-6">
-              <div className="max-w-3xl mx-auto">
-                <div className="mb-8">
-                  <h2 className="text-lg font-medium text-gray-900 mb-1">Account Settings</h2>
-                  <p className="text-sm text-gray-500">Manage your account preferences</p>
-                </div>
-                
-                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-8">
-                  <div className="flex items-start">
-                    <Info className="h-5 w-5 text-blue-500 mr-3 mt-0.5" />
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-900">Your account is connected to EUDR Comply</h3>
-                      <p className="text-sm text-gray-500 mt-1">
-                        Your organization's account is managed by your administrator.
-                        Contact them for any account-related questions.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="space-y-6 mb-8">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-900">Two-factor authentication</h3>
-                      <p className="text-sm text-gray-500 mt-1">
-                        Add an extra layer of security to your account
-                      </p>
-                    </div>
-                    <Button variant="outline" size="sm">
-                      Enable
-                    </Button>
-                  </div>
-                  
-                  <Separator />
-                  
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-900">Account activity log</h3>
-                      <p className="text-sm text-gray-500 mt-1">
-                        View a log of activities and events related to your account
-                      </p>
-                    </div>
-                    <Button variant="outline" size="sm">
-                      View log
-                    </Button>
-                  </div>
-                  
-                  <Separator />
-                  
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-900">Change password</h3>
-                      <p className="text-sm text-gray-500 mt-1">
-                        Update your password for improved security
-                      </p>
-                    </div>
-                    <Button variant="outline" size="sm">
-                      Change
-                    </Button>
-                  </div>
-                </div>
-                
-                <div className="border border-red-200 rounded-lg p-4 mb-8">
-                  <h3 className="text-sm font-medium text-red-600 flex items-center">
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Delete Account
-                  </h3>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Permanently delete your account and all associated data.
-                    This action cannot be undone.
-                  </p>
-                  <div className="mt-3">
-                    <Button variant="outline" size="sm" className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700">
-                      Delete account
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </TabsContent>
-
-            {/* Appearance Tab */}
-            <TabsContent value="appearance" className="p-6">
-              <div className="max-w-3xl mx-auto">
-                <div className="mb-8">
-                  <h2 className="text-lg font-medium text-gray-900 mb-1">Appearance Settings</h2>
-                  <p className="text-sm text-gray-500">Customize how the application looks</p>
-                </div>
-                
-                <div className="mb-8">
-                  <h3 className="text-sm font-medium text-gray-900 mb-4">Theme</h3>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="border border-primary-600 rounded-lg p-4 bg-primary-50">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center">
-                          <Sun className="h-5 w-5 text-gray-600 mr-2" />
-                          <span className="text-sm font-medium text-gray-900">Light</span>
-                        </div>
-                        <div className="h-5 w-5 bg-primary-600 rounded-full flex items-center justify-center">
-                          <Check className="h-3 w-3 text-white" />
-                        </div>
-                      </div>
-                      <div className="h-24 bg-white border border-gray-200 rounded-md"></div>
-                    </div>
-                    
-                    <div className="border border-gray-200 rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center">
-                          <Moon className="h-5 w-5 text-gray-600 mr-2" />
-                          <span className="text-sm font-medium text-gray-900">Dark</span>
-                        </div>
-                      </div>
-                      <div className="h-24 bg-gray-800 border border-gray-700 rounded-md"></div>
-                      <div className="mt-2 text-center text-xs text-gray-500">Coming soon</div>
-                    </div>
-                    
-                    <div className="border border-gray-200 rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center">
-                          <div className="mr-2 h-5 w-5 rounded-full overflow-hidden bg-gradient-to-tr from-gray-50 to-gray-900 flex items-center justify-center">
-                            <Sun className="h-3 w-3 text-gray-800" />
-                          </div>
-                          <span className="text-sm font-medium text-gray-900">System</span>
-                        </div>
-                      </div>
-                      <div className="h-24 rounded-md overflow-hidden">
-                        <div className="h-12 bg-white border-b border-gray-200"></div>
-                        <div className="h-12 bg-gray-800"></div>
-                      </div>
-                      <div className="mt-2 text-center text-xs text-gray-500">Coming soon</div>
-                    </div>
-                  </div>
-                </div>
-                
-                <Separator className="my-8" />
-                
-                <div className="mb-8">
-                  <h3 className="text-sm font-medium text-gray-900 mb-4">Density</h3>
-                  <div className="space-y-4">
-                    <div className="flex items-center">
-                      <div className="h-4 w-4 rounded-full border border-gray-300 flex items-center justify-center mr-3">
-                        <div className="h-2 w-2 rounded-full bg-primary-600"></div>
-                      </div>
-                      <div>
-                        <span className="text-sm font-medium text-gray-900">Comfortable</span>
-                        <p className="text-xs text-gray-500">Default spacing between elements</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center">
-                      <div className="h-4 w-4 rounded-full border border-gray-300 mr-3"></div>
-                      <div>
-                        <span className="text-sm font-medium text-gray-900">Compact</span>
-                        <p className="text-xs text-gray-500">Reduced spacing to fit more content</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <Separator className="my-8" />
-                
-                <div className="flex justify-end">
-                  <Button variant="outline" className="mr-2">Cancel</Button>
-                  <Button onClick={() => handleSaveSettings('appearance')}>
-                    Save changes
-                  </Button>
-                </div>
-              </div>
-            </TabsContent>
-
+            
             {/* Notifications Tab */}
-            <TabsContent value="notifications" className="p-6">
-              <div className="max-w-3xl mx-auto">
-                <div className="mb-8">
-                  <h2 className="text-lg font-medium text-gray-900 mb-1">Notification Preferences</h2>
-                  <p className="text-sm text-gray-500">Control when and how you receive notifications</p>
-                </div>
-                
-                <div className="mb-8">
-                  <h3 className="text-sm font-medium text-gray-900 mb-4">Email Notifications</h3>
-                  
+            <TabsContent value="notifications">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Notification Settings</CardTitle>
+                  <CardDescription>
+                    Configure how and when you receive notifications
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <h3 className="text-md font-medium">Notification Channels</h3>
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <span className="text-sm font-medium text-gray-900">Compliance alerts</span>
-                        <p className="text-xs text-gray-500">Receive emails about compliance status changes</p>
+                        <Label htmlFor="emailNotif">Email Notifications</Label>
+                        <p className="text-sm text-gray-500">
+                          Receive notifications via email
+                        </p>
                       </div>
-                      <Switch defaultChecked id="compliance-email" />
+                      <Switch id="emailNotif" defaultChecked />
                     </div>
                     
                     <div className="flex items-center justify-between">
                       <div>
-                        <span className="text-sm font-medium text-gray-900">Document updates</span>
-                        <p className="text-xs text-gray-500">Receive emails when documents are uploaded or modified</p>
+                        <Label htmlFor="browserNotif">Browser Notifications</Label>
+                        <p className="text-sm text-gray-500">
+                          Receive notifications in your browser
+                        </p>
                       </div>
-                      <Switch defaultChecked id="document-email" />
+                      <Switch id="browserNotif" defaultChecked />
                     </div>
                     
                     <div className="flex items-center justify-between">
                       <div>
-                        <span className="text-sm font-medium text-gray-900">Supplier responses</span>
-                        <p className="text-xs text-gray-500">Receive emails when suppliers respond to questionnaires</p>
+                        <Label htmlFor="smsNotif">SMS Notifications</Label>
+                        <p className="text-sm text-gray-500">
+                          Receive important alerts via SMS
+                        </p>
                       </div>
-                      <Switch defaultChecked id="supplier-email" />
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <span className="text-sm font-medium text-gray-900">System updates</span>
-                        <p className="text-xs text-gray-500">Receive emails about system changes and maintenance</p>
-                      </div>
-                      <Switch id="system-email" />
+                      <Switch id="smsNotif" />
                     </div>
                   </div>
-                </div>
-                
-                <Separator className="my-8" />
-                
-                <div className="mb-8">
-                  <h3 className="text-sm font-medium text-gray-900 mb-4">In-App Notifications</h3>
                   
+                  <Separator />
+                  
+                  <h3 className="text-md font-medium">Notification Types</h3>
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <span className="text-sm font-medium text-gray-900">Compliance alerts</span>
-                        <p className="text-xs text-gray-500">Receive in-app notifications about compliance status changes</p>
+                        <Label htmlFor="declarationAlerts">Declaration Alerts</Label>
+                        <p className="text-sm text-gray-500">
+                          Get notified about new or updated declarations
+                        </p>
                       </div>
-                      <Switch defaultChecked id="compliance-app" />
+                      <Switch id="declarationAlerts" defaultChecked />
                     </div>
                     
                     <div className="flex items-center justify-between">
                       <div>
-                        <span className="text-sm font-medium text-gray-900">Document updates</span>
-                        <p className="text-xs text-gray-500">Receive in-app notifications when documents are uploaded or modified</p>
+                        <Label htmlFor="complianceAlerts">Compliance Alerts</Label>
+                        <p className="text-sm text-gray-500">
+                          Get notified about compliance issues or updates
+                        </p>
                       </div>
-                      <Switch defaultChecked id="document-app" />
+                      <Switch id="complianceAlerts" defaultChecked />
                     </div>
                     
                     <div className="flex items-center justify-between">
                       <div>
-                        <span className="text-sm font-medium text-gray-900">Supplier responses</span>
-                        <p className="text-xs text-gray-500">Receive in-app notifications when suppliers respond to questionnaires</p>
+                        <Label htmlFor="documentAlerts">Document Alerts</Label>
+                        <p className="text-sm text-gray-500">
+                          Get notified about document uploads and verification
+                        </p>
                       </div>
-                      <Switch defaultChecked id="supplier-app" />
+                      <Switch id="documentAlerts" defaultChecked />
                     </div>
                     
                     <div className="flex items-center justify-between">
                       <div>
-                        <span className="text-sm font-medium text-gray-900">System notifications</span>
-                        <p className="text-xs text-gray-500">Receive in-app notifications about system status</p>
+                        <Label htmlFor="systemAlerts">System Alerts</Label>
+                        <p className="text-sm text-gray-500">
+                          Get notified about system updates and maintenance
+                        </p>
                       </div>
-                      <Switch defaultChecked id="system-app" />
+                      <Switch id="systemAlerts" />
                     </div>
                   </div>
-                </div>
-                
-                <Separator className="my-8" />
-                
-                <div className="flex justify-end">
-                  <Button variant="outline" className="mr-2">Cancel</Button>
+                  
+                  <Separator />
+                  
+                  <h3 className="text-md font-medium">Frequency</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label htmlFor="frequency">Notification Frequency</Label>
+                        <p className="text-sm text-gray-500">
+                          How often you want to receive notifications
+                        </p>
+                      </div>
+                      <Select defaultValue="realtime">
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue placeholder="Select frequency" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="realtime">Realtime</SelectItem>
+                          <SelectItem value="hourly">Hourly digest</SelectItem>
+                          <SelectItem value="daily">Daily digest</SelectItem>
+                          <SelectItem value="weekly">Weekly digest</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </CardContent>
+                <CardFooter className="flex justify-end">
                   <Button onClick={() => handleSaveSettings('notifications')}>
-                    Save changes
+                    <Save className="h-4 w-4 mr-2" />
+                    Save Notification Settings
                   </Button>
-                </div>
-              </div>
+                </CardFooter>
+              </Card>
             </TabsContent>
-
-            {/* Language Tab */}
-            <TabsContent value="language" className="p-6">
-              <div className="max-w-3xl mx-auto">
-                <div className="mb-8">
-                  <h2 className="text-lg font-medium text-gray-900 mb-1">Language Settings</h2>
-                  <p className="text-sm text-gray-500">Choose your preferred language for the interface</p>
-                </div>
-                
-                <div className="mb-8">
-                  <h3 className="text-sm font-medium text-gray-900 mb-4">Application Language</h3>
+            
+            {/* API Access Tab */}
+            <TabsContent value="api">
+              <Card>
+                <CardHeader>
+                  <CardTitle>API Access</CardTitle>
+                  <CardDescription>
+                    Manage API keys and integration settings
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="bg-gray-50 p-4 rounded-lg border">
+                    <h3 className="text-md font-medium mb-2">Your API Key</h3>
+                    <div className="flex items-center space-x-2">
+                      <Input 
+                        type="password" 
+                        value="sk_test_51M9EUDR3gul4rty0mpl1an_XXXXXXXXXXXXXX" 
+                        readOnly 
+                        className="bg-gray-100 font-mono text-sm"
+                      />
+                      <Button variant="outline" size="sm">
+                        <Copy className="h-4 w-4 mr-2" />
+                        Copy
+                      </Button>
+                      <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
+                        <RefreshCw className="h-4 w-4 mr-2" />
+                        Regenerate
+                      </Button>
+                    </div>
+                    <p className="text-sm text-gray-500 mt-2">
+                      Keep this key secret. Never share it or expose it in client-side code.
+                    </p>
+                  </div>
                   
-                  <div className="grid gap-3">
-                    <div 
-                      className={cn(
-                        "flex items-center justify-between p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors",
-                        language === "en" ? "border-primary-500 bg-primary-50" : "border-gray-200"
-                      )}
-                      onClick={() => changeLanguage("en")}
-                    >
+                  <div className="space-y-4">
+                    <h3 className="text-md font-medium">API Permissions</h3>
+                    
+                    <div className="flex items-center justify-between">
                       <div>
-                        <div className="flex items-center">
-                          <span className="font-medium">English</span>
-                          <span className="ml-2 px-1.5 py-0.5 bg-gray-100 text-gray-800 text-xs rounded">Default</span>
-                        </div>
-                        <p className="text-sm text-gray-500">English (United States)</p>
+                        <Label htmlFor="readAccess">Read Access</Label>
+                        <p className="text-sm text-gray-500">
+                          Allow reading declarations and compliance data
+                        </p>
                       </div>
-                      {language === "en" && (
-                        <Check className="h-5 w-5 text-primary-600" />
-                      )}
+                      <Switch id="readAccess" defaultChecked />
                     </div>
                     
-                    <div 
-                      className={cn(
-                        "flex items-center justify-between p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors",
-                        language === "fr" ? "border-primary-500 bg-primary-50" : "border-gray-200"
-                      )}
-                      onClick={() => changeLanguage("fr")}
-                    >
+                    <div className="flex items-center justify-between">
                       <div>
-                        <span className="font-medium">French</span>
-                        <p className="text-sm text-gray-500">Français</p>
+                        <Label htmlFor="writeAccess">Write Access</Label>
+                        <p className="text-sm text-gray-500">
+                          Allow creating and updating declarations
+                        </p>
                       </div>
-                      {language === "fr" && (
-                        <Check className="h-5 w-5 text-primary-600" />
-                      )}
+                      <Switch id="writeAccess" defaultChecked />
                     </div>
                     
-                    <div 
-                      className={cn(
-                        "flex items-center justify-between p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors",
-                        language === "de" ? "border-primary-500 bg-primary-50" : "border-gray-200"
-                      )}
-                      onClick={() => changeLanguage("de")}
-                    >
+                    <div className="flex items-center justify-between">
                       <div>
-                        <span className="font-medium">German</span>
-                        <p className="text-sm text-gray-500">Deutsch</p>
+                        <Label htmlFor="adminAccess">Admin Access</Label>
+                        <p className="text-sm text-gray-500">
+                          Allow administrative operations
+                        </p>
                       </div>
-                      {language === "de" && (
-                        <Check className="h-5 w-5 text-primary-600" />
-                      )}
-                    </div>
-                    
-                    <div 
-                      className={cn(
-                        "flex items-center justify-between p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors",
-                        language === "ar" ? "border-primary-500 bg-primary-50" : "border-gray-200"
-                      )}
-                      onClick={() => changeLanguage("ar")}
-                    >
-                      <div>
-                        <div className="flex items-center">
-                          <span className="font-medium">Arabic</span>
-                          <span className="ml-2 px-1.5 py-0.5 bg-blue-50 text-blue-700 text-xs rounded">RTL</span>
-                        </div>
-                        <p className="text-sm text-gray-500">العربية</p>
-                      </div>
-                      {language === "ar" && (
-                        <Check className="h-5 w-5 text-primary-600" />
-                      )}
+                      <Switch id="adminAccess" />
                     </div>
                   </div>
-                </div>
-                
-                <Separator className="my-8" />
-                
-                <div className="mb-8">
-                  <h3 className="text-sm font-medium text-gray-900 mb-4">Date and Number Formats</h3>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <Label htmlFor="dateFormat" className="text-sm font-medium">
-                        Date format
-                      </Label>
-                      <Select defaultValue="dd/MM/yyyy">
-                        <SelectTrigger className="mt-1 bg-white">
-                          <SelectValue placeholder="Select date format" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="MM/dd/yyyy">MM/DD/YYYY (01/31/2025)</SelectItem>
-                          <SelectItem value="dd/MM/yyyy">DD/MM/YYYY (31/01/2025)</SelectItem>
-                          <SelectItem value="yyyy-MM-dd">YYYY-MM-DD (2025-01-31)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="numberFormat" className="text-sm font-medium">
-                        Number format
-                      </Label>
-                      <Select defaultValue="1,234.56">
-                        <SelectTrigger className="mt-1 bg-white">
-                          <SelectValue placeholder="Select number format" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="1,234.56">1,234.56 (US/UK)</SelectItem>
-                          <SelectItem value="1.234,56">1.234,56 (Europe)</SelectItem>
-                          <SelectItem value="1 234,56">1 234,56 (France)</SelectItem>
-                        </SelectContent>
-                      </Select>
+                  <div className="space-y-2">
+                    <h3 className="text-md font-medium">Webhook Endpoint</h3>
+                    <Input 
+                      placeholder="https://your-server.com/eudr-webhooks" 
+                      className="font-mono text-sm"
+                    />
+                    <p className="text-sm text-gray-500">
+                      We'll send webhook events to this URL when declaration status changes
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-4 mt-4">
+                    <h3 className="text-md font-medium">API Documentation</h3>
+                    <div className="flex items-center">
+                      <Button variant="outline">
+                        <FileText className="h-4 w-4 mr-2" />
+                        View API Documentation
+                      </Button>
                     </div>
                   </div>
-                </div>
-                
-                <div className="flex justify-end">
-                  <Button variant="outline" className="mr-2">Reset to defaults</Button>
-                  <Button onClick={() => handleSaveSettings('language')}>
-                    Save changes
+                  
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mt-4">
+                    <div className="flex items-start">
+                      <AlertTriangle className="h-5 w-5 text-amber-500 mr-2 mt-0.5" />
+                      <div>
+                        <h3 className="text-sm font-medium text-amber-800">API Rate Limits</h3>
+                        <p className="text-sm text-amber-700 mt-1">
+                          Your current plan allows 5,000 API requests per day. 
+                          You have used 1,203 requests today.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+                <CardFooter className="flex justify-end">
+                  <Button onClick={() => handleSaveSettings('api')}>
+                    <Save className="h-4 w-4 mr-2" />
+                    Save API Settings
                   </Button>
-                </div>
-              </div>
+                </CardFooter>
+              </Card>
+            </TabsContent>
+            
+            {/* Display & Language Tab */}
+            <TabsContent value="display">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Display & Language</CardTitle>
+                  <CardDescription>
+                    Customize your interface language and display preferences
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="language">Language</Label>
+                    <Select value={language} onValueChange={changeLanguage}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select language" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="en">English</SelectItem>
+                        <SelectItem value="fr">Français</SelectItem>
+                        <SelectItem value="de">Deutsch</SelectItem>
+                        <SelectItem value="ar">العربية</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="timezone">Timezone</Label>
+                    <Select defaultValue="Europe/Paris">
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select timezone" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="UTC">UTC (Coordinated Universal Time)</SelectItem>
+                        <SelectItem value="Europe/London">London (GMT+0/BST)</SelectItem>
+                        <SelectItem value="Europe/Paris">Paris, Berlin, Rome (CET/CEST)</SelectItem>
+                        <SelectItem value="America/New_York">New York (EST/EDT)</SelectItem>
+                        <SelectItem value="America/Los_Angeles">Los Angeles (PST/PDT)</SelectItem>
+                        <SelectItem value="Asia/Tokyo">Tokyo (JST)</SelectItem>
+                        <SelectItem value="Asia/Shanghai">Beijing, Shanghai (CST)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="dateFormat">Date format</Label>
+                    <Select defaultValue="DD/MM/YYYY">
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select date format" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="MM/DD/YYYY">MM/DD/YYYY</SelectItem>
+                        <SelectItem value="DD/MM/YYYY">DD/MM/YYYY</SelectItem>
+                        <SelectItem value="YYYY-MM-DD">YYYY-MM-DD</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <Separator />
+                  
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label htmlFor="darkMode">Dark Mode</Label>
+                        <p className="text-sm text-gray-500">
+                          Enable dark mode for the interface
+                        </p>
+                      </div>
+                      <Switch id="darkMode" />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label htmlFor="highContrast">High Contrast</Label>
+                        <p className="text-sm text-gray-500">
+                          Increase contrast for better visibility
+                        </p>
+                      </div>
+                      <Switch id="highContrast" />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label htmlFor="compactView">Compact View</Label>
+                        <p className="text-sm text-gray-500">
+                          Show more information in less space
+                        </p>
+                      </div>
+                      <Switch id="compactView" />
+                    </div>
+                  </div>
+                  
+                  <Separator />
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="defaultPage">Default landing page</Label>
+                    <Select defaultValue="dashboard">
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select default page" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="dashboard">Dashboard</SelectItem>
+                        <SelectItem value="supply-chain">Supply Chain</SelectItem>
+                        <SelectItem value="compliance">Compliance</SelectItem>
+                        <SelectItem value="declarations">EUDR Declarations</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-sm text-gray-500">
+                      Choose which page to show when you log in to the application
+                    </p>
+                  </div>
+                </CardContent>
+                <CardFooter className="flex justify-end">
+                  <Button onClick={() => handleSaveSettings('display and language')}>
+                    <Save className="h-4 w-4 mr-2" />
+                    Save Display Settings
+                  </Button>
+                </CardFooter>
+              </Card>
+            </TabsContent>
+            
+            {/* Questionnaire Configuration Tab */}
+            <TabsContent value="questionnaire">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Questionnaire Configuration</CardTitle>
+                  <CardDescription>
+                    Configure self-assessment questionnaire settings
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="defaultDeadline">Default deadline (days)</Label>
+                    <Input 
+                      id="defaultDeadline" 
+                      type="number" 
+                      defaultValue={30} 
+                      min={1} 
+                      max={365}
+                    />
+                    <p className="text-sm text-gray-500">
+                      Default number of days suppliers have to complete questionnaires
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="reminderFrequency">Reminder frequency (days)</Label>
+                    <Input 
+                      id="reminderFrequency" 
+                      type="number" 
+                      defaultValue={7} 
+                      min={1} 
+                      max={30}
+                    />
+                    <p className="text-sm text-gray-500">
+                      How often to send reminder notifications for incomplete questionnaires
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="defaultQuestionnaireTemplate">Default questionnaire template</Label>
+                    <Select defaultValue="standard">
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select template" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="standard">Standard EUDR Assessment</SelectItem>
+                        <SelectItem value="extended">Extended Compliance Review</SelectItem>
+                        <SelectItem value="brief">Brief Initial Assessment</SelectItem>
+                        <SelectItem value="custom">Custom Template</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-sm text-gray-500">
+                      Default template to use when creating new questionnaires
+                    </p>
+                  </div>
+                  
+                  <Separator />
+                  
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label htmlFor="autoReminders">Automatic Reminders</Label>
+                        <p className="text-sm text-gray-500">
+                          Send automatic reminder emails to suppliers
+                        </p>
+                      </div>
+                      <Switch id="autoReminders" defaultChecked />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label htmlFor="autoArchive">Auto-archive</Label>
+                        <p className="text-sm text-gray-500">
+                          Automatically archive completed questionnaires after 1 year
+                        </p>
+                      </div>
+                      <Switch id="autoArchive" defaultChecked />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label htmlFor="alertOnExpiry">Alert on expiry</Label>
+                        <p className="text-sm text-gray-500">
+                          Send alerts when questionnaires are about to expire
+                        </p>
+                      </div>
+                      <Switch id="alertOnExpiry" defaultChecked />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label htmlFor="enableComments">Enable comments</Label>
+                        <p className="text-sm text-gray-500">
+                          Allow suppliers to add comments to their responses
+                        </p>
+                      </div>
+                      <Switch id="enableComments" defaultChecked />
+                    </div>
+                  </div>
+                  
+                  <Separator />
+                  
+                  <div className="space-y-4">
+                    <h3 className="text-md font-medium">Questionnaire Templates</h3>
+                    <div className="bg-gray-50 p-4 rounded-lg border">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <h4 className="text-sm font-medium">Manage Custom Templates</h4>
+                          <p className="text-sm text-gray-500 mt-1">
+                            Create, edit, and delete custom questionnaire templates
+                          </p>
+                        </div>
+                        <Button variant="outline" size="sm">
+                          <SettingsIcon className="h-4 w-4 mr-2" />
+                          Manage Templates
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-gray-50 p-4 rounded-lg border">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <h4 className="text-sm font-medium">Import/Export Templates</h4>
+                          <p className="text-sm text-gray-500 mt-1">
+                            Import or export questionnaire templates
+                          </p>
+                        </div>
+                        <div className="flex space-x-2">
+                          <Button variant="outline" size="sm">
+                            <DownloadCloud className="h-4 w-4 mr-2" />
+                            Import
+                          </Button>
+                          <Button variant="outline" size="sm">
+                            <DownloadCloud className="h-4 w-4 mr-2" />
+                            Export
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+                <CardFooter className="flex justify-end">
+                  <Button onClick={() => handleSaveSettings('questionnaire')}>
+                    <Save className="h-4 w-4 mr-2" />
+                    Save Questionnaire Settings
+                  </Button>
+                </CardFooter>
+              </Card>
+            </TabsContent>
+            
+            {/* Roles & Access Tab */}
+            <TabsContent value="roles">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Roles & Access Control</CardTitle>
+                  <CardDescription>
+                    Manage user roles and permissions
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Role Name
+                          </th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Description
+                          </th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Users
+                          </th>
+                          <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Actions
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        <tr>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            Administrator
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            Full system access
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            2
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                              <Edit className="h-4 w-4" />
+                              <span className="sr-only">Edit</span>
+                            </Button>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            Compliance Officer
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            Manage compliance documentation
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            5
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                              <Edit className="h-4 w-4" />
+                              <span className="sr-only">Edit</span>
+                            </Button>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            Declaration Specialist
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            Create and manage declarations
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            3
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                              <Edit className="h-4 w-4" />
+                              <span className="sr-only">Edit</span>
+                            </Button>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            Auditor
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            Read-only access to all data
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            2
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                              <Edit className="h-4 w-4" />
+                              <span className="sr-only">Edit</span>
+                            </Button>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  
+                  <div className="flex justify-end">
+                    <Button variant="outline">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Custom Role
+                    </Button>
+                  </div>
+                  
+                  <Separator />
+                  
+                  <div className="space-y-4">
+                    <h3 className="text-md font-medium">Access Settings</h3>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label htmlFor="twoFactor">Require Two-Factor Authentication</Label>
+                        <p className="text-sm text-gray-500">
+                          Require 2FA for all administrative accounts
+                        </p>
+                      </div>
+                      <Switch id="twoFactor" defaultChecked />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label htmlFor="sessionTimeout">Session Timeout (minutes)</Label>
+                        <p className="text-sm text-gray-500">
+                          Automatically log out inactive users
+                        </p>
+                      </div>
+                      <Input 
+                        id="sessionTimeout" 
+                        type="number" 
+                        defaultValue={30} 
+                        min={5} 
+                        max={240}
+                        className="w-24 text-right"
+                      />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label htmlFor="passwordPolicy">Password Policy</Label>
+                        <p className="text-sm text-gray-500">
+                          Set password requirements for all users
+                        </p>
+                      </div>
+                      <Select defaultValue="strong">
+                        <SelectTrigger className="w-40">
+                          <SelectValue placeholder="Select policy" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="basic">Basic</SelectItem>
+                          <SelectItem value="standard">Standard</SelectItem>
+                          <SelectItem value="strong">Strong</SelectItem>
+                          <SelectItem value="custom">Custom</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-gray-50 p-4 rounded-lg border">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h4 className="text-sm font-medium">User Management</h4>
+                        <p className="text-sm text-gray-500 mt-1">
+                          Manage users, permissions, and role assignments
+                        </p>
+                      </div>
+                      <Button variant="outline" size="sm">
+                        <User className="h-4 w-4 mr-2" />
+                        Manage Users
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+                <CardFooter className="flex justify-end">
+                  <Button onClick={() => handleSaveSettings('roles and access')}>
+                    <Save className="h-4 w-4 mr-2" />
+                    Save Access Settings
+                  </Button>
+                </CardFooter>
+              </Card>
             </TabsContent>
           </Tabs>
         </div>
