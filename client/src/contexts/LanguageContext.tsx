@@ -20,13 +20,24 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
   const changeLanguage = async (lang: string) => {
     await i18n.changeLanguage(lang);
     setLanguage(lang);
-    setIsRTL(i18n.dir() === 'rtl');
+    
+    // Set RTL for Arabic language
+    const isRtl = lang === 'ar';
+    setIsRTL(isRtl);
     localStorage.setItem('i18nextLng', lang);
     document.documentElement.lang = lang;
-    document.documentElement.dir = i18n.dir();
+    document.documentElement.dir = isRtl ? 'rtl' : 'ltr';
     
-    // Show toast notification on language change
-    const languageName = lang === 'en' ? 'English' : lang === 'de' ? 'German' : 'Unknown';
+    // Get proper language name
+    const languageNames: Record<string, string> = {
+      'en': 'English',
+      'fr': 'French',
+      'de': 'German',
+      'ar': 'Arabic'
+    };
+    
+    const languageName = languageNames[lang] || 'Unknown';
+    
     toast({
       title: "Language Changed",
       description: `Interface language changed to ${languageName}`,
@@ -34,17 +45,21 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
     });
   };
   
-  // Toggle between English and German as specified in requirements
+  // Toggle between available languages cycling through English, French, German, Arabic
   const toggleLanguage = () => {
-    const newLang = language === 'en' ? 'de' : 'en';
+    const languageOrder = ['en', 'fr', 'de', 'ar'];
+    const currentIndex = languageOrder.indexOf(language);
+    const nextIndex = (currentIndex + 1) % languageOrder.length;
+    const newLang = languageOrder[nextIndex];
     changeLanguage(newLang);
   };
 
   useEffect(() => {
     // Initialize with the stored language or default to English
     const storedLanguage = localStorage.getItem('i18nextLng') || 'en';
-    // Only allow EN and DE as per requirements
-    const validLang = ['en', 'de'].includes(storedLanguage) ? storedLanguage : 'en';
+    // Allow all supported languages
+    const supportedLanguages = ['en', 'fr', 'de', 'ar'];
+    const validLang = supportedLanguages.includes(storedLanguage) ? storedLanguage : 'en';
     changeLanguage(validLang);
   }, []);
 
