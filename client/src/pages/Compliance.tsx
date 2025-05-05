@@ -161,14 +161,15 @@ export default function Compliance() {
         {/* Compliance Score Widgets */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {complianceScores.map((score, index) => (
-            <Card key={index} className="border-0 shadow-md">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg font-medium">{score.title}</CardTitle>
-                <CardDescription>{score.description}</CardDescription>
+            <Card key={index} className="border border-gray-200 shadow-sm overflow-hidden">
+              <CardHeader className="px-4 py-3 bg-white border-b border-gray-200">
+                <CardTitle className="text-base font-semibold text-gray-900">{score.title}</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-3xl font-bold">{score.score}%</span>
+              <CardContent className="px-4 py-4 pt-2 bg-white">
+                <CardDescription className="text-xs text-gray-500 mb-3">{score.description}</CardDescription>
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-2xl font-bold text-gray-900">{score.score}%</span>
+                  <div className="rounded-full p-1.5 flex items-center justify-center">
                   {score.score >= 80 ? (
                     <CheckCircle2 className="h-5 w-5 text-green-500" />
                   ) : score.score >= 60 ? (
@@ -176,91 +177,93 @@ export default function Compliance() {
                   ) : (
                     <XCircle className="h-5 w-5 text-red-500" />
                   )}
+                  </div>
                 </div>
-                <Progress value={score.score} className={`h-2 ${score.color}`} />
+                <Progress 
+                  value={score.score} 
+                  className={`h-1.5 rounded-sm ${score.color} transition-all duration-300`} 
+                />
               </CardContent>
             </Card>
           ))}
         </div>
         
         {/* Non-Compliance Incidents */}
-        <div className="bg-white shadow rounded-lg mb-8">
-          <div className="px-4 py-5 border-b border-gray-200 sm:px-6">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg leading-6 font-medium text-gray-900">
-                Non-Compliance Incidents
-              </h3>
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                {nonComplianceIncidents.filter(i => i.status === 'open').length} Open Issues
-              </span>
-            </div>
-          </div>
-          <div className="overflow-hidden">
-            <ul className="divide-y divide-gray-200">
-              {nonComplianceIncidents.map((incident) => (
-                <li key={incident.id} className="px-4 py-4 sm:px-6 hover:bg-gray-50">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex items-center mb-3 sm:mb-0">
-                      <div className="flex-shrink-0">
-                        {incident.status === 'open' ? (
-                          <AlertTriangle className="h-6 w-6 text-red-500" />
-                        ) : incident.status === 'in-progress' ? (
-                          <ClockIcon className="h-6 w-6 text-amber-500" />
-                        ) : (
-                          <CheckCircle2 className="h-6 w-6 text-green-500" />
-                        )}
-                      </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">{incident.title}</div>
-                        <div className="text-sm text-gray-500">
-                          Supplier: {incident.supplier} | Reported: {incident.date}
+        <Card className="border border-gray-200 shadow-sm overflow-hidden mb-8">
+          <CardHeader className="px-4 py-3 bg-white border-b border-gray-200 flex flex-row items-center justify-between">
+            <CardTitle className="text-base font-semibold text-gray-900">
+              Non-Compliance Incidents
+            </CardTitle>
+            <Badge variant="destructive" className="bg-red-100 text-red-800 hover:bg-red-200 px-2.5 py-0.5 rounded-full text-xs font-medium border-0">
+              {nonComplianceIncidents.filter(i => i.status === 'open').length} Open Issues
+            </Badge>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="overflow-hidden">
+              <ul className="divide-y divide-gray-200">
+                {nonComplianceIncidents.map((incident) => (
+                  <li key={incident.id} className="px-4 py-3 hover:bg-gray-50 transition-colors">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                      <div className="flex items-center mb-2 sm:mb-0">
+                        <div className="flex-shrink-0">
+                          {incident.status === 'open' ? (
+                            <AlertTriangle className="h-5 w-5 text-red-500" />
+                          ) : incident.status === 'in-progress' ? (
+                            <ClockIcon className="h-5 w-5 text-amber-500" />
+                          ) : (
+                            <CheckCircle2 className="h-5 w-5 text-green-500" />
+                          )}
+                        </div>
+                        <div className="ml-3">
+                          <div className="text-sm font-medium text-gray-900">{incident.title}</div>
+                          <div className="text-xs text-gray-500">
+                            Supplier: {incident.supplier} | Reported: {incident.date}
+                          </div>
                         </div>
                       </div>
+                      <div className="flex items-center space-x-3 ml-8 sm:ml-0">
+                        {getSeverityBadge(incident.severity)}
+                        <div className="ml-2 hidden sm:flex">{getStatusBadge(incident.status)}</div>
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-full">
+                          <span className="sr-only">View details</span>
+                          <ArrowRight className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex items-center space-x-4 ml-10 sm:ml-0">
-                      {getSeverityBadge(incident.severity)}
-                      <div className="ml-2 hidden sm:flex">{getStatusBadge(incident.status)}</div>
-                      <Button variant="ghost" size="sm">
-                        <span className="sr-only">View details</span>
-                        <ArrowRight className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </CardContent>
+          <div className="bg-gray-50 px-4 py-3 border-t border-gray-200 flex justify-center">
+            <Button variant="link" className="text-blue-600 h-8 px-2 py-0">View All Compliance Issues</Button>
           </div>
-          <div className="bg-gray-50 px-4 py-4 sm:px-6 flex justify-center">
-            <Button variant="link">View All Compliance Issues</Button>
-          </div>
-        </div>
+        </Card>
         
         {/* Compliance Tips */}
-        <Card className="bg-blue-50 border-blue-200">
-          <CardHeader>
-            <div className="flex items-center">
-              <Lightbulb className="h-5 w-5 text-blue-600 mr-2" />
-              <CardTitle className="text-lg">Compliance Tips</CardTitle>
-            </div>
+        <Card className="border border-gray-200 shadow-sm overflow-hidden bg-white">
+          <CardHeader className="px-4 py-3 border-b border-gray-200 flex flex-row items-center">
+            <Lightbulb className="h-5 w-5 text-blue-600 mr-2" />
+            <CardTitle className="text-base font-semibold text-gray-900">Compliance Tips</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className={cn("flex", isRTL && "flex-row-reverse text-right")}>
-                <ShieldCheck className={cn("h-5 w-5 text-green-600 flex-shrink-0", isRTL ? "ml-3" : "mr-3")} />
-                <p className="text-sm">Ensure all suppliers have completed their due diligence documentation</p>
+          <CardContent className="p-4">
+            <div className="space-y-3">
+              <div className={cn("flex items-start", isRTL && "flex-row-reverse text-right")}>
+                <ShieldCheck className={cn("h-4 w-4 mt-0.5 text-green-600 flex-shrink-0", isRTL ? "ml-3" : "mr-3")} />
+                <p className="text-sm text-gray-700">Ensure all suppliers have completed their due diligence documentation</p>
               </div>
-              <div className={cn("flex", isRTL && "flex-row-reverse text-right")}>
-                <ShieldCheck className={cn("h-5 w-5 text-green-600 flex-shrink-0", isRTL ? "ml-3" : "mr-3")} />
-                <p className="text-sm">Regularly monitor changes in EUDR compliance requirements</p>
+              <div className={cn("flex items-start", isRTL && "flex-row-reverse text-right")}>
+                <ShieldCheck className={cn("h-4 w-4 mt-0.5 text-green-600 flex-shrink-0", isRTL ? "ml-3" : "mr-3")} />
+                <p className="text-sm text-gray-700">Regularly monitor changes in EUDR compliance requirements</p>
               </div>
-              <div className={cn("flex", isRTL && "flex-row-reverse text-right")}>
-                <ShieldCheck className={cn("h-5 w-5 text-green-600 flex-shrink-0", isRTL ? "ml-3" : "mr-3")} />
-                <p className="text-sm">Conduct quarterly risk assessments for high-risk suppliers</p>
+              <div className={cn("flex items-start", isRTL && "flex-row-reverse text-right")}>
+                <ShieldCheck className={cn("h-4 w-4 mt-0.5 text-green-600 flex-shrink-0", isRTL ? "ml-3" : "mr-3")} />
+                <p className="text-sm text-gray-700">Conduct quarterly risk assessments for high-risk suppliers</p>
               </div>
             </div>
           </CardContent>
-          <CardFooter>
-            <Button variant="link" className="text-blue-600 p-0">
+          <CardFooter className="px-4 py-3 bg-gray-50 border-t border-gray-200">
+            <Button variant="link" className="text-blue-600 p-0 h-8">
               Read Compliance Guide
             </Button>
           </CardFooter>
