@@ -98,7 +98,7 @@ export function ViewResponseForm({ open, onOpenChange, supplierId, supplierName 
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto modal-transition">
         <DialogHeader>
           <DialogTitle className="text-xl">SAQ Response: {supplierName}</DialogTitle>
           <DialogDescription>
@@ -122,7 +122,7 @@ export function ViewResponseForm({ open, onOpenChange, supplierId, supplierName 
               <span className={`text-3xl font-bold ${getScoreColor(responseData.score)}`}>
                 {responseData.score}%
               </span>
-              <Button variant="outline" size="sm" className="gap-1">
+              <Button variant="outline" size="sm" className="gap-1 transition-all duration-200">
                 <Download className="h-4 w-4" />
                 Export
               </Button>

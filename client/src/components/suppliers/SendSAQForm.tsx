@@ -109,7 +109,7 @@ export function SendSAQForm({ open, onOpenChange, supplierName, onSubmit }: Send
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] modal-transition">
         <DialogHeader>
           <DialogTitle>Send Self-Assessment Questionnaire</DialogTitle>
           <DialogDescription>

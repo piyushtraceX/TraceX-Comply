@@ -44,6 +44,7 @@ const supplierFormSchema = z.object({
 export type SupplierFormData = z.infer<typeof supplierFormSchema>;
 
 export function AddSupplierForm({ open, onOpenChange, onSubmit, formType }: AddSupplierFormProps) {
+  // Adding animation classes for smoother transitions
   const {
     register,
     handleSubmit,
@@ -241,7 +242,7 @@ export function AddSupplierForm({ open, onOpenChange, onSubmit, formType }: AddS
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] modal-transition">
         <DialogHeader>
           <DialogTitle>{getDialogTitle()}</DialogTitle>
           <DialogDescription>
@@ -259,6 +260,7 @@ export function AddSupplierForm({ open, onOpenChange, onSubmit, formType }: AddS
             type="submit" 
             onClick={() => handleSubmit(processForm)()}
             disabled={isSubmitting}
+            className="transition-all duration-200"
           >
             {isSubmitting ? "Processing..." : "Save Supplier"}
           </Button>

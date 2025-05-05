@@ -9,21 +9,26 @@
     font-family: 'Inter', sans-serif;
   }
   
-  /* Standardizing font sizes across the app */
+  /* Standardizing font sizes across the app to match reference */
   h1, h2, h3, h4, h5, h6 {
     @apply tracking-tight text-gray-900;
   }
   
   h1 {
-    @apply text-3xl font-semibold sm:text-4xl;
+    @apply text-2xl font-semibold sm:text-3xl;
   }
   
   h2 {
-    @apply text-2xl font-bold sm:text-3xl;
+    @apply text-xl font-semibold sm:text-2xl;
   }
   
   h3 {
     @apply text-lg font-medium leading-6;
+  }
+  
+  /* Table headers */
+  th {
+    @apply text-xs font-medium uppercase text-gray-500 tracking-wider;
   }
   
   /* Standard text sizes */
@@ -32,7 +37,7 @@
   }
   
   .text-secondary {
-    @apply text-sm leading-5 text-gray-500;
+    @apply text-xs leading-5 text-gray-500;
   }
   
   /* Standard spacing for components */
@@ -46,13 +51,31 @@
   }
   
   /* Buttons and badges */
-  button, .badge {
+  button {
     @apply text-sm font-medium;
+  }
+  
+  .badge {
+    @apply text-xs font-medium;
   }
   
   /* Card styles */
   .card-title {
-    @apply text-lg font-medium leading-6;
+    @apply text-base font-medium leading-6;
+  }
+  
+  /* Custom transitions for modals and animations */
+  .modal-transition {
+    @apply transition-all duration-300 ease-in-out;
+  }
+  
+  /* Dashboard card content */
+  .card-value {
+    @apply text-xl font-bold text-gray-900;
+  }
+  
+  .card-label {
+    @apply text-xs font-medium text-gray-500 uppercase tracking-wide;
   }
 }
 
