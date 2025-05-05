@@ -188,7 +188,30 @@ export default function SupplyChain() {
   
   const handleExportResults = () => {
     console.log("Export results clicked");
-    alert("Assessment results would be exported");
+    
+    // Create CSV content
+    const headers = ["Supplier Name", "Decision", "Explanation"];
+    const rows = [
+      ["ABC Corp", "Compliant", "Meets compliance standards"],
+      ["ABC Corp", "Non-Compliant", "Does not meet compliance standards"],
+      ["ABC Corp", "SAQ Pending", "Awaiting SAQ completion"]
+    ];
+    
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.join(','))
+    ].join('\n');
+    
+    // Create a blob and download link
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'assessment-results.csv');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
   
   const handleSupplierSubmit = (data: SupplierFormData) => {
@@ -564,116 +587,6 @@ export default function SupplyChain() {
                       </tr>
                     </tbody>
                   </table>
-                </div>
-              </div>
-              
-              {/* SAQ Management Table */}
-              <div className="mt-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-medium text-gray-900">Questionnaire Management</h3>
-                  <Button size="sm" className="gap-1">
-                    <Plus className="h-4 w-4" />
-                    New Questionnaire
-                  </Button>
-                </div>
-                
-                <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 border-b border-gray-200">
-                    <div className="relative w-full sm:w-72">
-                      <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
-                      <Input
-                        type="search"
-                        placeholder="Search questionnaires..."
-                        className="w-full pl-9"
-                      />
-                    </div>
-                    
-                    <Select defaultValue="all">
-                      <SelectTrigger className="w-full sm:w-48">
-                        <SelectValue placeholder="Filter by status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Statuses</SelectItem>
-                        <SelectItem value="published">Published</SelectItem>
-                        <SelectItem value="draft">Draft</SelectItem>
-                        <SelectItem value="archived">Archived</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="overflow-x-auto">
-                    <table className="w-full border-collapse">
-                      <thead>
-                        <tr className="bg-gray-50 border-b border-gray-200">
-                          <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Questionnaire Title</th>
-                          <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Status</th>
-                          <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Deadline</th>
-                          <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Assigned Suppliers</th>
-                          <th className="px-4 py-3 text-right text-sm font-medium text-gray-600">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr className="border-b border-gray-200 hover:bg-gray-50">
-                          <td className="px-4 py-3">
-                            <div>
-                              <div className="font-medium">EUDR Basic Compliance Assessment</div>
-                              <div className="text-sm text-gray-500">Basic assessment for suppliers to verify compliance with EU Deforestation Regulation</div>
-                            </div>
-                          </td>
-                          <td className="px-4 py-3">
-                            <Badge className="bg-green-100 text-green-800 hover:bg-green-200">
-                              <CheckCircle className="h-3 w-3 mr-1" />
-                              Published
-                            </Badge>
-                          </td>
-                          <td className="px-4 py-3 whitespace-nowrap">
-                            2023-12-31
-                          </td>
-                          <td className="px-4 py-3">
-                            <div className="flex flex-wrap gap-1">
-                              <Badge variant="outline" className="bg-gray-100 text-xs">
-                                Eco Timber Solutions
-                              </Badge>
-                              <Badge variant="outline" className="bg-gray-100 text-xs">
-                                Green Forest Products
-                              </Badge>
-                            </div>
-                          </td>
-                          <td className="px-4 py-3 text-right whitespace-nowrap">
-                            <div className="flex justify-end items-center space-x-2">
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                className="h-8 w-8 p-0"
-                                onClick={() => console.log("View questionnaire details")}
-                              >
-                                <Eye className="h-4 w-4" />
-                                <span className="sr-only">View</span>
-                              </Button>
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                className="h-8 w-8 p-0"
-                                onClick={() => console.log("Edit questionnaire")}
-                              >
-                                <Eye className="h-4 w-4" />
-                                <span className="sr-only">Edit</span>
-                              </Button>
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                className="h-8 w-8 p-0 text-red-500 hover:text-red-600 hover:bg-red-50"
-                                onClick={() => console.log("Delete questionnaire")}
-                              >
-                                <Eye className="h-4 w-4" />
-                                <span className="sr-only">Delete</span>
-                              </Button>
-                            </div>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
                 </div>
               </div>
             </div>
