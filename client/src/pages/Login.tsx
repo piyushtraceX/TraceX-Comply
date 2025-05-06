@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Logo } from '@/components/ui/logo';
 import { Lock, Mail, Eye, EyeOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -16,23 +16,22 @@ export default function Login() {
   const { t } = useTranslation();
   const { isRTL } = useLanguage();
   const { toast } = useToast();
-  const auth = useAuth();
-  const [, setLocation] = useLocation();
+  const { login, isLoggedIn } = useAuth();
+  const [, navigate] = useLocation();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // If already logged in, redirect to dashboard
+  // Redirect if already logged in
   React.useEffect(() => {
-    if (auth.isLoggedIn) {
-      setLocation('/dashboard');
+    if (isLoggedIn) {
+      navigate('/dashboard');
     }
-  }, [auth.isLoggedIn, setLocation]);
+  }, [isLoggedIn, navigate]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     
     // Simple validation
     if (!email || !password) {
@@ -41,34 +40,24 @@ export default function Login() {
         description: "Please enter both email and password",
         variant: "destructive",
       });
-      setIsLoading(false);
       return;
     }
     
-    // Simulate login
+    setIsLoading(true);
+    
+    // Login is immediate since we're not doing real auth
+    login();
+    
+    toast({
+      title: "Success",
+      description: "You have been logged in successfully",
+    });
+    
+    // Navigate to dashboard
     setTimeout(() => {
-      try {
-        // Call the login function from auth context
-        auth.login();
-        
-        // Success message
-        toast({
-          title: "Success",
-          description: "You have been logged in successfully",
-        });
-        
-        // Redirect to dashboard
-        setLocation('/dashboard');
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: "Failed to login. Please try again.",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    }, 1000);
+      navigate('/dashboard');
+      setIsLoading(false);
+    }, 500);
   };
 
   return (

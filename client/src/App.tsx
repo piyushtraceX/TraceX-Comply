@@ -77,6 +77,21 @@ export const useAuth = () => {
   return useContext(AuthContext);
 };
 
+// Protected route component
+const ProtectedRoute: React.FC<{ component: React.ComponentType }> = ({ component: Component }) => {
+  const { isLoggedIn } = useAuth();
+  const [, navigate] = useLocation();
+  
+  React.useEffect(() => {
+    if (!isLoggedIn) {
+      navigate('/login');
+    }
+  }, [isLoggedIn, navigate]);
+  
+  if (!isLoggedIn) return null;
+  return <Component />;
+};
+
 function App() {
   console.log("App component rendering");
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
@@ -111,28 +126,27 @@ function App() {
                   <Suspense fallback={<Loading />}>
                     <Switch>
                       <Route path="/login" component={Login} />
-                      <Route path="/" component={isLoggedIn ? HomePage : Login} />
-                      <Route path="/dashboard" component={isLoggedIn ? Dashboard : Login} />
-                      <Route path="/supply-chain" component={isLoggedIn ? SupplyChain : Login} />
-                      <Route path="/sourcing-entities" component={isLoggedIn ? SourcingEntities : Login} />
-                      <Route path="/import-sources" component={isLoggedIn ? ImportSources : Login} />
-                      <Route path="/supplier" component={isLoggedIn ? () => <Layout title="Suppliers">Suppliers List</Layout> : Login} />
-                      {/* Redirect SAQ Management to Supply Chain page */}
+                      <Route path="/" component={() => <ProtectedRoute component={HomePage} />} />
+                      <Route path="/dashboard" component={() => <ProtectedRoute component={Dashboard} />} />
+                      <Route path="/supply-chain" component={() => <ProtectedRoute component={SupplyChain} />} />
+                      <Route path="/sourcing-entities" component={() => <ProtectedRoute component={SourcingEntities} />} />
+                      <Route path="/import-sources" component={() => <ProtectedRoute component={ImportSources} />} />
+                      <Route path="/supplier" component={() => <ProtectedRoute component={() => <Layout title="Suppliers">Suppliers List</Layout>} />} />
                       <Route path="/saq-management" component={() => {
                         window.location.href = '/supply-chain';
                         return <div>Redirecting to Supply Chain...</div>;
                       }} />
-                      <Route path="/add-supplier" component={isLoggedIn ? AddSupplier : Login} />
-                      <Route path="/supplier/:id" component={isLoggedIn ? SupplierDetail : Login} />
-                      <Route path="/compliance" component={isLoggedIn ? Compliance : Login} />
-                      <Route path="/declarations" component={isLoggedIn ? Declarations : Login} />
-                      <Route path="/add-declaration" component={isLoggedIn ? AddDeclaration : Login} />
-                      <Route path="/customers" component={isLoggedIn ? Customers : Login} />
-                      <Route path="/customer" component={isLoggedIn ? Customers : Login} />
-                      <Route path="/add-customer" component={isLoggedIn ? AddCustomer : Login} />
-                      <Route path="/settings" component={isLoggedIn ? Settings : Login} />
-                      <Route path="/test-language" component={isLoggedIn ? TestLanguage : Login} />
-                      <Route path="/test-persona" component={isLoggedIn ? TestPersona : Login} />
+                      <Route path="/add-supplier" component={() => <ProtectedRoute component={AddSupplier} />} />
+                      <Route path="/supplier/:id" component={() => <ProtectedRoute component={SupplierDetail} />} />
+                      <Route path="/compliance" component={() => <ProtectedRoute component={Compliance} />} />
+                      <Route path="/declarations" component={() => <ProtectedRoute component={Declarations} />} />
+                      <Route path="/add-declaration" component={() => <ProtectedRoute component={AddDeclaration} />} />
+                      <Route path="/customers" component={() => <ProtectedRoute component={Customers} />} />
+                      <Route path="/customer" component={() => <ProtectedRoute component={Customers} />} />
+                      <Route path="/add-customer" component={() => <ProtectedRoute component={AddCustomer} />} />
+                      <Route path="/settings" component={() => <ProtectedRoute component={Settings} />} />
+                      <Route path="/test-language" component={() => <ProtectedRoute component={TestLanguage} />} />
+                      <Route path="/test-persona" component={() => <ProtectedRoute component={TestPersona} />} />
                       <Route path="/debug" component={() => <div className="p-10">Debug Page Working</div>} />
                       <Route component={NotFound} />
                     </Switch>
