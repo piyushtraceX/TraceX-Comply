@@ -1,39 +1,37 @@
-import React, { useState } from 'react';
-import { useTranslation } from '@/hooks/use-translation';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { useAuth } from '@/App';
-import { cn } from '@/lib/utils';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
-import { Logo } from '@/components/ui/logo';
 import { Lock, Mail, Eye, EyeOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useLocation } from 'wouter';
+import { useAuth } from '@/lib/auth/auth-context';
+
+// Simple logo component
+const Logo = () => (
+  <div className="text-3xl font-bold text-primary-600">EUDR Comply</div>
+);
 
 export default function Login() {
-  const { t } = useTranslation();
-  const { isRTL } = useLanguage();
-  const { toast } = useToast();
-  const { login, isLoggedIn } = useAuth();
-  const [, navigate] = useLocation();
-  const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isLoggedIn, login } = useAuth();
+  const [, navigate] = useLocation();
+  const { toast } = useToast();
 
-  // Redirect if already logged in
-  React.useEffect(() => {
+  // If already logged in, redirect to dashboard
+  useEffect(() => {
     if (isLoggedIn) {
       navigate('/dashboard');
     }
   }, [isLoggedIn, navigate]);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Simple validation
+
     if (!email || !password) {
       toast({
         title: "Error",
@@ -42,29 +40,26 @@ export default function Login() {
       });
       return;
     }
+
+    setIsSubmitting(true);
     
-    setIsLoading(true);
-    
-    // Login is immediate since we're not doing real auth
-    login();
-    
-    toast({
-      title: "Success",
-      description: "You have been logged in successfully",
-    });
-    
-    // Navigate to dashboard
+    // For demo purposes, we'll accept any credentials
     setTimeout(() => {
+      login();
+      toast({
+        title: "Success",
+        description: "You have been logged in successfully",
+      });
+      setIsSubmitting(false);
       navigate('/dashboard');
-      setIsLoading(false);
-    }, 500);
+    }, 1000);
   };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
-          <Logo className="w-auto h-12" />
+          <Logo />
         </div>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
           Sign in to your account
@@ -77,12 +72,10 @@ export default function Login() {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <Card className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <CardContent className="pt-4">
-            <form className="space-y-6" onSubmit={handleLogin}>
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <Label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                  Email address
-                </Label>
-                <div className="mt-1 relative rounded-md shadow-sm">
+                <Label htmlFor="email">Email address</Label>
+                <div className="mt-1 relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <Mail className="h-5 w-5 text-gray-400" />
                   </div>
@@ -92,7 +85,7 @@ export default function Login() {
                     type="email"
                     autoComplete="email"
                     required
-                    className="block w-full pl-10 sm:text-sm border-gray-300 focus:ring-primary-500 focus:border-primary-500 rounded-md"
+                    className="pl-10"
                     placeholder="you@example.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -101,10 +94,8 @@ export default function Login() {
               </div>
 
               <div>
-                <Label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                  Password
-                </Label>
-                <div className="mt-1 relative rounded-md shadow-sm">
+                <Label htmlFor="password">Password</Label>
+                <div className="mt-1 relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <Lock className="h-5 w-5 text-gray-400" />
                   </div>
@@ -114,7 +105,7 @@ export default function Login() {
                     type={showPassword ? "text" : "password"}
                     autoComplete="current-password"
                     required
-                    className="block w-full pl-10 sm:text-sm border-gray-300 focus:ring-primary-500 focus:border-primary-500 rounded-md"
+                    className="pl-10"
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -158,10 +149,10 @@ export default function Login() {
               <div>
                 <Button
                   type="submit"
-                  className="w-full flex justify-center py-2 px-4"
-                  disabled={isLoading}
+                  className="w-full"
+                  disabled={isSubmitting}
                 >
-                  {isLoading ? "Signing in..." : "Sign in"}
+                  {isSubmitting ? "Signing in..." : "Sign in"}
                 </Button>
               </div>
             </form>

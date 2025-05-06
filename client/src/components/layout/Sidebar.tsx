@@ -3,10 +3,19 @@ import { Link, useLocation } from 'wouter';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/hooks/use-translation';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Logo } from '@/components/ui/logo';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useAuth } from '@/App';
+import { useAuth } from '@/lib/auth/auth-context';
 import { X, Menu, LayoutDashboard, Network, ShieldCheck, FileText, Users, Settings, User, LogOut, ClipboardList, Globe } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+
+// Simple logo component
+export const Logo = () => {
+  return (
+    <div className="flex items-center gap-2">
+      <div className="font-bold text-primary-600 text-xl">EUDR Comply</div>
+    </div>
+  );
+};
 
 // Navigation item type
 type NavItem = {
@@ -30,13 +39,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const [location] = useLocation();
   const isMobile = useIsMobile();
   const { logout } = useAuth();
-
-  // Log sidebar state for debugging
-  useEffect(() => {
-    console.log("Sidebar rendered:", { isOpen, isMobile, location });
-    
-    return () => console.log("Sidebar unmounted");
-  }, [isOpen, isMobile, location]);
+  const { toast } = useToast();
 
   // Navigation items in the order specified by the reference app
   const navItems: NavItem[] = [
@@ -105,11 +108,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
       window.removeEventListener('resize', handleResize);
     };
   }, [isMobile, isOpen, onClose]);
-  
-  // Handle logout click
-  const handleLogout = (e: React.MouseEvent) => {
-    e.preventDefault();
+
+  // Handle logout
+  const handleLogout = () => {
+    console.log("Logging out...");
     logout();
+    toast({
+      title: "Logged out",
+      description: "You have been successfully logged out.",
+    });
   };
 
   return (
