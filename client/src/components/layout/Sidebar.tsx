@@ -5,6 +5,7 @@ import { useTranslation } from '@/hooks/use-translation';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Logo } from '@/components/ui/logo';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useAuth } from '@/App';
 import { X, Menu, LayoutDashboard, Network, ShieldCheck, FileText, Users, Settings, User, LogOut, ClipboardList, Globe } from 'lucide-react';
 
 // Navigation item type
@@ -28,6 +29,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const { isRTL } = useLanguage();
   const [location] = useLocation();
   const isMobile = useIsMobile();
+  const { logout } = useAuth();
 
   // Log sidebar state for debugging
   useEffect(() => {
@@ -103,6 +105,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
       window.removeEventListener('resize', handleResize);
     };
   }, [isMobile, isOpen, onClose]);
+  
+  // Handle logout click
+  const handleLogout = (e: React.MouseEvent) => {
+    e.preventDefault();
+    logout();
+  };
 
   return (
     <>
@@ -227,7 +235,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <p className="text-sm font-medium text-gray-900">{t('user.name')}</p>
                 <p className="text-xs font-medium text-gray-500">{t('user.email')}</p>
               </div>
-              <button className={cn('ml-auto flex-shrink-0 bg-white rounded-full p-1 text-gray-400 hover:text-gray-500', isRTL && 'mr-auto ml-0')}>
+              <button 
+                onClick={handleLogout}
+                className={cn('ml-auto flex-shrink-0 bg-white rounded-full p-1 text-gray-400 hover:text-gray-500', isRTL && 'mr-auto ml-0')}
+                aria-label="Logout"
+              >
                 <LogOut className="h-4 w-4" />
               </button>
             </div>
