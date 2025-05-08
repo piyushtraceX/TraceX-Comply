@@ -22,10 +22,18 @@ export function AuthDebugger() {
   
   // Handle API backend switch
   const handleBackendSwitch = (checked: boolean) => {
+    console.log(`Switching to ${checked ? 'Go' : 'Express'} backend`);
+    
     setUseGoBackend(checked);
     setApiEndpoint(checked ? 'go' : 'express');
+    
     // Clear query cache when switching backends
     queryClient.clear();
+    
+    // Force a reload after a short delay to ensure all hooks re-run with new API configuration
+    setTimeout(() => {
+      window.location.reload();
+    }, 500);
   };
   
   // Handle login

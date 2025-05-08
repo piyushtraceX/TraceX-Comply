@@ -57,19 +57,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   } = useQuery({
     queryKey: ['auth', 'me'],
     queryFn: async () => {
-      // If we're on the auth page, skip the API call
+      // If we're on the auth page, skip the API call to avoid unnecessary 401 errors
       if (isAuthPage) {
+        console.log('On auth page, skipping auth check');
         return null;
       }
       
       try {
+        console.log('Fetching current user...');
         const response = await authApi.getCurrentUser();
+        console.log('Current user fetched:', response.data);
         return response.data;
-      } catch (error) {
+      } catch (error: any) {
         // Return null for 401 errors (not authenticated)
         if (axios.isAxiosError(error) && error.response?.status === 401) {
+          console.log('Not authenticated (401)');
           return null;
         }
+        
+        // Log other errors for debugging
+        console.error('Error fetching current user:', error);
+        if (axios.isAxiosError(error)) {
+          console.error('Response status:', error.response?.status);
+          console.error('Response data:', error.response?.data);
+        }
+        
         throw error;
       }
     },
@@ -77,7 +89,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     refetchOnWindowFocus: false,
     refetchInterval: false,
     staleTime: Infinity,
-    retry: false,
+    retry: 1, // Allow one retry for potential network issues
+    retryDelay: 1000, // Wait 1 second before retrying
     // Skip the query if we're on the auth page
     enabled: !isAuthPage,
   });
@@ -94,21 +107,50 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Login mutation
   const loginMutation = useMutation({
-    mutationFn: (credentials: LoginCredentials) => {
-      return authApi.login(credentials.username, credentials.password);
+    mutationFn: async (credentials: LoginCredentials) => {
+      console.log('Attempting login with:', credentials.username);
+      try {
+        const response = await authApi.login(credentials.username, credentials.password);
+        console.log('Login successful, response:', response.data);
+        return response;
+      } catch (error: any) {
+        console.error('Login error:', error);
+        
+        if (axios.isAxiosError(error)) {
+          console.error('Login response status:', error.response?.status);
+          console.error('Login response data:', error.response?.data);
+        }
+        
+        throw error;
+      }
     },
     onSuccess: (response) => {
       // Update the user data in the query cache
+      console.log('Updating auth cache with user data');
       queryClient.setQueryData(['auth', 'me'], response.data);
+      
       toast({
         title: "Login successful",
-        description: "Welcome back!",
+        description: `Welcome back, ${response.data.user?.name || response.data.user?.username}!`,
       });
+      
+      // Redirect to the dashboard after successful login
+      if (window.location.pathname === '/auth') {
+        setTimeout(() => {
+          window.location.href = '/dashboard';
+        }, 500);
+      }
     },
     onError: (error: any) => {
+      const errorMessage = 
+        error.response?.data?.error || 
+        error.response?.data?.message ||
+        error.message ||
+        "Invalid username or password";
+        
       toast({
         title: "Login failed",
-        description: error.response?.data?.error || "Invalid username or password",
+        description: errorMessage,
         variant: "destructive",
       });
     },
@@ -116,23 +158,55 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Logout mutation
   const logoutMutation = useMutation({
-    mutationFn: () => {
-      return authApi.logout();
+    mutationFn: async () => {
+      console.log('Attempting logout...');
+      try {
+        const response = await authApi.logout();
+        console.log('Logout API call succeeded');
+        return response;
+      } catch (error: any) {
+        console.error('Logout error:', error);
+        
+        // Sometimes logout fails because the session is already expired
+        // In this case, we can just clear the local state anyway
+        if (axios.isAxiosError(error) && error.response?.status === 401) {
+          console.log('Session already expired, continuing with local logout');
+          return null;
+        }
+        
+        throw error;
+      }
     },
     onSuccess: () => {
       // Clear user data from the query cache
+      console.log('Clearing auth cache');
       queryClient.setQueryData(['auth', 'me'], null);
+      
       toast({
         title: "Logged out",
         description: "You have been successfully logged out",
       });
+      
+      // Redirect to login page
+      setTimeout(() => {
+        window.location.href = '/auth';
+      }, 500);
     },
     onError: (error: any) => {
+      const errorMessage = 
+        error.response?.data?.error || 
+        error.response?.data?.message ||
+        error.message ||
+        "An error occurred while logging out";
+      
       toast({
         title: "Logout failed",
-        description: error.response?.data?.error || "An error occurred while logging out",
+        description: errorMessage,
         variant: "destructive",
       });
+      
+      // Even if logout fails on the server, clear local state
+      queryClient.setQueryData(['auth', 'me'], null);
     },
   });
 

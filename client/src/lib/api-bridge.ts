@@ -22,6 +22,12 @@ const API_CONFIGS = {
   }
 };
 
+// Log the available API configurations
+console.log('API configurations:', {
+  express: API_CONFIGS.express.baseURL,
+  go: API_CONFIGS.go.baseURL
+});
+
 // Current API endpoint to use, defaults to Express
 // Can be changed at runtime to test the Go backend
 let currentEndpoint: ApiEndpoint = 'express';
