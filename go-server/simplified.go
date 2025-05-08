@@ -5,10 +5,9 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
+	"strings"
 	"time"
-
-	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
 )
 
 func main() {
@@ -18,90 +17,147 @@ func main() {
 		port = "8080"
 	}
 
-	// Log configuration
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
-	log.Printf("Starting simplified Go API server on port %s", port)
-
-	// Create router
-	router := gin.Default()
-
-	// Configure CORS
-	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"*"},
-		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
-		ExposeHeaders:    []string{"Content-Length"},
-		AllowCredentials: true,
-		MaxAge:           12 * time.Hour,
-	}))
+	// Simple multiplexer
+	mux := http.NewServeMux()
 
 	// API routes
-	api := router.Group("/api")
-	{
-		// Health check endpoint
-		api.GET("/health", func(c *gin.Context) {
-			c.JSON(http.StatusOK, gin.H{
-				"status":    "ok",
-				"message":   "Go API server is running",
-				"timestamp": time.Now().Format(time.RFC3339),
-				"version":   "1.0.0",
-			})
-		})
+	mux.HandleFunc("/api/health", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintf(w, `{"status":"ok","message":"Go API server is running","timestamp":"%s","version":"1.0.0"}`, time.Now().Format(time.RFC3339))
+	})
 
-		// Test endpoint for verifying Go API is working
-		api.GET("/test", func(c *gin.Context) {
-			c.JSON(http.StatusOK, gin.H{
-				"message":   "Go API test endpoint is working",
-				"timestamp": time.Now().Format(time.RFC3339),
-			})
-		})
+	// Auth routes
+	mux.HandleFunc("/api/auth/login", handleLogin)
+	mux.HandleFunc("/api/auth/logout", handleLogout)
+	mux.HandleFunc("/api/auth/me", handleGetCurrentUser)
+	mux.HandleFunc("/api/auth/switch-tenant", handleSwitchTenant)
 
-		// Simple authentication endpoint
-		api.POST("/auth/login", func(c *gin.Context) {
-			var credentials struct {
-				Username string `json:"username" binding:"required"`
-				Password string `json:"password" binding:"required"`
-			}
+	// Test endpoint
+	mux.HandleFunc("/api/test", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintf(w, `{"message":"Go API test endpoint is working","timestamp":"%s"}`, time.Now().Format(time.RFC3339))
+	})
 
-			if err := c.ShouldBindJSON(&credentials); err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
-				return
-			}
-
-			// For demo purposes, accept any credentials
-			user := gin.H{
-				"id":       1,
-				"username": credentials.Username,
-				"name":     "Demo User",
-				"email":    "demo@example.com",
-			}
-
-			c.JSON(http.StatusOK, gin.H{
-				"user": user,
-			})
-		})
-
-		// Get current user endpoint
-		api.GET("/auth/me", func(c *gin.Context) {
-			// In production, get user from session
-			// For demo, return sample user
-			user := gin.H{
-				"id":       1,
-				"username": "demouser",
-				"name":     "Demo User",
-				"email":    "demo@example.com",
-			}
-
-			c.JSON(http.StatusOK, gin.H{
-				"user": user,
-			})
-		})
+	// Set up static file serving
+	staticDir := os.Getenv("STATIC_DIR")
+	if staticDir == "" {
+		staticDir = "../client/dist"
 	}
+
+	// Serve static files
+	fileServer := http.FileServer(http.Dir(staticDir))
+	mux.Handle("/assets/", fileServer)
+	mux.Handle("/src/", fileServer)
+	mux.Handle("/node_modules/", fileServer)
+	mux.Handle("/@fs/", fileServer)
+	mux.Handle("/locales/", fileServer)
+	mux.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, filepath.Join(staticDir, "favicon.ico"))
+	})
+
+	// Handle SPA routes - serve index.html for any unmatched route
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		// Skip API routes which are handled separately
+		if strings.HasPrefix(r.URL.Path, "/api/") {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusNotFound)
+			fmt.Fprintf(w, `{"error":"API endpoint not found"}`)
+			return
+		}
+
+		// For known static assets, return 404 if not found
+		if strings.HasPrefix(r.URL.Path, "/assets/") ||
+			strings.HasPrefix(r.URL.Path, "/src/") ||
+			strings.HasPrefix(r.URL.Path, "/node_modules/") ||
+			strings.HasPrefix(r.URL.Path, "/@fs/") ||
+			strings.HasPrefix(r.URL.Path, "/locales/") {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+
+		// Otherwise serve index.html for client-side routing
+		http.ServeFile(w, r, filepath.Join(staticDir, "index.html"))
+	})
+
+	// Set up middleware for CORS
+	handler := corsMiddleware(mux)
 
 	// Start server
 	serverAddr := fmt.Sprintf("0.0.0.0:%s", port)
 	log.Printf("Server running on %s", serverAddr)
-	if err := router.Run(serverAddr); err != nil {
+	log.Printf("Serving static files from: %s", staticDir)
+	if err := http.ListenAndServe(serverAddr, handler); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
+}
+
+func corsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Set CORS headers
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization, Set-Cookie, Cookie")
+		w.Header().Set("Access-Control-Expose-Headers", "Content-Length, Set-Cookie")
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
+
+		// Handle preflight requests
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		// Pass request to the next handler
+		next.ServeHTTP(w, r)
+	})
+}
+
+// Auth handlers
+func handleLogin(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	// In a real app, you would parse the request body and validate credentials
+	// For demo, accept any credentials
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprint(w, `{"user":{"id":1,"username":"demouser","name":"Demo User","email":"demo@example.com"}}`)
+}
+
+func handleLogout(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprint(w, `{"message":"Logged out successfully"}`)
+}
+
+func handleGetCurrentUser(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprint(w, `{"user":{"id":1,"username":"demouser","name":"Demo User","email":"demo@example.com"}}`)
+}
+
+func handleSwitchTenant(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	// In a real app, you would parse the request body to get tenantId
+	// For demo, return a fixed tenant
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprint(w, `{"tenant":{"id":1,"name":"Tenant 1","description":"Demo tenant"}}`)
 }
