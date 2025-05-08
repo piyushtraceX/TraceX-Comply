@@ -5,7 +5,7 @@ import { useTranslation } from '@/hooks/use-translation';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAuth } from '@/contexts/AuthContextV2';
-import { X, Menu, LayoutDashboard, Network, ShieldCheck, FileText, Users, Settings, User, LogOut, ClipboardList, Globe } from 'lucide-react';
+import { X, Menu, LayoutDashboard, Network, ShieldCheck, FileText, Users, Settings, User, LogOut, ClipboardList, Globe, UserCog } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 // Simple logo component
@@ -70,6 +70,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
       href: '/customers',
       label: t('nav.customers'),
       icon: <Users className={cn('h-4 w-4', isRTL ? 'ml-2.5 rtl-flip' : 'mr-2.5')} />,
+    },
+    {
+      href: '/user-management',
+      label: t('nav.userManagement') || 'User Management',
+      icon: <UserCog className={cn('h-4 w-4', isRTL ? 'ml-2.5 rtl-flip' : 'mr-2.5')} />,
     },
     {
       href: '/settings',

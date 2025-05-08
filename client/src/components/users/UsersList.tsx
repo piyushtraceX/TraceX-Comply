@@ -71,13 +71,19 @@ export const UsersList: React.FC = () => {
   // Create/update user mutation
   const mutation = useMutation({
     mutationFn: async (values: UserFormValues) => {
+      // Prepare the user data with displayName instead of name
+      const userData = {
+        ...values,
+        displayName: values.name, // Map name to displayName for the API
+      };
+      
       if (editingUser) {
         // Update user
-        const response = await apiRequest('PATCH', `/api/users/${editingUser.id}`, values);
+        const response = await apiRequest('PATCH', `/api/users/${editingUser.id}`, userData);
         return await response.json();
       } else {
         // Create new user
-        const response = await apiRequest('POST', '/api/users', values);
+        const response = await apiRequest('POST', '/api/users', userData);
         return await response.json();
       }
     },
@@ -134,11 +140,11 @@ export const UsersList: React.FC = () => {
     setEditingUser(user);
     form.reset({
       username: user.username,
-      name: user.name,
-      email: user.email,
+      name: user.displayName || '', // Use displayName as name
+      email: user.email || '',
       password: '', // Don't populate password for security
       tenantId: user.tenantId || 1,
-      isSuperAdmin: user.isSuperAdmin
+      isSuperAdmin: user.isSuperAdmin || false
     });
     setUserDialogOpen(true);
   };
@@ -349,16 +355,17 @@ export const UsersList: React.FC = () => {
                 {users?.map((user: User) => (
                   <TableRow key={user.id}>
                     <TableCell className="font-medium">{user.username}</TableCell>
-                    <TableCell>{user.name}</TableCell>
-                    <TableCell>{user.email}</TableCell>
+                    <TableCell>{user.displayName || '-'}</TableCell>
+                    <TableCell>{user.email || '-'}</TableCell>
                     <TableCell>
                       {tenants?.find((t: any) => t.id === user.tenantId)?.name || '-'}
                     </TableCell>
                     <TableCell>
-                      {user.roles?.join(', ') || '-'}
+                      {/* User roles will be populated by API in future */}
+                      {'-'}
                     </TableCell>
                     <TableCell>
-                      <Checkbox checked={user.isSuperAdmin} disabled />
+                      <Checkbox checked={!!user.isSuperAdmin} disabled />
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
