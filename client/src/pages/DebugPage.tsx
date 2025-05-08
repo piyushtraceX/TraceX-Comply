@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { AuthDebugger } from '@/components/auth/AuthDebugger';
 import { GoApiTester } from '@/components/debug/GoApiTester';
 import { ConnectionTester } from '@/components/debug/ConnectionTester';
+import ApiDebugger from '@/components/debug/ApiDebugger';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { API_BASE_URL } from '@/lib/api-config';
 import { Badge } from '@/components/ui/badge';
@@ -21,24 +22,21 @@ export default function DebugPage() {
     <div className="p-4 md:p-10 max-w-6xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">Debug Tools</h1>
       
-      <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4 mb-6">
-        <h3 className="text-yellow-800 font-medium text-sm">Go Server Migration in Progress</h3>
-        <p className="text-yellow-700 text-sm mt-1">
-          The application is being migrated from Express.js to a standalone Go server.
+      <div className="bg-green-50 border border-green-200 rounded-md p-4 mb-6">
+        <h3 className="text-green-800 font-medium text-sm">Go Server Migration Complete!</h3>
+        <p className="text-green-700 text-sm mt-1">
+          The application has been migrated from Express.js to a standalone Go server.
           Use this page to test the Go server connection and debug any issues.
         </p>
         <div className="flex justify-between items-center mt-3">
-          <p className="text-yellow-700 text-sm">
-            <strong>Go API URL:</strong> {API_BASE_URL}
+          <p className="text-green-700 text-sm">
+            <strong>Go API URL:</strong> {`${window.location.protocol}//${window.location.hostname}/api`}
           </p>
           <div className="flex items-center space-x-2">
-            <span className="text-xs text-yellow-700">API Mode:</span>
-            <Badge variant={currentApiType === 'express' ? 'default' : 'outline'}>
-              Express
+            <span className="text-xs text-green-700">Server Mode:</span>
+            <Badge className="bg-green-100 text-green-800 border-green-300">
+              Go Server
             </Badge>
-            <Button size="sm" variant="ghost" className="h-6 px-2" onClick={() => handleApiSwitch('go')}>
-              Switch to Go
-            </Button>
           </div>
         </div>
       </div>
@@ -52,26 +50,26 @@ export default function DebugPage() {
             <div className="space-y-4">
               <div className="flex items-center justify-between border-b pb-2">
                 <span className="text-sm font-medium">Express API</span>
+                <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+                  Disabled
+                </Badge>
+              </div>
+              <div className="flex items-center justify-between border-b pb-2">
+                <span className="text-sm font-medium">Go API</span>
                 <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
                   Active
                 </Badge>
               </div>
               <div className="flex items-center justify-between border-b pb-2">
-                <span className="text-sm font-medium">Go API</span>
-                <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
-                  In Progress
-                </Badge>
-              </div>
-              <div className="flex items-center justify-between border-b pb-2">
-                <span className="text-sm font-medium">API Router</span>
-                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                  Fallback Enabled
+                <span className="text-sm font-medium">Static File Serving</span>
+                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                  Go Server
                 </Badge>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Current Mode</span>
-                <Badge>
-                  {currentApiType === 'express' ? 'Express' : 'Go'} API
+                <Badge className="bg-green-100 text-green-800 border-green-300">
+                  Go Server
                 </Badge>
               </div>
             </div>
@@ -79,12 +77,17 @@ export default function DebugPage() {
         </Card>
       </div>
       
-      <Tabs defaultValue="go-api">
+      <Tabs defaultValue="direct-api">
         <TabsList className="mb-4">
-          <TabsTrigger value="go-api">API Tester</TabsTrigger>
+          <TabsTrigger value="direct-api">Go API Debugger</TabsTrigger>
+          <TabsTrigger value="go-api">Legacy API Tester</TabsTrigger>
           <TabsTrigger value="auth">Auth Debugger</TabsTrigger>
           <TabsTrigger value="logs">API Logs</TabsTrigger>
         </TabsList>
+        
+        <TabsContent value="direct-api">
+          <ApiDebugger />
+        </TabsContent>
         
         <TabsContent value="go-api">
           <GoApiTester />
