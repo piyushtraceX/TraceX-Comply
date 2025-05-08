@@ -78,8 +78,9 @@ export async function authenticate(req: Request, res: Response, next: NextFuncti
         req.tenant = tenant;
       } else {
         // Reset to user's default tenant
-        req.session.tenantId = user.tenantId;
-        req.tenant = user.tenantId ? await storage.getTenant(user.tenantId) : null;
+        const tenantId = user.tenantId !== null ? user.tenantId : undefined;
+        req.session.tenantId = tenantId;
+        req.tenant = tenantId !== undefined ? await storage.getTenant(tenantId) : undefined;
       }
     } else if (user.tenantId) {
       // Use user's default tenant
@@ -155,10 +156,11 @@ export function setupAuthRoutes(app: Express) {
 
       // Set user in session
       req.session.userId = user.id;
-      req.session.tenantId = user.tenantId;
+      const tenantId = user.tenantId !== null ? user.tenantId : undefined;
+      req.session.tenantId = tenantId;
 
       // Get user roles
-      const roles = await storage.getUserRoles(user.id, user.tenantId);
+      const roles = await storage.getUserRoles(user.id, tenantId);
 
       res.status(201).json({
         user,
@@ -204,16 +206,17 @@ export function setupAuthRoutes(app: Express) {
       
       // Set user in session
       req.session.userId = user.id;
-      req.session.tenantId = user.tenantId;
+      const tenantId = user.tenantId !== null ? user.tenantId : undefined;
+      req.session.tenantId = tenantId;
       
       // Get tenant info
       let tenant = undefined;
-      if (user.tenantId) {
-        tenant = await storage.getTenant(user.tenantId);
+      if (tenantId !== undefined) {
+        tenant = await storage.getTenant(tenantId);
       }
       
       // Get user roles
-      const roles = await storage.getUserRoles(user.id, user.tenantId);
+      const roles = await storage.getUserRoles(user.id, tenantId);
       
       res.json({
         user,
