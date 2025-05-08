@@ -1,5 +1,39 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
-import { apiBridge, getApiInstance } from "./api-bridge";
+import axios from "axios";
+import { API_BASE_URL, getApiUrl } from "./api-config";
+
+// Create a reusable axios instance configured for the Go API
+const apiClient = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  withCredentials: true,
+});
+
+// Log requests in development
+apiClient.interceptors.request.use((config) => {
+  console.log(`API Request: ${config.method?.toUpperCase()} ${config.url}`);
+  return config;
+});
+
+// Handle errors consistently
+apiClient.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    console.error("API Error:", error.message);
+    
+    // For unauthorized errors, redirect to login if not already there
+    if (error.response?.status === 401 && window.location.pathname !== '/auth') {
+      console.log('Not authenticated, redirecting to login');
+      window.location.href = '/auth';
+    }
+    
+    return Promise.reject(error);
+  }
+);
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
@@ -13,27 +47,29 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  // Use the API bridge for more robust handling across backends
+  // Make sure we're using the Go API URL
+  const fullUrl = getApiUrl(url);
+  
   try {
     let response;
     
     // Use different HTTP methods based on the method parameter
     switch (method.toUpperCase()) {
       case 'GET':
-        response = await apiBridge.get(url);
+        response = await apiClient.get(fullUrl);
         break;
       case 'POST':
-        response = await apiBridge.post(url, data);
+        response = await apiClient.post(fullUrl, data);
         break;
       case 'PUT':
-        response = await apiBridge.put(url, data);
+        response = await apiClient.put(fullUrl, data);
         break;
       case 'DELETE':
-        response = await apiBridge.delete(url);
+        response = await apiClient.delete(fullUrl);
         break;
       default:
         // Fall back to fetch for other methods
-        return await fetch(url, {
+        return await fetch(fullUrl, {
           method,
           headers: data ? { "Content-Type": "application/json" } : {},
           body: data ? JSON.stringify(data) : undefined,
@@ -71,12 +107,12 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
+    const path = queryKey[0] as string;
+    const url = getApiUrl(path);
+    
     try {
-      // Use API bridge for consistent behavior
-      const api = getApiInstance();
-      const response = await api.get(queryKey[0] as string);
-      
-      // Convert Axios successful response
+      // Use direct API call to Go server
+      const response = await apiClient.get(url);
       return response.data;
     } catch (error: any) {
       console.error("Query error:", error);

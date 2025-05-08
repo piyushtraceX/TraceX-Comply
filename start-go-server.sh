@@ -1,24 +1,36 @@
 #!/bin/bash
 
-# This script builds and starts the Go API server
-# Makes it easier to test the Go backend alongside the existing Express.js server
+# This script builds and starts the Go API server as the standalone backend
+# Express.js is no longer used for API functionality
 
-# Set environment variables 
+# Set environment variables
 export PORT=8080
 export ENV=development
-export DATABASE_URL=$DATABASE_URL  # Use the same database as Express.js backend
+export DATABASE_URL=$DATABASE_URL
+export GO_SERVER_URL="http://localhost:8080/api"
 
-echo "Building the Go API server..."
+echo "========================================================"
+echo "🚀 Starting standalone Go backend server"
+echo "========================================================"
+echo "- All API requests will be handled by the Go server"
+echo "- Express.js is only used to serve the frontend assets"
+echo "- API URL: $GO_SERVER_URL"
+echo "========================================================"
+
+# Go to the go-server directory
 cd go-server
 
-# Make directories if they don't exist
+# Create the bin directory if it doesn't exist
 mkdir -p bin
 
-# Get Go dependencies if needed
-go mod tidy
+# Update Go dependencies (with a timeout to prevent hanging)
+echo "Installing Go dependencies..."
+timeout 30s go mod tidy || echo "Warning: go mod tidy timed out, continuing anyway"
 
-# Build the go server
+# Build the Go server
+echo "Building Go API server..."
 go build -o ./bin/api ./cmd/api/
 
-echo "Starting the Go API server on port $PORT..."
+# Run the Go server
+echo "Starting Go API server on port $PORT..."
 ./bin/api
