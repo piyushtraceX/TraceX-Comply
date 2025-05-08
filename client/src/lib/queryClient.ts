@@ -2,7 +2,7 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 import axios from "axios";
 import { API_BASE_URL, getApiUrl } from "./api-config";
 
-// TEMPORARY SOLUTION: Use Express API endpoint while Go server is being set up
+// IMPORTANT: Always use Express API for now, while Go server is being fixed
 const USE_EXPRESS_API = true;
 const EXPRESS_API_URL = '/api';
 
@@ -64,8 +64,8 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  // Make sure we're using the Go API URL
-  const fullUrl = getApiUrl(url);
+  // When in EXPRESS API mode, ignore any Go API routing
+  const fullUrl = USE_EXPRESS_API ? url : getApiUrl(url);
   
   try {
     let response;
@@ -125,10 +125,11 @@ export const getQueryFn: <T>(options: {
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
     const path = queryKey[0] as string;
-    const url = getApiUrl(path);
+    // When in EXPRESS API mode, ignore any Go API routing
+    const url = USE_EXPRESS_API ? path : getApiUrl(path);
     
     try {
-      // Use direct API call to Go server
+      // Use consistent API client for all requests
       const response = await apiClient.get(url);
       return response.data;
     } catch (error: any) {

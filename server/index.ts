@@ -24,14 +24,8 @@ app.use((req, res, next) => {
   next();
 });
 
-// Important notice for API requests
-app.use('/api', (req, res) => {
-  res.status(404).json({
-    error: "API Not Found", 
-    message: "API endpoints have been moved to the Go server. Please update your client configuration.",
-    goServerUrl: process.env.GO_SERVER_URL || "http://localhost:8080/api"
-  });
-});
+// TEMPORARY: We've restored API functionality while Go server is being fixed
+// This comment is here to remember to re-remove these routes once Go server is working
 
 (async () => {
   const server = await registerRoutes(app);

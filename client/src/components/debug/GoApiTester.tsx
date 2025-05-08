@@ -10,9 +10,9 @@ import { useToast } from "@/hooks/use-toast";
 import axios from 'axios';
 import { API_BASE_URL } from '@/lib/api-config';
 
-// TEMPORARY: Use Express API for testing while Go server is being fixed
+// IMPORTANT: Always use Express API for now (fallback mode)
 const USE_EXPRESS_API = true;
-const EXPRESS_API_URL = '';
+const EXPRESS_API_URL = '/api';
 
 // Endpoint types for testing
 type Endpoint = {
