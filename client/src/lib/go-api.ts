@@ -1,0 +1,139 @@
+import axios, { AxiosInstance, AxiosResponse, AxiosRequestConfig } from 'axios';
+
+// Create axios instance for Go API
+const apiClient: AxiosInstance = axios.create({
+  baseURL: import.meta.env.VITE_GO_API_URL || 'http://localhost:8080/api',
+  timeout: 10000,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  withCredentials: true,
+});
+
+// Setup request interceptor for logging
+apiClient.interceptors.request.use(
+  (config) => {
+    console.log(`[API Request] ${config.method?.toUpperCase()} ${config.url}`);
+    return config;
+  },
+  (error) => {
+    console.error('[API Request Error]', error);
+    return Promise.reject(error);
+  }
+);
+
+// Setup response interceptor for error handling
+apiClient.interceptors.response.use(
+  (response) => {
+    console.log(`[API Response] ${response.status} ${response.config.url}`);
+    return response;
+  },
+  (error) => {
+    console.error('[API Response Error]', error);
+    
+    // Handle authentication errors - redirect to login page
+    if (error.response && error.response.status === 401) {
+      // Only redirect if not already on auth page
+      if (window.location.pathname !== '/auth') {
+        window.location.href = '/auth';
+      }
+    }
+    
+    return Promise.reject(error);
+  }
+);
+
+// API interface - Authentication
+export const authApi = {
+  login: (username: string, password: string): Promise<AxiosResponse<any>> => {
+    return apiClient.post('/auth/login', { username, password });
+  },
+  
+  logout: (): Promise<AxiosResponse<any>> => {
+    return apiClient.post('/auth/logout');
+  },
+  
+  getCurrentUser: (): Promise<AxiosResponse<any>> => {
+    return apiClient.get('/auth/me');
+  },
+  
+  switchTenant: (tenantId: number): Promise<AxiosResponse<any>> => {
+    return apiClient.post('/auth/switch-tenant', { tenantId });
+  },
+};
+
+// API interface - Users
+export const usersApi = {
+  getUsers: (config?: AxiosRequestConfig): Promise<AxiosResponse<any>> => {
+    return apiClient.get('/users', config);
+  },
+  
+  getUser: (id: number): Promise<AxiosResponse<any>> => {
+    return apiClient.get(`/users/${id}`);
+  },
+  
+  createUser: (userData: any): Promise<AxiosResponse<any>> => {
+    return apiClient.post('/users', userData);
+  },
+  
+  updateUser: (id: number, userData: any): Promise<AxiosResponse<any>> => {
+    return apiClient.put(`/users/${id}`, userData);
+  },
+  
+  deleteUser: (id: number): Promise<AxiosResponse<any>> => {
+    return apiClient.delete(`/users/${id}`);
+  },
+};
+
+// API interface - Roles
+export const rolesApi = {
+  getRoles: (config?: AxiosRequestConfig): Promise<AxiosResponse<any>> => {
+    return apiClient.get('/roles', config);
+  },
+  
+  getRole: (id: number): Promise<AxiosResponse<any>> => {
+    return apiClient.get(`/roles/${id}`);
+  },
+  
+  createRole: (roleData: any): Promise<AxiosResponse<any>> => {
+    return apiClient.post('/roles', roleData);
+  },
+  
+  updateRole: (id: number, roleData: any): Promise<AxiosResponse<any>> => {
+    return apiClient.put(`/roles/${id}`, roleData);
+  },
+  
+  deleteRole: (id: number): Promise<AxiosResponse<any>> => {
+    return apiClient.delete(`/roles/${id}`);
+  },
+};
+
+// API interface - Tenants
+export const tenantsApi = {
+  getTenants: (): Promise<AxiosResponse<any>> => {
+    return apiClient.get('/tenants');
+  },
+  
+  getTenant: (id: number): Promise<AxiosResponse<any>> => {
+    return apiClient.get(`/tenants/${id}`);
+  },
+  
+  createTenant: (tenantData: any): Promise<AxiosResponse<any>> => {
+    return apiClient.post('/tenants', tenantData);
+  },
+  
+  updateTenant: (id: number, tenantData: any): Promise<AxiosResponse<any>> => {
+    return apiClient.put(`/tenants/${id}`, tenantData);
+  },
+  
+  deleteTenant: (id: number): Promise<AxiosResponse<any>> => {
+    return apiClient.delete(`/tenants/${id}`);
+  },
+};
+
+export default {
+  auth: authApi,
+  users: usersApi,
+  roles: rolesApi,
+  tenants: tenantsApi,
+};
