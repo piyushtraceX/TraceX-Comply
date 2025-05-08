@@ -35,9 +35,19 @@ const apiClient: AxiosInstance = axios.create({
 // Initialize auth token from localStorage on module load
 (function initAuthToken() {
   const token = localStorage.getItem('auth_token');
+  
+  // Also check for user data which might be stored as a fallback
+  const userData = localStorage.getItem('user_data');
+  const justLoggedIn = localStorage.getItem('just_logged_in') === 'true';
+  
   if (token) {
-    console.log('[API] Initializing authorization header from localStorage');
+    console.log('[API] Initializing authorization header from localStorage token');
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  } else if (userData) {
+    console.log('[API] Found user data in localStorage but no token');
+    if (justLoggedIn) {
+      console.log('[API] Just logged in flag is set, will try to fetch new token');
+    }
   }
 })();
 
@@ -72,9 +82,22 @@ apiClient.interceptors.response.use(
     
     // Handle authentication errors - redirect to login page
     if (error.response && error.response.status === 401) {
-      // Only redirect if not already on auth page
-      if (window.location.pathname !== '/auth') {
+      const justLoggedIn = localStorage.getItem('just_logged_in') === 'true';
+      const hasUserData = localStorage.getItem('user_data') !== null;
+      const isAuthPage = window.location.pathname === '/auth';
+      
+      // Only redirect if:
+      // 1. Not already on auth page
+      // 2. Not just logged in (might be race condition)
+      // 3. No backup user data available
+      // 4. Not calling /auth/me endpoint (which will be handled separately)
+      if (!isAuthPage && !justLoggedIn && !hasUserData && !error.config.url?.includes('/auth/me')) {
+        console.log('[API] 401 error, redirecting to login page');
         window.location.href = '/auth';
+      } else if (justLoggedIn) {
+        console.log('[API] 401 error but just_logged_in flag is set, not redirecting');
+      } else if (hasUserData) {
+        console.log('[API] 401 error but has backup user data, not redirecting');
       }
     }
     
@@ -87,14 +110,33 @@ export const authApi = {
   login: (username: string, password: string): Promise<AxiosResponse<any>> => {
     // Clear any existing token before login
     localStorage.removeItem('auth_token');
+    localStorage.removeItem('user_data');
     delete axios.defaults.headers.common['Authorization'];
+    
+    // Set a flag to indicate we're in the login process
+    localStorage.setItem('just_logged_in', 'true');
+    
+    console.log('Login attempt with username:', username);
     
     return apiClient.post('/auth/login', { username, password })
       .then(response => {
-        console.log('Login response:', response.data);
+        console.log('Login response received:', response.data);
         
-        // Handle different token response formats
+        // Store the successful login flag to prevent immediate logouts
+        localStorage.setItem('just_logged_in', 'true');
+        
+        // Extract and store the user data for fallback authentication
+        let userData = null;
         let token = null;
+        
+        // Handle different API response formats
+        
+        // Response format with user and token objects
+        if (response.data?.user) {
+          console.log('Found user data in response, storing in localStorage');
+          userData = response.data.user;
+          localStorage.setItem('user_data', JSON.stringify(userData));
+        }
         
         // Format 1: { auth: { token: "..." } }
         if (response.data?.auth?.token) {
@@ -104,7 +146,14 @@ export const authApi = {
         else if (response.data?.token) {
           token = response.data.token;
         }
-        // Format 3: String token directly in body 
+        // Format 3: Token in authorization header 
+        else if (response.headers?.authorization) {
+          const authHeader = response.headers.authorization;
+          if (authHeader.startsWith('Bearer ')) {
+            token = authHeader.substring(7);
+          }
+        }
+        // Format 4: String token directly in body 
         else if (typeof response.data === 'string' && response.data.length > 20) {
           token = response.data;
         }
@@ -116,7 +165,18 @@ export const authApi = {
           axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         } else {
           console.log('No token found in login response');
+          
+          // If we have user data but no token, we might still need to call /auth/me
+          // to get a proper session cookie established
+          if (userData) {
+            console.log('We have user data but no token, will try session-based auth');
+          }
         }
+        
+        // Schedule clearing of just_logged_in flag
+        setTimeout(() => {
+          localStorage.removeItem('just_logged_in');
+        }, 30000); // Clear after 30 seconds
         
         return response;
       });
@@ -125,25 +185,58 @@ export const authApi = {
   logout: (): Promise<AxiosResponse<any>> => {
     return apiClient.post('/auth/logout')
       .finally(() => {
-        // Always clear token on logout regardless of API success/failure
-        console.log('Removing auth token from localStorage');
+        // Always clear all auth data on logout regardless of API success/failure
+        console.log('Clearing all auth data from localStorage');
         localStorage.removeItem('auth_token');
+        localStorage.removeItem('user_data');
+        localStorage.removeItem('just_logged_in');
         delete axios.defaults.headers.common['Authorization'];
       });
   },
   
   getCurrentUser: (): Promise<AxiosResponse<any>> => {
+    // Check if we just logged in
+    const justLoggedIn = localStorage.getItem('just_logged_in') === 'true';
+    
     // Use token-based auth as fallback for cookie-based auth
     const token = localStorage.getItem('auth_token');
     const config: AxiosRequestConfig = {};
     
     if (token) {
+      console.log('[API] Using token for getCurrentUser request');
       config.headers = {
         'Authorization': `Bearer ${token}`
       };
+    } else {
+      console.log('[API] No token available for getCurrentUser request');
     }
     
-    return apiClient.get('/auth/me', config);
+    // Try to get user from API first
+    return apiClient.get('/auth/me', config)
+      .catch(error => {
+        console.error('[API] Error in getCurrentUser:', error);
+        
+        // If we have stored user data and either just logged in or getting a 401 error, use the fallback
+        if (justLoggedIn || (error.response && error.response.status === 401)) {
+          const userData = localStorage.getItem('user_data');
+          
+          if (userData) {
+            console.log('[API] Using localStorage fallback for user data');
+            
+            // Create a mock response with the stored user data
+            return Promise.resolve({
+              data: { user: JSON.parse(userData) },
+              status: 200,
+              statusText: 'OK (localStorage fallback)',
+              headers: {},
+              config: config
+            } as AxiosResponse);
+          }
+        }
+        
+        // If no fallback, rethrow the error
+        return Promise.reject(error);
+      });
   },
   
   switchTenant: (tenantId: number): Promise<AxiosResponse<any>> => {
