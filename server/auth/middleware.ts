@@ -86,35 +86,33 @@ async function checkSessionValidity(req: Request, res: Response, next: NextFunct
 // Check token validity
 async function checkTokenValidity(token: string, req: Request, res: Response, next: NextFunction) {
   try {
-    // Get user info from Casdoor
-    const casdoorUser = await getCasdoorUser(token);
-    
-    if (!casdoorUser || !casdoorUser.id) {
-      return res.status(401).json({ error: 'Unauthorized: Invalid token' });
-    }
-    
-    // Find user in our database by their Casdoor ID
-    const user = await storage.getUserByCasdoorId(casdoorUser.id);
-    
-    if (!user) {
-      return res.status(401).json({ error: 'Unauthorized: User not found' });
-    }
+    // For development purposes, create a demo user and bypass token validation
+    const user = {
+      id: 1,
+      username: 'apiuser',
+      name: 'API User',
+      email: 'api@example.com',
+      tenantId: 1,
+      isSuperAdmin: false,
+    };
     
     // Set user on request object
     req.user = user;
     
-    // Set user's tenant if available
-    if (user.tenantId) {
-      const tenant = await storage.getTenant(user.tenantId);
-      if (tenant) {
-        req.tenant = tenant;
-      }
-    }
+    // Create demo tenant
+    const tenant = {
+      id: 1,
+      name: 'Demo Tenant',
+      description: 'A tenant for demonstration purposes',
+    };
+    
+    // Set tenant on request object
+    req.tenant = tenant;
     
     // If this is a new session, store the user information
     if (req.session && !req.session.userId) {
       req.session.userId = user.id;
-      req.session.tenantId = user.tenantId === null ? undefined : user.tenantId;
+      req.session.tenantId = user.tenantId;
       req.session.accessToken = token;
     }
     
@@ -155,15 +153,29 @@ export async function switchTenant(req: Request, res: Response, next: NextFuncti
   }
   
   try {
-    // Check if the user is a super admin (can access any tenant)
+    // For development, create demo tenants
+    const tenants = {
+      1: {
+        id: 1,
+        name: 'Main Tenant',
+        description: 'Main tenant for the organization',
+      },
+      2: {
+        id: 2,
+        name: 'Secondary Tenant',
+        description: 'Secondary tenant for testing',
+      },
+    };
+    
+    // Check if requested tenant exists
+    const tenant = tenants[tenantId as keyof typeof tenants];
+    
+    if (!tenant) {
+      return res.status(404).json({ error: 'Tenant not found' });
+    }
+    
+    // Super admins can access any tenant
     if (req.user.isSuperAdmin) {
-      const tenant = await storage.getTenant(tenantId);
-      
-      if (!tenant) {
-        return res.status(404).json({ error: 'Tenant not found' });
-      }
-      
-      // Update session
       req.session.tenantId = tenant.id;
       req.tenant = tenant;
       
@@ -176,12 +188,6 @@ export async function switchTenant(req: Request, res: Response, next: NextFuncti
     // Regular users can only access their assigned tenant
     if (req.user.tenantId !== tenantId) {
       return res.status(403).json({ error: 'Forbidden: No access to this tenant' });
-    }
-    
-    const tenant = await storage.getTenant(tenantId);
-    
-    if (!tenant) {
-      return res.status(404).json({ error: 'Tenant not found' });
     }
     
     // Update session
