@@ -118,7 +118,7 @@ export const authApi = {
     
     console.log('Login attempt with username:', username);
     
-    return apiClient.post('/auth/login', { username, password })
+    return apiClient.post('/api/auth/login', { username, password })
       .then(response => {
         console.log('Login response received:', response.data);
         
@@ -166,7 +166,7 @@ export const authApi = {
         } else {
           console.log('No token found in login response');
           
-          // If we have user data but no token, we might still need to call /auth/me
+          // If we have user data but no token, we might still need to call /api/auth/me
           // to get a proper session cookie established
           if (userData) {
             console.log('We have user data but no token, will try session-based auth');
@@ -183,7 +183,7 @@ export const authApi = {
   },
   
   logout: (): Promise<AxiosResponse<any>> => {
-    return apiClient.post('/auth/logout')
+    return apiClient.post('/api/auth/logout')
       .finally(() => {
         // Always clear all auth data on logout regardless of API success/failure
         console.log('Clearing all auth data from localStorage');
@@ -212,7 +212,7 @@ export const authApi = {
     }
     
     // Try to get user from API first
-    return apiClient.get('/auth/me', config)
+    return apiClient.get('/api/auth/me', config)
       .catch(error => {
         console.error('[API] Error in getCurrentUser:', error);
         
@@ -240,76 +240,76 @@ export const authApi = {
   },
   
   switchTenant: (tenantId: number): Promise<AxiosResponse<any>> => {
-    return apiClient.post('/auth/switch-tenant', { tenantId });
+    return apiClient.post('/api/auth/switch-tenant', { tenantId });
   },
 };
 
 // API interface - Users
 export const usersApi = {
   getUsers: (config?: AxiosRequestConfig): Promise<AxiosResponse<any>> => {
-    return apiClient.get('/users', config);
+    return apiClient.get('/api/users', config);
   },
   
   getUser: (id: number): Promise<AxiosResponse<any>> => {
-    return apiClient.get(`/users/${id}`);
+    return apiClient.get(`/api/users/${id}`);
   },
   
   createUser: (userData: any): Promise<AxiosResponse<any>> => {
-    return apiClient.post('/users', userData);
+    return apiClient.post('/api/users', userData);
   },
   
   updateUser: (id: number, userData: any): Promise<AxiosResponse<any>> => {
-    return apiClient.put(`/users/${id}`, userData);
+    return apiClient.put(`/api/users/${id}`, userData);
   },
   
   deleteUser: (id: number): Promise<AxiosResponse<any>> => {
-    return apiClient.delete(`/users/${id}`);
+    return apiClient.delete(`/api/users/${id}`);
   },
 };
 
 // API interface - Roles
 export const rolesApi = {
   getRoles: (config?: AxiosRequestConfig): Promise<AxiosResponse<any>> => {
-    return apiClient.get('/roles', config);
+    return apiClient.get('/api/roles', config);
   },
   
   getRole: (id: number): Promise<AxiosResponse<any>> => {
-    return apiClient.get(`/roles/${id}`);
+    return apiClient.get(`/api/roles/${id}`);
   },
   
   createRole: (roleData: any): Promise<AxiosResponse<any>> => {
-    return apiClient.post('/roles', roleData);
+    return apiClient.post('/api/roles', roleData);
   },
   
   updateRole: (id: number, roleData: any): Promise<AxiosResponse<any>> => {
-    return apiClient.put(`/roles/${id}`, roleData);
+    return apiClient.put(`/api/roles/${id}`, roleData);
   },
   
   deleteRole: (id: number): Promise<AxiosResponse<any>> => {
-    return apiClient.delete(`/roles/${id}`);
+    return apiClient.delete(`/api/roles/${id}`);
   },
 };
 
 // API interface - Tenants
 export const tenantsApi = {
   getTenants: (): Promise<AxiosResponse<any>> => {
-    return apiClient.get('/tenants');
+    return apiClient.get('/api/tenants');
   },
   
   getTenant: (id: number): Promise<AxiosResponse<any>> => {
-    return apiClient.get(`/tenants/${id}`);
+    return apiClient.get(`/api/tenants/${id}`);
   },
   
   createTenant: (tenantData: any): Promise<AxiosResponse<any>> => {
-    return apiClient.post('/tenants', tenantData);
+    return apiClient.post('/api/tenants', tenantData);
   },
   
   updateTenant: (id: number, tenantData: any): Promise<AxiosResponse<any>> => {
-    return apiClient.put(`/tenants/${id}`, tenantData);
+    return apiClient.put(`/api/tenants/${id}`, tenantData);
   },
   
   deleteTenant: (id: number): Promise<AxiosResponse<any>> => {
-    return apiClient.delete(`/tenants/${id}`);
+    return apiClient.delete(`/api/tenants/${id}`);
   },
 };
 

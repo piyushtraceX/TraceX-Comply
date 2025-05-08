@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { authApi } from '@/lib/go-api'; // Use Go API directly
+import { authApi } from '@/lib/go-api'; // Use API client
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
