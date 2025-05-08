@@ -53,6 +53,6 @@ app.use((req, res, next) => {
     reusePort: true,
   }, () => {
     log(`Frontend server running on port ${port}`);
-    log(`NOTE: All API functionality has been moved to the Go server`);
+    log(`TEMPORARY FALLBACK MODE: Express API is active while Go server is being fixed`);
   });
 })();
