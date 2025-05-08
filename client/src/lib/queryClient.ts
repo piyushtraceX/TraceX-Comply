@@ -49,6 +49,8 @@ export const queryClient = new QueryClient({
       refetchOnWindowFocus: false,
       staleTime: Infinity,
       retry: false,
+      // Prevent refetching when the query is already fetching or errored
+      refetchOnMount: false,
     },
     mutations: {
       retry: false,

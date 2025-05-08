@@ -1,123 +1,105 @@
-import axios, { AxiosResponse, AxiosRequestConfig } from 'axios';
+import { AxiosResponse, AxiosRequestConfig } from 'axios';
+import apiBridge, { setApiEndpoint } from './api-bridge';
 
-// Create an axios instance with default config
-const api = axios.create({
-  baseURL: '/api',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  withCredentials: true, // Important for cookies/sessions
-});
-
-// Response interceptor for handling common errors
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    // Handle session expiration or authentication errors
-    if (error.response && error.response.status === 401) {
-      // Only redirect if not already on the auth page
-      if (window.location.pathname !== '/auth') {
-        window.location.href = '/auth';
-      }
-    }
-    return Promise.reject(error);
-  }
-);
+// Use the Express.js backend by default
+// Can be changed to 'go' to use the Go backend
+setApiEndpoint('express');
 
 // API interface - Authentication
 export const authApi = {
   login: (username: string, password: string): Promise<AxiosResponse<any>> => {
-    return api.post('/auth/login', { username, password });
+    return apiBridge.post('/auth/login', { username, password });
   },
   
   logout: (): Promise<AxiosResponse<any>> => {
-    return api.post('/auth/logout');
+    return apiBridge.post('/auth/logout');
   },
   
   getCurrentUser: (): Promise<AxiosResponse<any>> => {
-    return api.get('/auth/me');
+    return apiBridge.get('/auth/me');
   },
   
   switchTenant: (tenantId: number): Promise<AxiosResponse<any>> => {
-    return api.post('/auth/switch-tenant', { tenantId });
+    return apiBridge.post('/auth/switch-tenant', { tenantId });
   },
 };
 
 // API interface - Users
 export const usersApi = {
   getUsers: (config?: AxiosRequestConfig): Promise<AxiosResponse<any>> => {
-    return api.get('/users', config);
+    return apiBridge.get('/users', config);
   },
   
   getUser: (id: number): Promise<AxiosResponse<any>> => {
-    return api.get(`/users/${id}`);
+    return apiBridge.get(`/users/${id}`);
   },
   
   createUser: (userData: any): Promise<AxiosResponse<any>> => {
-    return api.post('/users', userData);
+    return apiBridge.post('/users', userData);
   },
   
   updateUser: (id: number, userData: any): Promise<AxiosResponse<any>> => {
-    return api.put(`/users/${id}`, userData);
+    return apiBridge.put(`/users/${id}`, userData);
   },
   
   deleteUser: (id: number): Promise<AxiosResponse<any>> => {
-    return api.delete(`/users/${id}`);
+    return apiBridge.delete(`/users/${id}`);
   },
   
   assignRole: (userId: number, roleId: number, tenantId?: number): Promise<AxiosResponse<any>> => {
-    return api.post(`/users/${userId}/roles`, { roleId, tenantId });
+    return apiBridge.post(`/users/${userId}/roles`, { roleId, tenantId });
   },
   
   removeRole: (userId: number, roleId: number): Promise<AxiosResponse<any>> => {
-    return api.delete(`/users/${userId}/roles/${roleId}`);
+    return apiBridge.delete(`/users/${userId}/roles/${roleId}`);
   },
 };
 
 // API interface - Roles
 export const rolesApi = {
   getRoles: (config?: AxiosRequestConfig): Promise<AxiosResponse<any>> => {
-    return api.get('/roles', config);
+    return apiBridge.get('/roles', config);
   },
   
   getRole: (id: number): Promise<AxiosResponse<any>> => {
-    return api.get(`/roles/${id}`);
+    return apiBridge.get(`/roles/${id}`);
   },
   
   createRole: (roleData: any): Promise<AxiosResponse<any>> => {
-    return api.post('/roles', roleData);
+    return apiBridge.post('/roles', roleData);
   },
   
   updateRole: (id: number, roleData: any): Promise<AxiosResponse<any>> => {
-    return api.put(`/roles/${id}`, roleData);
+    return apiBridge.put(`/roles/${id}`, roleData);
   },
   
   deleteRole: (id: number): Promise<AxiosResponse<any>> => {
-    return api.delete(`/roles/${id}`);
+    return apiBridge.delete(`/roles/${id}`);
   },
 };
 
 // API interface - Tenants
 export const tenantsApi = {
   getTenants: (): Promise<AxiosResponse<any>> => {
-    return api.get('/tenants');
+    return apiBridge.get('/tenants');
   },
   
   getTenant: (id: number): Promise<AxiosResponse<any>> => {
-    return api.get(`/tenants/${id}`);
+    return apiBridge.get(`/tenants/${id}`);
   },
   
   createTenant: (tenantData: any): Promise<AxiosResponse<any>> => {
-    return api.post('/tenants', tenantData);
+    return apiBridge.post('/tenants', tenantData);
   },
   
   updateTenant: (id: number, tenantData: any): Promise<AxiosResponse<any>> => {
-    return api.put(`/tenants/${id}`, tenantData);
+    return apiBridge.put(`/tenants/${id}`, tenantData);
   },
   
   deleteTenant: (id: number): Promise<AxiosResponse<any>> => {
-    return api.delete(`/tenants/${id}`);
+    return apiBridge.delete(`/tenants/${id}`);
   },
 };
 
-export default api;
+// Export the ability to switch API backends
+export { setApiEndpoint } from './api-bridge';
