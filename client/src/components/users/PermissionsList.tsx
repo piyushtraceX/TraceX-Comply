@@ -1,27 +1,63 @@
 import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { useTranslation } from '@/hooks/use-translation';
-import { Permission } from '@shared/schema';
-import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Edit, Trash2, Lock, RefreshCw } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { queryClient, apiRequest } from '@/lib/queryClient';
 
-// Form validation schema
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Plus, Trash2 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+
+// Define schema for permission form
 const permissionFormSchema = z.object({
-  roleId: z.coerce.number().positive('Please select a role'),
-  resourceId: z.coerce.number().positive('Please select a resource'),
-  actionId: z.coerce.number().positive('Please select an action'),
-  tenantId: z.coerce.number().nullable().optional(),
+  roleId: z.number().optional(),
+  resourceId: z.number().optional(),
+  actionId: z.number().optional(),
+  tenantId: z.number().nullable()
 });
 
 type PermissionFormValues = z.infer<typeof permissionFormSchema>;
@@ -29,12 +65,10 @@ type PermissionFormValues = z.infer<typeof permissionFormSchema>;
 export const PermissionsList: React.FC = () => {
   const { t } = useTranslation();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const [permissionDialogOpen, setPermissionDialogOpen] = useState(false);
-  const [editingPermission, setEditingPermission] = useState<Permission | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   // Fetch permissions
-  const { data: permissions, isLoading, isError, refetch } = useQuery({
+  const { data: permissions, isLoading } = useQuery({
     queryKey: ['/api/permissions'],
     queryFn: async () => {
       const response = await apiRequest('GET', '/api/permissions');
@@ -42,7 +76,7 @@ export const PermissionsList: React.FC = () => {
     }
   });
 
-  // Fetch roles for the select dropdown
+  // Fetch roles for dropdown
   const { data: roles } = useQuery({
     queryKey: ['/api/roles'],
     queryFn: async () => {
@@ -51,7 +85,7 @@ export const PermissionsList: React.FC = () => {
     }
   });
 
-  // Fetch resources for the select dropdown
+  // Fetch resources for dropdown
   const { data: resources } = useQuery({
     queryKey: ['/api/resources'],
     queryFn: async () => {
@@ -60,7 +94,7 @@ export const PermissionsList: React.FC = () => {
     }
   });
 
-  // Fetch actions for the select dropdown
+  // Fetch actions for dropdown
   const { data: actions } = useQuery({
     queryKey: ['/api/actions'],
     queryFn: async () => {
@@ -69,7 +103,7 @@ export const PermissionsList: React.FC = () => {
     }
   });
 
-  // Fetch tenants for the select dropdown
+  // Fetch tenants for dropdown
   const { data: tenants } = useQuery({
     queryKey: ['/api/tenants'],
     queryFn: async () => {
@@ -78,44 +112,25 @@ export const PermissionsList: React.FC = () => {
     }
   });
 
-  // Form handling
-  const form = useForm<PermissionFormValues>({
-    resolver: zodResolver(permissionFormSchema),
-    defaultValues: {
-      roleId: 0,
-      resourceId: 0,
-      actionId: 0,
-      tenantId: null,
-    }
-  });
-
-  // Create/update permission mutation
-  const mutation = useMutation({
+  // Create permission mutation
+  const createMutation = useMutation({
     mutationFn: async (values: PermissionFormValues) => {
-      if (editingPermission) {
-        // Update permission
-        const response = await apiRequest('PATCH', `/api/permissions/${editingPermission.id}`, values);
-        return await response.json();
-      } else {
-        // Create new permission
-        const response = await apiRequest('POST', '/api/permissions', values);
-        return await response.json();
-      }
+      const response = await apiRequest('POST', '/api/permissions', values);
+      return await response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/permissions'] });
       toast({
-        title: editingPermission ? 'Permission updated' : 'Permission created',
-        description: editingPermission
-          ? `The permission has been updated successfully`
-          : `The permission has been created successfully`,
+        title: t('userManagement.permissionCreated'),
+        description: t('userManagement.permissionCreatedDesc'),
       });
-      resetAndCloseDialog();
+      queryClient.invalidateQueries({ queryKey: ['/api/permissions'] });
+      setIsDialogOpen(false);
+      form.reset();
     },
-    onError: (error: any) => {
+    onError: (error) => {
       toast({
-        title: 'Error',
-        description: error.message || 'Something went wrong',
+        title: t('common.error'),
+        description: error.message,
         variant: 'destructive',
       });
     }
@@ -123,246 +138,72 @@ export const PermissionsList: React.FC = () => {
 
   // Delete permission mutation
   const deleteMutation = useMutation({
-    mutationFn: async (permissionId: number) => {
-      const response = await apiRequest('DELETE', `/api/permissions/${permissionId}`);
-      return response.ok;
+    mutationFn: async (id: number) => {
+      const response = await apiRequest('DELETE', `/api/permissions/${id}`);
+      return response;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/permissions'] });
       toast({
-        title: 'Permission deleted',
-        description: 'The permission has been deleted successfully',
+        title: t('userManagement.permissionDeleted'),
+        description: t('userManagement.permissionDeletedDesc'),
       });
+      queryClient.invalidateQueries({ queryKey: ['/api/permissions'] });
     },
-    onError: (error: any) => {
+    onError: (error) => {
       toast({
-        title: 'Error',
-        description: error.message || 'Something went wrong',
+        title: t('common.error'),
+        description: error.message,
         variant: 'destructive',
       });
     }
   });
 
-  // Reset form and close dialog
-  const resetAndCloseDialog = () => {
-    form.reset();
-    setEditingPermission(null);
-    setPermissionDialogOpen(false);
-  };
+  const form = useForm<PermissionFormValues>({
+    resolver: zodResolver(permissionFormSchema),
+    defaultValues: {
+      roleId: undefined,
+      resourceId: undefined,
+      actionId: undefined,
+      tenantId: null
+    }
+  });
 
-  // Open dialog for editing a permission
-  const handleEditPermission = (permission: Permission) => {
-    setEditingPermission(permission);
+  const handleAddPermission = () => {
     form.reset({
-      roleId: permission.roleId,
-      resourceId: permission.resourceId,
-      actionId: permission.actionId,
-      tenantId: permission.tenantId,
+      roleId: undefined,
+      resourceId: undefined,
+      actionId: undefined,
+      tenantId: null
     });
-    setPermissionDialogOpen(true);
+    setIsDialogOpen(true);
   };
 
-  // Handle form submission
   const onSubmit = (values: PermissionFormValues) => {
-    mutation.mutate(values);
+    createMutation.mutate(values);
   };
-
-  // Helper to get entity name by ID
-  const getRoleName = (id: number) => roles?.find((r: any) => r.id === id)?.name || 'Unknown';
-  const getResourceName = (id: number) => resources?.find((r: any) => r.id === id)?.name || 'Unknown';
-  const getActionName = (id: number) => actions?.find((a: any) => a.id === id)?.name || 'Unknown';
-  const getTenantName = (id: number | null) => id ? tenants?.find((t: any) => t.id === id)?.name : 'Global';
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold">{t('userManagement.permissionsListTitle')}</h2>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => refetch()} className="flex items-center gap-1">
-            <RefreshCw className="h-4 w-4" />
-            {t('common.refresh')}
-          </Button>
-          <Dialog open={permissionDialogOpen} onOpenChange={setPermissionDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="flex items-center gap-1" onClick={() => {
-                setEditingPermission(null);
-                form.reset({
-                  roleId: 0,
-                  resourceId: 0,
-                  actionId: 0,
-                  tenantId: null,
-                });
-              }}>
-                <Lock className="h-4 w-4" />
-                {t('userManagement.addPermission')}
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[550px]">
-              <DialogHeader>
-                <DialogTitle>
-                  {editingPermission ? t('userManagement.editPermission') : t('userManagement.addPermission')}
-                </DialogTitle>
-                <DialogDescription>
-                  {editingPermission
-                    ? t('userManagement.editPermissionDescription')
-                    : t('userManagement.addPermissionDescription')}
-                </DialogDescription>
-              </DialogHeader>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)}>
-                  <div className="space-y-4 py-4">
-                    <FormField
-                      control={form.control}
-                      name="roleId"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t('userManagement.role')}</FormLabel>
-                          <Select
-                            onValueChange={(value) => field.onChange(parseInt(value))}
-                            value={field.value ? field.value.toString() : undefined}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder={t('userManagement.selectRole')} />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {roles?.map((role: any) => (
-                                <SelectItem key={role.id} value={role.id.toString()}>
-                                  {role.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="resourceId"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t('userManagement.resource')}</FormLabel>
-                          <Select
-                            onValueChange={(value) => field.onChange(parseInt(value))}
-                            value={field.value ? field.value.toString() : undefined}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder={t('userManagement.selectResource')} />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {resources?.map((resource: any) => (
-                                <SelectItem key={resource.id} value={resource.id.toString()}>
-                                  {resource.type}/{resource.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="actionId"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t('userManagement.action')}</FormLabel>
-                          <Select
-                            onValueChange={(value) => field.onChange(parseInt(value))}
-                            value={field.value ? field.value.toString() : undefined}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder={t('userManagement.selectAction')} />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {actions?.map((action: any) => (
-                                <SelectItem key={action.id} value={action.id.toString()}>
-                                  {action.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="tenantId"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t('userManagement.tenant')}</FormLabel>
-                          <Select
-                            onValueChange={(value) => {
-                              if (value === "null") {
-                                field.onChange(null);
-                              } else {
-                                field.onChange(parseInt(value));
-                              }
-                            }}
-                            value={field.value !== null ? field.value?.toString() : "null"}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder={t('userManagement.selectTenant')} />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="null">{t('userManagement.globalPermission')}</SelectItem>
-                              {tenants?.map((tenant: any) => (
-                                <SelectItem key={tenant.id} value={tenant.id.toString()}>
-                                  {tenant.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <DialogFooter>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={resetAndCloseDialog}
-                    >
-                      {t('common.cancel')}
-                    </Button>
-                    <Button
-                      type="submit"
-                      disabled={mutation.isPending}
-                    >
-                      {mutation.isPending && <RefreshCw className="mr-2 h-4 w-4 animate-spin" />}
-                      {editingPermission ? t('common.save') : t('common.create')}
-                    </Button>
-                  </DialogFooter>
-                </form>
-              </Form>
-            </DialogContent>
-          </Dialog>
-        </div>
-      </div>
-
+    <div className="space-y-4">
       <Card>
-        <CardContent className="pt-6">
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>{t('userManagement.permissions')}</CardTitle>
+            <CardDescription>{t('userManagement.permissionsDesc')}</CardDescription>
+          </div>
+          <Button 
+            onClick={handleAddPermission}
+            className="ml-auto"
+          >
+            <Plus className="h-4 w-4 mr-2" /> {t('userManagement.addPermission')}
+          </Button>
+        </CardHeader>
+        <CardContent>
           {isLoading ? (
-            <div className="flex justify-center items-center py-10">
-              <RefreshCw className="h-8 w-8 animate-spin text-primary" />
-            </div>
-          ) : isError ? (
-            <div className="text-center py-10 text-destructive">
-              {t('common.errorLoadingData')}
+            <div className="flex justify-center py-8">
+              <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
             </div>
           ) : (
             <Table>
-              <TableCaption>{t('userManagement.permissionsTableCaption')}</TableCaption>
               <TableHeader>
                 <TableRow>
                   <TableHead>{t('userManagement.role')}</TableHead>
@@ -373,47 +214,37 @@ export const PermissionsList: React.FC = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {permissions?.map((permission: Permission) => (
+                {permissions?.map((permission: any) => (
                   <TableRow key={permission.id}>
                     <TableCell>
-                      <Badge variant="outline" className="bg-primary-50">
-                        {getRoleName(permission.roleId)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{getResourceName(permission.resourceId)}</TableCell>
-                    <TableCell>
-                      <Badge variant="secondary">
-                        {getActionName(permission.actionId)}
-                      </Badge>
+                      {roles?.find((r: any) => r.id === permission.roleId)?.displayName || 
+                       roles?.find((r: any) => r.id === permission.roleId)?.name || '-'}
                     </TableCell>
                     <TableCell>
-                      {permission.tenantId
-                        ? getTenantName(permission.tenantId)
-                        : <Badge variant="outline">Global</Badge>}
+                      {resources?.find((r: any) => r.id === permission.resourceId)?.displayName || 
+                       resources?.find((r: any) => r.id === permission.resourceId)?.name || '-'}
+                    </TableCell>
+                    <TableCell>
+                      {actions?.find((a: any) => a.id === permission.actionId)?.displayName || 
+                       actions?.find((a: any) => a.id === permission.actionId)?.name || '-'}
+                    </TableCell>
+                    <TableCell>
+                      {tenants?.find((t: any) => t.id === permission.tenantId)?.name || '-'}
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleEditPermission(permission)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-destructive"
-                          onClick={() => {
-                            if (window.confirm(t('userManagement.confirmDeletePermission'))) {
-                              deleteMutation.mutate(permission.id);
-                            }
-                          }}
-                          disabled={deleteMutation.isPending}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        className="text-destructive"
+                        onClick={() => {
+                          if (window.confirm(t('userManagement.confirmDelete'))) {
+                            deleteMutation.mutate(permission.id);
+                          }
+                        }}
+                        disabled={deleteMutation.isPending}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -429,6 +260,155 @@ export const PermissionsList: React.FC = () => {
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-[550px]">
+          <DialogHeader>
+            <DialogTitle>{t('userManagement.addPermission')}</DialogTitle>
+            <DialogDescription>
+              {t('userManagement.addPermissionDesc')}
+            </DialogDescription>
+          </DialogHeader>
+
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="roleId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('userManagement.role')}</FormLabel>
+                    <Select 
+                      onValueChange={(value) => field.onChange(parseInt(value))}
+                      value={field.value?.toString()}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder={t('userManagement.selectRole')} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {roles?.map((role: any) => (
+                          <SelectItem key={role.id} value={role.id.toString()}>
+                            {role.displayName || role.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="resourceId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('userManagement.resource')}</FormLabel>
+                    <Select 
+                      onValueChange={(value) => field.onChange(parseInt(value))}
+                      value={field.value?.toString()}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder={t('userManagement.selectResource')} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {resources?.map((resource: any) => (
+                          <SelectItem key={resource.id} value={resource.id.toString()}>
+                            {resource.displayName || resource.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="actionId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('userManagement.action')}</FormLabel>
+                    <Select 
+                      onValueChange={(value) => field.onChange(parseInt(value))}
+                      value={field.value?.toString()}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder={t('userManagement.selectAction')} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {actions?.map((action: any) => (
+                          <SelectItem key={action.id} value={action.id.toString()}>
+                            {action.displayName || action.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="tenantId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('userManagement.tenant')}</FormLabel>
+                    <Select 
+                      onValueChange={(value) => field.onChange(parseInt(value))}
+                      value={field.value?.toString()}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder={t('userManagement.selectTenant')} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="">
+                          {t('userManagement.allTenants')}
+                        </SelectItem>
+                        {tenants?.map((tenant: any) => (
+                          <SelectItem key={tenant.id} value={tenant.id.toString()}>
+                            {tenant.displayName || tenant.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <DialogFooter>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setIsDialogOpen(false)}
+                >
+                  {t('common.cancel')}
+                </Button>
+                <Button 
+                  type="submit"
+                  disabled={createMutation.isPending}
+                >
+                  {createMutation.isPending && (
+                    <div className="animate-spin mr-2 h-4 w-4 border-2 border-background border-t-transparent rounded-full" />
+                  )}
+                  {t('common.create')}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

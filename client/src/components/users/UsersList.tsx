@@ -1,31 +1,65 @@
 import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { useTranslation } from '@/hooks/use-translation';
-import { User } from '@shared/schema';
-import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Edit, Trash2, UserPlus, RefreshCw } from 'lucide-react';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Switch } from '@/components/ui/switch';
+import { queryClient, apiRequest } from '@/lib/queryClient';
 
-// Form validation schema
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Edit, Trash2, Plus } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+
+// Define schema for user form
 const userFormSchema = z.object({
-  username: z.string().min(3, 'Username must be at least 3 characters'),
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.string().email('Please enter a valid email'),
-  password: z.string().min(6, 'Password must be at least 6 characters').optional().or(z.literal('')),
-  tenantId: z.coerce.number().positive('Please select a tenant'),
-  isSuperAdmin: z.boolean().default(false)
+  username: z.string().min(1, { message: 'Username is required' }),
+  displayName: z.string().min(1, { message: 'Display name is required' }),
+  email: z.string().email().optional().nullable(),
+  password: z.string().min(6, { message: 'Password must be at least 6 characters' }).or(z.literal('')),
+  tenantId: z.number().nullable(),
+  isSuperAdmin: z.boolean().default(false),
+  isActive: z.boolean().default(true)
 });
 
 type UserFormValues = z.infer<typeof userFormSchema>;
@@ -33,12 +67,11 @@ type UserFormValues = z.infer<typeof userFormSchema>;
 export const UsersList: React.FC = () => {
   const { t } = useTranslation();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const [userDialogOpen, setUserDialogOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<any | null>(null);
 
   // Fetch users
-  const { data: users, isLoading, isError, refetch } = useQuery({
+  const { data: users, isLoading } = useQuery({
     queryKey: ['/api/users'],
     queryFn: async () => {
       const response = await apiRequest('GET', '/api/users');
@@ -46,7 +79,7 @@ export const UsersList: React.FC = () => {
     }
   });
 
-  // Fetch tenants for the select dropdown
+  // Fetch tenants for the dropdown
   const { data: tenants } = useQuery({
     queryKey: ['/api/tenants'],
     queryFn: async () => {
@@ -55,52 +88,49 @@ export const UsersList: React.FC = () => {
     }
   });
 
-  // Form handling
-  const form = useForm<UserFormValues>({
-    resolver: zodResolver(userFormSchema),
-    defaultValues: {
-      username: '',
-      name: '',
-      email: '',
-      password: '',
-      tenantId: 1,
-      isSuperAdmin: false
+  // Create user mutation
+  const createMutation = useMutation({
+    mutationFn: async (values: UserFormValues) => {
+      const response = await apiRequest('POST', '/api/users', values);
+      return await response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: t('userManagement.userCreated'),
+        description: t('userManagement.userCreatedDesc'),
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/users'] });
+      setIsDialogOpen(false);
+      form.reset();
+    },
+    onError: (error) => {
+      toast({
+        title: t('common.error'),
+        description: error.message,
+        variant: 'destructive',
+      });
     }
   });
 
-  // Create/update user mutation
-  const mutation = useMutation({
-    mutationFn: async (values: UserFormValues) => {
-      // Prepare the user data with displayName instead of name
-      const userData = {
-        ...values,
-        displayName: values.name, // Map name to displayName for the API
-      };
-      
-      if (editingUser) {
-        // Update user
-        const response = await apiRequest('PATCH', `/api/users/${editingUser.id}`, userData);
-        return await response.json();
-      } else {
-        // Create new user
-        const response = await apiRequest('POST', '/api/users', userData);
-        return await response.json();
-      }
+  // Update user mutation
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, values }: { id: number; values: UserFormValues }) => {
+      const response = await apiRequest('PATCH', `/api/users/${id}`, values);
+      return await response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/users'] });
       toast({
-        title: editingUser ? 'User updated' : 'User created',
-        description: editingUser 
-          ? `${form.getValues('username')}'s account has been updated` 
-          : `${form.getValues('username')}'s account has been created`,
+        title: t('userManagement.userUpdated'),
+        description: t('userManagement.userUpdatedDesc'),
       });
-      resetAndCloseDialog();
+      queryClient.invalidateQueries({ queryKey: ['/api/users'] });
+      setIsDialogOpen(false);
+      form.reset();
     },
-    onError: (error: any) => {
+    onError: (error) => {
       toast({
-        title: 'Error',
-        description: error.message || 'Something went wrong',
+        title: t('common.error'),
+        description: error.message,
         variant: 'destructive',
       });
     }
@@ -108,251 +138,111 @@ export const UsersList: React.FC = () => {
 
   // Delete user mutation
   const deleteMutation = useMutation({
-    mutationFn: async (userId: number) => {
-      const response = await apiRequest('DELETE', `/api/users/${userId}`);
-      return response.ok;
+    mutationFn: async (id: number) => {
+      const response = await apiRequest('DELETE', `/api/users/${id}`);
+      return response;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/users'] });
       toast({
-        title: 'User deleted',
-        description: 'The user has been deleted successfully',
+        title: t('userManagement.userDeleted'),
+        description: t('userManagement.userDeletedDesc'),
       });
+      queryClient.invalidateQueries({ queryKey: ['/api/users'] });
     },
-    onError: (error: any) => {
+    onError: (error) => {
       toast({
-        title: 'Error',
-        description: error.message || 'Something went wrong',
+        title: t('common.error'),
+        description: error.message,
         variant: 'destructive',
       });
     }
   });
 
-  // Reset form and close dialog
-  const resetAndCloseDialog = () => {
-    form.reset();
+  const form = useForm<UserFormValues>({
+    resolver: zodResolver(userFormSchema),
+    defaultValues: {
+      username: '',
+      displayName: '',
+      email: '',
+      password: '',
+      tenantId: null,
+      isSuperAdmin: false,
+      isActive: true
+    }
+  });
+
+  const handleAddUser = () => {
     setEditingUser(null);
-    setUserDialogOpen(false);
+    form.reset({
+      username: '',
+      displayName: '',
+      email: '',
+      password: '',
+      tenantId: null,
+      isSuperAdmin: false,
+      isActive: true
+    });
+    setIsDialogOpen(true);
   };
 
-  // Open dialog for editing a user
-  const handleEditUser = (user: User) => {
+  const handleEditUser = (user: any) => {
     setEditingUser(user);
     form.reset({
       username: user.username,
-      name: user.displayName || '', // Use displayName as name
+      displayName: user.displayName || '',
       email: user.email || '',
-      password: '', // Don't populate password for security
-      tenantId: user.tenantId || 1,
-      isSuperAdmin: user.isSuperAdmin || false
+      password: '', // Don't prefill password for security
+      tenantId: user.tenantId,
+      isSuperAdmin: !!user.isSuperAdmin,
+      isActive: user.isActive !== false // Default to true if not set
     });
-    setUserDialogOpen(true);
+    setIsDialogOpen(true);
   };
 
-  // Handle form submission
   const onSubmit = (values: UserFormValues) => {
-    mutation.mutate(values);
+    // If editing, update user, otherwise create new one
+    if (editingUser) {
+      updateMutation.mutate({ id: editingUser.id, values });
+    } else {
+      createMutation.mutate(values);
+    }
   };
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold">{t('userManagement.usersListTitle')}</h2>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => refetch()} className="flex items-center gap-1">
-            <RefreshCw className="h-4 w-4" />
-            {t('common.refresh')}
-          </Button>
-          <Dialog open={userDialogOpen} onOpenChange={setUserDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="flex items-center gap-1" onClick={() => {
-                setEditingUser(null);
-                form.reset({
-                  username: '',
-                  name: '',
-                  email: '',
-                  password: '',
-                  tenantId: 1,
-                  isSuperAdmin: false
-                });
-              }}>
-                <UserPlus className="h-4 w-4" />
-                {t('userManagement.addUser')}
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[550px]">
-              <DialogHeader>
-                <DialogTitle>
-                  {editingUser ? t('userManagement.editUser') : t('userManagement.addUser')}
-                </DialogTitle>
-                <DialogDescription>
-                  {editingUser 
-                    ? t('userManagement.editUserDescription') 
-                    : t('userManagement.addUserDescription')}
-                </DialogDescription>
-              </DialogHeader>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)}>
-                  <div className="space-y-4 py-4">
-                    <FormField
-                      control={form.control}
-                      name="username"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t('userManagement.username')}</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t('userManagement.fullName')}</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t('userManagement.email')}</FormLabel>
-                          <FormControl>
-                            <Input type="email" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>
-                            {editingUser 
-                              ? t('userManagement.newPassword') 
-                              : t('userManagement.password')}
-                          </FormLabel>
-                          <FormControl>
-                            <Input 
-                              type="password" 
-                              {...field} 
-                              placeholder={editingUser ? "Leave blank to keep current password" : ""} 
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="tenantId"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t('userManagement.tenant')}</FormLabel>
-                          <Select 
-                            onValueChange={(value) => field.onChange(parseInt(value))}
-                            defaultValue={field.value.toString()}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder={t('userManagement.selectTenant')} />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {tenants?.map((tenant: any) => (
-                                <SelectItem key={tenant.id} value={tenant.id.toString()}>
-                                  {tenant.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="isSuperAdmin"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between p-3 rounded-lg border">
-                          <div>
-                            <FormLabel className="text-base">
-                              {t('userManagement.superAdmin')}
-                            </FormLabel>
-                            <p className="text-sm text-muted-foreground">
-                              {t('userManagement.superAdminDescription')}
-                            </p>
-                          </div>
-                          <FormControl>
-                            <Switch 
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <DialogFooter>
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      onClick={resetAndCloseDialog}
-                    >
-                      {t('common.cancel')}
-                    </Button>
-                    <Button 
-                      type="submit"
-                      disabled={mutation.isPending}
-                    >
-                      {mutation.isPending && <RefreshCw className="mr-2 h-4 w-4 animate-spin" />}
-                      {editingUser ? t('common.save') : t('common.create')}
-                    </Button>
-                  </DialogFooter>
-                </form>
-              </Form>
-            </DialogContent>
-          </Dialog>
-        </div>
-      </div>
-
+    <div className="space-y-4">
       <Card>
-        <CardContent className="pt-6">
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>{t('userManagement.users')}</CardTitle>
+            <CardDescription>{t('userManagement.usersDesc')}</CardDescription>
+          </div>
+          <Button 
+            onClick={handleAddUser}
+            className="ml-auto"
+          >
+            <Plus className="h-4 w-4 mr-2" /> {t('userManagement.addUser')}
+          </Button>
+        </CardHeader>
+        <CardContent>
           {isLoading ? (
-            <div className="flex justify-center items-center py-10">
-              <RefreshCw className="h-8 w-8 animate-spin text-primary" />
-            </div>
-          ) : isError ? (
-            <div className="text-center py-10 text-destructive">
-              {t('common.errorLoadingData')}
+            <div className="flex justify-center py-8">
+              <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
             </div>
           ) : (
             <Table>
-              <TableCaption>{t('userManagement.usersTableCaption')}</TableCaption>
               <TableHeader>
                 <TableRow>
                   <TableHead>{t('userManagement.username')}</TableHead>
-                  <TableHead>{t('userManagement.name')}</TableHead>
+                  <TableHead>{t('userManagement.displayName')}</TableHead>
                   <TableHead>{t('userManagement.email')}</TableHead>
                   <TableHead>{t('userManagement.tenant')}</TableHead>
                   <TableHead>{t('userManagement.roles')}</TableHead>
-                  <TableHead>{t('userManagement.admin')}</TableHead>
+                  <TableHead>{t('userManagement.superAdmin')}</TableHead>
                   <TableHead className="text-right">{t('common.actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {users?.map((user: User) => (
+                {users?.map((user: any) => (
                   <TableRow key={user.id}>
                     <TableCell className="font-medium">{user.username}</TableCell>
                     <TableCell>{user.displayName || '-'}</TableCell>
@@ -405,6 +295,205 @@ export const UsersList: React.FC = () => {
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-[550px]">
+          <DialogHeader>
+            <DialogTitle>
+              {editingUser ? t('userManagement.editUser') : t('userManagement.addUser')}
+            </DialogTitle>
+            <DialogDescription>
+              {editingUser 
+                ? t('userManagement.editUserDesc') 
+                : t('userManagement.addUserDesc')}
+            </DialogDescription>
+          </DialogHeader>
+
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('userManagement.username')}</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder={t('userManagement.usernamePlaceholder')} 
+                        {...field} 
+                        disabled={!!editingUser} // Username can't be changed once created
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      {t('userManagement.usernameDesc')}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="displayName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('userManagement.displayName')}</FormLabel>
+                    <FormControl>
+                      <Input placeholder={t('userManagement.displayNamePlaceholder')} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('userManagement.email')}</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="email" 
+                        placeholder={t('userManagement.emailPlaceholder')} 
+                        {...field} 
+                        value={field.value || ''} 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      {editingUser 
+                        ? t('userManagement.newPassword') 
+                        : t('userManagement.password')}
+                    </FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="password" 
+                        placeholder={
+                          editingUser 
+                            ? t('userManagement.newPasswordPlaceholder') 
+                            : t('userManagement.passwordPlaceholder')
+                        } 
+                        {...field} 
+                      />
+                    </FormControl>
+                    {editingUser && (
+                      <FormDescription>
+                        {t('userManagement.leaveBlankToKeep')}
+                      </FormDescription>
+                    )}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="tenantId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('userManagement.tenant')}</FormLabel>
+                    <Select 
+                      onValueChange={(value) => field.onChange(value ? parseInt(value) : null)}
+                      value={field.value?.toString()}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder={t('userManagement.selectTenant')} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {tenants?.map((tenant: any) => (
+                          <SelectItem key={tenant.id} value={tenant.id.toString()}>
+                            {tenant.displayName || tenant.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="isSuperAdmin"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>
+                        {t('userManagement.superAdmin')}
+                      </FormLabel>
+                      <FormDescription>
+                        {t('userManagement.superAdminDesc')}
+                      </FormDescription>
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="isActive"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>
+                        {t('userManagement.active')}
+                      </FormLabel>
+                      <FormDescription>
+                        {t('userManagement.activeDesc')}
+                      </FormDescription>
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <DialogFooter>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setIsDialogOpen(false)}
+                >
+                  {t('common.cancel')}
+                </Button>
+                <Button 
+                  type="submit"
+                  disabled={createMutation.isPending || updateMutation.isPending}
+                >
+                  {(createMutation.isPending || updateMutation.isPending) && (
+                    <div className="animate-spin mr-2 h-4 w-4 border-2 border-background border-t-transparent rounded-full" />
+                  )}
+                  {editingUser ? t('common.update') : t('common.create')}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
