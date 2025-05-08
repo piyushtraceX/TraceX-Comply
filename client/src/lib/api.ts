@@ -15,8 +15,10 @@ api.interceptors.response.use(
   (error) => {
     // Handle session expiration or authentication errors
     if (error.response && error.response.status === 401) {
-      // Redirect to login or clear auth state
-      window.location.href = '/auth';
+      // Only redirect if not already on the auth page
+      if (window.location.pathname !== '/auth') {
+        window.location.href = '/auth';
+      }
     }
     return Promise.reject(error);
   }

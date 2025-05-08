@@ -46,6 +46,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [tenant, setTenant] = useState<Tenant | null>(null);
 
   // Query to fetch the current user
+  const isAuthPage = window.location.pathname === '/auth';
+  
   const { 
     data, 
     isLoading, 
@@ -53,6 +55,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   } = useQuery({
     queryKey: ['auth', 'me'],
     queryFn: async () => {
+      // If we're on the auth page, skip the API call
+      if (isAuthPage) {
+        return null;
+      }
+      
       try {
         const response = await authApi.getCurrentUser();
         return response.data;
@@ -64,6 +71,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw error;
       }
     },
+    // Add these options to prevent excessive refetching
+    refetchOnWindowFocus: false,
+    refetchInterval: false,
+    staleTime: Infinity,
+    retry: false,
+    // Skip the query if we're on the auth page
+    enabled: !isAuthPage,
   });
 
   // Extract user and tenant from data
@@ -214,8 +228,10 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // If not authenticated, redirect to login
   if (!user) {
-    // Use window.location for hard redirect to ensure context is reset
-    window.location.href = '/auth';
+    // Use react router instead of hard redirect to prevent refresh loops
+    if (window.location.pathname !== '/auth') {
+      window.location.href = '/auth';
+    }
     return null;
   }
 
