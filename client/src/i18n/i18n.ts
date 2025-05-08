@@ -1,43 +1,35 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
-import Backend from 'i18next-http-backend';
+import HttpBackend from 'i18next-http-backend';
 
 // Initialize i18next
 i18n
-  // Load translations using http backend
-  .use(Backend)
+  // Load translations using http backend (Vite will handle this via @assets alias)
+  .use(HttpBackend)
   // Detect user language
   .use(LanguageDetector)
   // Pass the i18n instance to react-i18next
   .use(initReactI18next)
   // Initialize i18next
   .init({
+    debug: true, // Enable debug in development
     fallbackLng: 'en',
-    debug: process.env.NODE_ENV === 'development',
-    
-    // Namespaces
-    ns: ['common'],
-    defaultNS: 'common',
-    
-    // Detect language from URL or localStorage
-    detection: {
-      order: ['path', 'localStorage', 'navigator'],
-      lookupFromPathIndex: 0,
-      caches: ['localStorage'],
-    },
-    
     interpolation: {
-      escapeValue: false, // React already safes from XSS
+      escapeValue: false, // React already escapes values
     },
-    
-    react: {
-      useSuspense: true,
-    },
-    
-    // Backend configuration - where to load translations from
+    // List of namespaces to load
+    ns: ['common', 'auth'],
+    defaultNS: 'common',
     backend: {
+      // Path to load translations from
       loadPath: '/locales/{{lng}}/{{ns}}.json',
+    },
+    detection: {
+      // Order of language detection methods
+      order: ['localStorage', 'navigator'],
+      // Cache language selection in localStorage
+      caches: ['localStorage'],
     },
   });
 

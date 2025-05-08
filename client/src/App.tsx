@@ -17,15 +17,16 @@ import AddDeclaration from "@/pages/AddDeclaration";
 import Customers from "@/pages/Customers";
 import AddCustomer from "@/pages/AddCustomer";
 import Settings from "@/pages/Settings";
-import Login from "@/pages/Login";
+import AuthPage from "@/pages/AuthPage";
 import TestLanguage from "@/pages/TestLanguage";
 import TestPersona from "@/pages/TestPersona";
 import { ThemeProvider } from "next-themes";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { PersonaProvider } from "./contexts/PersonaContext";
-import { AuthProvider, ProtectedRoute } from "./lib/auth/auth-context";
+import { AuthProvider, ProtectedRoute } from "./contexts/AuthContextV2";
 import { Layout } from "@/components/layout/Layout";
 import React, { Suspense } from "react";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 // Simple loading component 
 const Loading = () => (
@@ -36,8 +37,6 @@ const Loading = () => (
     </div>
   </div>
 );
-
-// No need to pre-wrap components when using ProtectedRoute
 
 function App() {
   console.log("App component rendering");
@@ -53,25 +52,57 @@ function App() {
                   <Toaster />
                   <Suspense fallback={<Loading />}>
                     <Switch>
-                      <Route path="/login">
-                        <Login />
+                      <Route path="/auth">
+                        <AuthPage />
                       </Route>
-                      <ProtectedRoute path="/" component={HomePage} />
-                      <ProtectedRoute path="/dashboard" component={Dashboard} />
-                      <ProtectedRoute path="/supply-chain" component={SupplyChain} />
-                      <ProtectedRoute path="/sourcing-entities" component={SourcingEntities} />
-                      <ProtectedRoute path="/import-sources" component={ImportSources} />
-                      <ProtectedRoute path="/add-supplier" component={AddSupplier} />
-                      <ProtectedRoute path="/supplier/:id" component={SupplierDetail} />
-                      <ProtectedRoute path="/compliance" component={Compliance} />
-                      <ProtectedRoute path="/declarations" component={Declarations} />
-                      <ProtectedRoute path="/add-declaration" component={AddDeclaration} />
-                      <ProtectedRoute path="/customers" component={Customers} />
-                      <ProtectedRoute path="/customer" component={Customers} />
-                      <ProtectedRoute path="/add-customer" component={AddCustomer} />
-                      <ProtectedRoute path="/settings" component={Settings} />
-                      <ProtectedRoute path="/test-language" component={TestLanguage} />
-                      <ProtectedRoute path="/test-persona" component={TestPersona} />
+                      <ProtectedRoute path="/">
+                        <HomePage />
+                      </ProtectedRoute>
+                      <ProtectedRoute path="/dashboard">
+                        <Dashboard />
+                      </ProtectedRoute>
+                      <ProtectedRoute path="/supply-chain">
+                        <SupplyChain />
+                      </ProtectedRoute>
+                      <ProtectedRoute path="/sourcing-entities">
+                        <SourcingEntities />
+                      </ProtectedRoute>
+                      <ProtectedRoute path="/import-sources">
+                        <ImportSources />
+                      </ProtectedRoute>
+                      <ProtectedRoute path="/add-supplier">
+                        <AddSupplier />
+                      </ProtectedRoute>
+                      <ProtectedRoute path="/supplier/:id">
+                        {(params) => <SupplierDetail id={params.id} />}
+                      </ProtectedRoute>
+                      <ProtectedRoute path="/compliance">
+                        <Compliance />
+                      </ProtectedRoute>
+                      <ProtectedRoute path="/declarations">
+                        <Declarations />
+                      </ProtectedRoute>
+                      <ProtectedRoute path="/add-declaration">
+                        <AddDeclaration />
+                      </ProtectedRoute>
+                      <ProtectedRoute path="/customers">
+                        <Customers />
+                      </ProtectedRoute>
+                      <ProtectedRoute path="/customer">
+                        <Customers />
+                      </ProtectedRoute>
+                      <ProtectedRoute path="/add-customer">
+                        <AddCustomer />
+                      </ProtectedRoute>
+                      <ProtectedRoute path="/settings">
+                        <Settings />
+                      </ProtectedRoute>
+                      <ProtectedRoute path="/test-language">
+                        <TestLanguage />
+                      </ProtectedRoute>
+                      <ProtectedRoute path="/test-persona">
+                        <TestPersona />
+                      </ProtectedRoute>
                       <Route path="/debug">
                         <div className="p-10">Debug Page Working</div>
                       </Route>
@@ -81,6 +112,7 @@ function App() {
                     </Switch>
                   </Suspense>
                 </TooltipProvider>
+                {process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />}
               </AuthProvider>
             </PersonaProvider>
           </LanguageProvider>
