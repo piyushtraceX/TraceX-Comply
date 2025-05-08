@@ -27,11 +27,17 @@ func main() {
                 fmt.Fprintf(w, `{"status":"ok","message":"Go API server is running","timestamp":"%s","version":"1.0.0"}`, time.Now().Format(time.RFC3339))
         })
 
-        // Auth routes
+        // Auth routes (both with /api/auth/* and legacy paths)
+        // Original routes
         mux.HandleFunc("/api/auth/login", handleLogin)
         mux.HandleFunc("/api/auth/logout", handleLogout)
         mux.HandleFunc("/api/auth/me", handleGetCurrentUser)
         mux.HandleFunc("/api/auth/switch-tenant", handleSwitchTenant)
+        
+        // Legacy paths used by the client
+        mux.HandleFunc("/api/login", handleLogin)
+        mux.HandleFunc("/api/logout", handleLogout)
+        mux.HandleFunc("/api/user", handleGetCurrentUser)
 
         // Test endpoint
         mux.HandleFunc("/api/test", func(w http.ResponseWriter, r *http.Request) {
@@ -43,16 +49,32 @@ func main() {
         // Set up static file serving
         staticDir := os.Getenv("STATIC_DIR")
         if staticDir == "" {
-                staticDir = "../client/dist"
+                // When in development mode, use the Vite dev server files
+                if os.Getenv("NODE_ENV") == "development" {
+                        staticDir = "../client/dist"
+                } else {
+                        // In production use compiled client files
+                        staticDir = "../client/dist"
+                }
         }
+        log.Printf("Using static directory: %s", staticDir)
 
-        // Serve static files
+        // Create a file server to serve static assets
         fileServer := http.FileServer(http.Dir(staticDir))
-        mux.Handle("/assets/", fileServer)
+        
+        // Handle different static file patterns
+        // 1. Handle source files for Vite dev server
         mux.Handle("/src/", fileServer)
         mux.Handle("/node_modules/", fileServer)
         mux.Handle("/@fs/", fileServer)
+        mux.Handle("/@vite/", fileServer)
+        mux.Handle("/@react-refresh", fileServer)
+        
+        // 2. Handle static assets in both dev and prod
+        mux.Handle("/assets/", fileServer)
         mux.Handle("/locales/", fileServer)
+        
+        // 3. Handle specific files
         mux.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
                 http.ServeFile(w, r, filepath.Join(staticDir, "favicon.ico"))
         })

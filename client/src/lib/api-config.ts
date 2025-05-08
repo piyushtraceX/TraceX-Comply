@@ -8,11 +8,8 @@ const host = window.location.hostname;
 const port = window.location.port ? `:${window.location.port}` : '';
 const protocol = window.location.protocol;
 
-// If running on replit.app, use the same origin for API calls
-// If running locally, use localhost:8080
-export const API_BASE_URL = host.includes('replit.app') 
-  ? `${protocol}//${host}${port}/api` 
-  : 'http://localhost:8080/api';
+// Always use the same origin for API calls to avoid CORS issues
+export const API_BASE_URL = `${protocol}//${host}${port}/api`;
 
 // Export functions to ensure all API requests go to the Go server
 export const getApiUrl = (path: string): string => {
