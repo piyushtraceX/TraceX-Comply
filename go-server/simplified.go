@@ -14,7 +14,7 @@ func main() {
         // Set default port if not provided
         port := os.Getenv("PORT")
         if port == "" {
-                port = "8080"
+                port = "5000"  // Use port 5000 to match Replit's default
         }
 
         // Simple multiplexer

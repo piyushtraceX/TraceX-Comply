@@ -2,8 +2,8 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 import axios from "axios";
 import { API_BASE_URL, getApiUrl } from "./api-config";
 
-// IMPORTANT: Always use Express API for now, while Go server is being fixed
-const USE_EXPRESS_API = true;
+// Now use the Go server for all API requests
+const USE_EXPRESS_API = false;
 const EXPRESS_API_URL = '/api';
 
 // Create a reusable axios instance configured for the API
@@ -11,8 +11,11 @@ const apiClient = axios.create({
   baseURL: USE_EXPRESS_API ? EXPRESS_API_URL : API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
+    'Accept': 'application/json, text/plain, */*',
   },
   withCredentials: true,
+  timeout: 10000,
+  allowAbsoluteUrls: true,
 });
 
 // Log requests in development
