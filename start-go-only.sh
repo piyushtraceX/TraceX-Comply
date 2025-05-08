@@ -1,15 +1,25 @@
 #!/bin/bash
 
-echo "Starting application with Go server only..."
-
-# Kill any existing Go processes
+# Kill any existing Go or Node.js processes
 pkill -f bin/api || true
-
-# Kill any Express.js server (from the 'Start application' workflow)
 pkill -f "node.*dev" || true
 
-# Build the Go server
-cd go-server && go build -o bin/api simplified.go
+# Build the Go server 
+cd go-server
+go build -o bin/api simplified.go
 
-# Start the Go server pointing to the client dist directory
-STATIC_DIR="../client/dist" ./bin/api
+# Start the Go server
+NODE_ENV=development ./bin/api > ../go-server.log 2>&1 &
+go_pid=$!
+echo $go_pid > ../go.pid
+echo "Go server started with PID $go_pid"
+
+# Notify user
+echo "----------------------------------------------------"
+echo "Go server started on port 5000."
+echo "Express.js has been completely disabled."
+echo "All requests are now handled by the Go server."
+echo "----------------------------------------------------"
+
+# Keep the script running
+tail -f ../go-server.log

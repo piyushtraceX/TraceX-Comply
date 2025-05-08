@@ -172,10 +172,21 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
         }
 
         // In a real app, you would parse the request body and validate credentials
-        // For demo, accept any credentials
+        // Here we'll set a cookie to simulate a logged-in session
+        http.SetCookie(w, &http.Cookie{
+                Name:     "session",
+                Value:    "dummy-session-token",
+                Path:     "/",
+                MaxAge:   3600 * 24, // 1 day
+                HttpOnly: true,
+                Secure:   r.TLS != nil,
+                SameSite: http.SameSiteLaxMode,
+        })
+
+        // Return user data
         w.Header().Set("Content-Type", "application/json")
         w.WriteHeader(http.StatusOK)
-        fmt.Fprint(w, `{"user":{"id":1,"username":"demouser","name":"Demo User","email":"demo@example.com"}}`)
+        fmt.Fprint(w, `{"user":{"id":1,"username":"demouser","name":"Demo User","email":"demo@example.com","isSuperAdmin":true}}`)
 }
 
 func handleLogout(w http.ResponseWriter, r *http.Request) {
@@ -183,6 +194,17 @@ func handleLogout(w http.ResponseWriter, r *http.Request) {
                 w.WriteHeader(http.StatusMethodNotAllowed)
                 return
         }
+
+        // Clear the session cookie
+        http.SetCookie(w, &http.Cookie{
+                Name:     "session",
+                Value:    "",
+                Path:     "/",
+                MaxAge:   -1, // Delete the cookie
+                HttpOnly: true,
+                Secure:   r.TLS != nil,
+                SameSite: http.SameSiteLaxMode,
+        })
 
         w.Header().Set("Content-Type", "application/json")
         w.WriteHeader(http.StatusOK)
@@ -195,9 +217,22 @@ func handleGetCurrentUser(w http.ResponseWriter, r *http.Request) {
                 return
         }
 
+        // Check for an Authorization header or cookie (simplified for demo)
+        _, hasAuth := r.Header["Authorization"]
+        cookie, hasCookie := r.Cookie("session")
+        
+        // If no authentication is present, return 401
+        if !hasAuth && (cookie == nil || !hasCookie) {
+                w.Header().Set("Content-Type", "application/json")
+                w.WriteHeader(http.StatusUnauthorized)
+                fmt.Fprint(w, `{"error":"Not authenticated"}`)
+                return
+        }
+
+        // Return mock user data (this would be fetched from database in a real app)
         w.Header().Set("Content-Type", "application/json")
         w.WriteHeader(http.StatusOK)
-        fmt.Fprint(w, `{"user":{"id":1,"username":"demouser","name":"Demo User","email":"demo@example.com"}}`)
+        fmt.Fprint(w, `{"user":{"id":1,"username":"demouser","name":"Demo User","email":"demo@example.com","isSuperAdmin":true}}`)
 }
 
 func handleSwitchTenant(w http.ResponseWriter, r *http.Request) {

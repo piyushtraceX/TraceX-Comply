@@ -1,8 +1,22 @@
 import axios, { AxiosInstance, AxiosResponse, AxiosRequestConfig } from 'axios';
 
 // Create axios instance for Go API
+// Get the hostname from window.location to ensure we're using the correct host
+const getApiBaseUrl = () => {
+  const host = window.location.hostname;
+  const port = '5000'; // Fixed port for Go API
+  const protocol = window.location.protocol;
+  
+  // Use the explicit port only in development mode or when not on Replit
+  if (host.includes('replit') || host.includes('repl.co')) {
+    return `${protocol}//${host}/api`;
+  }
+  
+  return `${protocol}//${host}:${port}/api`;
+};
+
 const apiClient: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_GO_API_URL || 'http://localhost:8080/api',
+  baseURL: getApiBaseUrl(),
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
