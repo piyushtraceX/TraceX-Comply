@@ -70,6 +70,16 @@ export function AuthDebugger() {
           </Label>
         </div>
         
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded border border-yellow-200 dark:border-yellow-800 text-sm mb-4">
+          <p className="font-medium mb-2">Backend Status</p>
+          <p className="text-xs text-yellow-800 dark:text-yellow-300">
+            Currently using the <span className="font-bold">{useGoBackend ? 'Go' : 'Express.js'}</span> backend. 
+            {useGoBackend 
+              ? ' Make sure the Go server is running on port 8080.' 
+              : ' Express.js is already running with the Vite development server.'}
+          </p>
+        </div>
+        
         <div className="space-y-2">
           <Label htmlFor="username">Username</Label>
           <Input 
@@ -94,16 +104,39 @@ export function AuthDebugger() {
         <div className="space-y-2">
           <Label>Authentication State</Label>
           <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded text-sm">
-            <div>Status: {isLoading ? 'Loading...' : user ? 'Authenticated' : 'Not Authenticated'}</div>
+            <div>Status: {isLoading 
+              ? <span className="text-blue-600 dark:text-blue-400">Loading...</span> 
+              : user 
+                ? <span className="text-green-600 dark:text-green-400">Authenticated</span> 
+                : <span className="text-red-600 dark:text-red-400">Not Authenticated</span>
+            }</div>
             {user && (
               <>
-                <div>User: {user.username} (ID: {user.id})</div>
+                <div>User: <span className="font-mono">{user.username}</span> (ID: {user.id})</div>
                 <div>Name: {user.name}</div>
                 <div>Email: {user.email}</div>
                 {tenant && <div>Tenant: {tenant.name} (ID: {tenant.id})</div>}
                 {user.roles && <div>Roles: {user.roles.join(', ')}</div>}
               </>
             )}
+          </div>
+        </div>
+        
+        <div className="space-y-2">
+          <Label>API Health Check</Label>
+          <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded text-sm">
+            <div className="flex items-center justify-between">
+              <span>Express API:</span> 
+              <span className={`px-2 py-1 rounded text-xs ${user ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'}`}>
+                {user ? 'Connected' : 'Not Authenticated'}
+              </span>
+            </div>
+            <div className="flex items-center justify-between mt-2">
+              <span>Go API:</span> 
+              <span className="px-2 py-1 rounded text-xs bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-400">
+                Not Tested
+              </span>
+            </div>
           </div>
         </div>
       </CardContent>

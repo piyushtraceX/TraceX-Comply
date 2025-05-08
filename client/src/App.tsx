@@ -139,9 +139,7 @@ function App() {
                         </ProtectedRoute>
                       </Route>
                       <Route path="/debug">
-                        <Suspense fallback={<Loading />}>
-                          <DebugPage />
-                        </Suspense>
+                        <DebugPage />
                       </Route>
                       <Route>
                         <NotFound />
