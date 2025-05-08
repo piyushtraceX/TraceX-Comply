@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { useTranslation } from '@/hooks/use-translation';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useAuth } from '@/lib/auth/auth-context';
+import { useAuth } from '@/contexts/AuthContextV2';
 import { X, Menu, LayoutDashboard, Network, ShieldCheck, FileText, Users, Settings, User, LogOut, ClipboardList, Globe } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 

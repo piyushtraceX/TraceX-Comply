@@ -4,7 +4,6 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
-import HomePage from "@/pages/HomePage";
 import Dashboard from "@/pages/Dashboard";
 import SupplyChain from "@/pages/SupplyChain";
 import SourcingEntities from "@/pages/SourcingEntities";
@@ -58,7 +57,7 @@ function App() {
                       </Route>
                       <Route path="/">
                         <ProtectedRoute>
-                          <HomePage />
+                          <Dashboard />
                         </ProtectedRoute>
                       </Route>
                       <Route path="/dashboard">

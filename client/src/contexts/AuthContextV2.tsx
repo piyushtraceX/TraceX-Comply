@@ -115,6 +115,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const response = await authApi.login(credentials.username, credentials.password);
         console.log('Login successful, response:', response.data);
         
+        // Save the "just logged in" flag
+        localStorage.setItem('just_logged_in', 'true');
+        
+        // Extract user data from response
+        let userData = null;
+        if (response.data?.user) {
+          userData = response.data.user;
+          console.log('Found user data in response, storing in localStorage');
+          localStorage.setItem('user_data', JSON.stringify(userData));
+        }
+        
         // Handle different token response formats
         let token = null;
         
@@ -141,6 +152,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } else {
           console.log('No token found in response, using cookie-based auth only');
         }
+        
+        // Schedule clearing of just_logged_in flag
+        setTimeout(() => {
+          localStorage.removeItem('just_logged_in');
+        }, 30000); // Clear after 30 seconds
         
         return response;
       } catch (error: any) {
