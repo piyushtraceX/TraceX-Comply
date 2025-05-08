@@ -38,7 +38,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const { isRTL } = useLanguage();
   const [location] = useLocation();
   const isMobile = useIsMobile();
-  const { logout } = useAuth();
+  const auth = useAuth();
   const { toast } = useToast();
 
   // Navigation items in the order specified by the reference app
@@ -112,7 +112,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   // Handle logout
   const handleLogout = () => {
     console.log("Logging out...");
-    logout();
+    auth.logout();
     toast({
       title: "Logged out",
       description: "You have been successfully logged out.",
@@ -239,8 +239,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </div>
               </div>
               <div className={cn('ml-3', isRTL && 'mr-3 ml-0 text-right')}>
-                <p className="text-sm font-medium text-gray-900">{t('user.name')}</p>
-                <p className="text-xs font-medium text-gray-500">{t('user.email')}</p>
+                <p className="text-sm font-medium text-gray-900">{auth.user?.name || auth.user?.username || t('user.name')}</p>
+                <p className="text-xs font-medium text-gray-500">{auth.user?.email || t('user.email')}</p>
               </div>
               <button 
                 onClick={handleLogout}
