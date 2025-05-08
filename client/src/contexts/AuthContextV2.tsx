@@ -115,13 +115,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const response = await authApi.login(credentials.username, credentials.password);
         console.log('Login successful, response:', response.data);
         
-        // If the response includes an auth token, store it in localStorage as a fallback
-        if (response.data.auth?.token) {
+        // Handle different token response formats
+        let token = null;
+        
+        // Format 1: { auth: { token: "..." } }
+        if (response.data?.auth?.token) {
+          token = response.data.auth.token;
+        } 
+        // Format 2: { token: "..." }
+        else if (response.data?.token) {
+          token = response.data.token;
+        }
+        // Format 3: String token directly in body 
+        else if (typeof response.data === 'string' && response.data.length > 20) {
+          token = response.data;
+        }
+        
+        // Store token if we found one
+        if (token) {
           console.log('Saving auth token to localStorage');
-          localStorage.setItem('auth_token', response.data.auth.token);
+          localStorage.setItem('auth_token', token);
           
           // Add the token to the Axios default headers
-          axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.auth.token}`;
+          axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        } else {
+          console.log('No token found in response, using cookie-based auth only');
         }
         
         return response;

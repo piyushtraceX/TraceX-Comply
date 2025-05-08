@@ -32,12 +32,21 @@ const apiClient: AxiosInstance = axios.create({
   withCredentials: true,
 });
 
+// Initialize auth token from localStorage on module load
+(function initAuthToken() {
+  const token = localStorage.getItem('auth_token');
+  if (token) {
+    console.log('[API] Initializing authorization header from localStorage');
+    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  }
+})();
+
 // Setup request interceptor for logging and auth token
 apiClient.interceptors.request.use(
   (config) => {
     console.log(`[API Request] ${config.method?.toUpperCase()} ${config.url}`);
     
-    // Add authorization header if we have a token in localStorage
+    // Add authorization header if we have a token in localStorage and it's not already in the request
     const token = localStorage.getItem('auth_token');
     if (token && !config.headers['Authorization']) {
       console.log('[API Request] Adding Authorization header from local storage');
@@ -82,12 +91,33 @@ export const authApi = {
     
     return apiClient.post('/auth/login', { username, password })
       .then(response => {
-        // Store token in localStorage if it exists in response
+        console.log('Login response:', response.data);
+        
+        // Handle different token response formats
+        let token = null;
+        
+        // Format 1: { auth: { token: "..." } }
         if (response.data?.auth?.token) {
-          console.log('Login successful, saving auth token');
-          localStorage.setItem('auth_token', response.data.auth.token);
-          axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.auth.token}`;
+          token = response.data.auth.token;
+        } 
+        // Format 2: { token: "..." }
+        else if (response.data?.token) {
+          token = response.data.token;
         }
+        // Format 3: String token directly in body 
+        else if (typeof response.data === 'string' && response.data.length > 20) {
+          token = response.data;
+        }
+        
+        // Store token if we found one
+        if (token) {
+          console.log('Login successful, saving auth token');
+          localStorage.setItem('auth_token', token);
+          axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        } else {
+          console.log('No token found in login response');
+        }
+        
         return response;
       });
   },

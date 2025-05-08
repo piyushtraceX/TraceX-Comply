@@ -26,11 +26,19 @@ export function AuthDebugger() {
   // State for storing token information
   const [authToken, setAuthToken] = useState<string | null>(null);
   const [headerAuthToken, setHeaderAuthToken] = useState<string | null>(null);
+  const [authCheckStatus, setAuthCheckStatus] = useState<'idle' | 'checking' | 'success' | 'failed'>('idle');
+  const [authCheckResult, setAuthCheckResult] = useState<string>('');
+  const [sessionCheckStatus, setSessionCheckStatus] = useState<'idle' | 'checking' | 'success' | 'failed'>('idle');
+  const [sessionCheckResult, setSessionCheckResult] = useState<string>('');
 
   // Check API status and auth token on mount
   useEffect(() => {
     checkApiStatus();
-    
+    refreshTokenInfo();
+  }, []);
+  
+  // Refresh token information
+  const refreshTokenInfo = () => {
     // Get token from localStorage
     const token = localStorage.getItem('auth_token');
     setAuthToken(token);
@@ -38,7 +46,46 @@ export function AuthDebugger() {
     // Get token from axios headers
     const axiosToken = axios.defaults.headers.common['Authorization'] as string;
     setHeaderAuthToken(axiosToken || null);
-  }, []);
+  };
+  
+  // Test authentication endpoint directly
+  const testAuthEndpoint = async () => {
+    setAuthCheckStatus('checking');
+    setAuthCheckResult('');
+    
+    try {
+      const host = window.location.hostname;
+      const authApiUrl = `${window.location.protocol}//${host}/api/auth/me`;
+      console.log('Testing auth endpoint at:', authApiUrl);
+      
+      const headers: Record<string, string> = {};
+      const token = localStorage.getItem('auth_token');
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
+      const authResponse = await axios.get(authApiUrl, { 
+        withCredentials: true,
+        headers,
+        timeout: 5000 
+      });
+      
+      console.log('Auth endpoint test result:', authResponse);
+      setAuthCheckStatus('success');
+      setAuthCheckResult(JSON.stringify(authResponse.data, null, 2));
+    } catch (error: any) {
+      console.error('Error testing auth endpoint:', error);
+      setAuthCheckStatus('failed');
+      
+      if (axios.isAxiosError(error)) {
+        const statusCode = error.response?.status;
+        const data = error.response?.data;
+        setAuthCheckResult(`Status: ${statusCode}\nData: ${JSON.stringify(data, null, 2)}`);
+      } else {
+        setAuthCheckResult(error.message);
+      }
+    }
+  };
   
   // Function to check the API status
   const checkApiStatus = async () => {
@@ -189,6 +236,79 @@ export function AuthDebugger() {
                 {tenant && <div>Tenant: {tenant.name} (ID: {tenant.id})</div>}
                 {user.roles && <div>Roles: {user.roles.join(', ')}</div>}
               </>
+            )}
+            
+            <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+              <div className="font-medium text-sm mb-1">Auth Token Info</div>
+              <div className="text-xs">
+                <div>LocalStorage Token: {authToken 
+                  ? <span className="text-green-600 dark:text-green-400 font-mono break-all">{authToken.substring(0, 15)}...</span> 
+                  : <span className="text-red-600 dark:text-red-400">Not Found</span>
+                }</div>
+                <div>Axios Headers Token: {headerAuthToken 
+                  ? <span className="text-green-600 dark:text-green-400 font-mono break-all">{headerAuthToken.substring(0, 15)}...</span> 
+                  : <span className="text-red-600 dark:text-red-400">Not Found</span>
+                }</div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-2 h-7 text-xs"
+                  onClick={() => {
+                    // Refresh token state
+                    const token = localStorage.getItem('auth_token');
+                    setAuthToken(token);
+                    const axiosToken = axios.defaults.headers.common['Authorization'] as string;
+                    setHeaderAuthToken(axiosToken || null);
+                  }}
+                >
+                  Refresh Token Info
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label>Test Authentication Endpoint</Label>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={testAuthEndpoint} 
+              className="h-8 px-2 text-xs"
+            >
+              Test Auth API
+            </Button>
+          </div>
+          <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded text-sm">
+            <div className="flex items-center justify-between mb-2">
+              <span>Auth Endpoint Status:</span> 
+              {authCheckStatus === 'idle' ? (
+                <span className="px-2 py-1 rounded text-xs bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-300 flex items-center">
+                  Not Tested
+                </span>
+              ) : authCheckStatus === 'checking' ? (
+                <span className="px-2 py-1 rounded text-xs bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 flex items-center">
+                  <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                  Testing...
+                </span>
+              ) : authCheckStatus === 'success' ? (
+                <span className="px-2 py-1 rounded text-xs bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 flex items-center">
+                  <CheckCircle className="mr-1 h-3 w-3" />
+                  Success
+                </span>
+              ) : (
+                <span className="px-2 py-1 rounded text-xs bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 flex items-center">
+                  <XCircle className="mr-1 h-3 w-3" />
+                  Failed
+                </span>
+              )}
+            </div>
+            
+            {authCheckResult && (
+              <div className="text-xs mt-2 p-2 bg-black/10 dark:bg-white/5 rounded font-mono whitespace-pre-wrap break-all">
+                {authCheckResult}
+              </div>
             )}
           </div>
         </div>
