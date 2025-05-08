@@ -47,6 +47,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const queryClient = useQueryClient();
   const [tenant, setTenant] = useState<Tenant | null>(null);
 
+  // Initialize auth token from localStorage on component mount
+  useEffect(() => {
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+      console.log('Found existing auth token in localStorage on startup');
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    }
+  }, []);
+
   // Query to fetch the current user
   const isAuthPage = window.location.pathname === '/auth';
   

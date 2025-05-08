@@ -32,10 +32,18 @@ const apiClient: AxiosInstance = axios.create({
   withCredentials: true,
 });
 
-// Setup request interceptor for logging
+// Setup request interceptor for logging and auth token
 apiClient.interceptors.request.use(
   (config) => {
     console.log(`[API Request] ${config.method?.toUpperCase()} ${config.url}`);
+    
+    // Add authorization header if we have a token in localStorage
+    const token = localStorage.getItem('auth_token');
+    if (token && !config.headers['Authorization']) {
+      console.log('[API Request] Adding Authorization header from local storage');
+      config.headers['Authorization'] = `Bearer ${token}`;
+    }
+    
     return config;
   },
   (error) => {
@@ -68,15 +76,44 @@ apiClient.interceptors.response.use(
 // API interface - Authentication
 export const authApi = {
   login: (username: string, password: string): Promise<AxiosResponse<any>> => {
-    return apiClient.post('/auth/login', { username, password });
+    // Clear any existing token before login
+    localStorage.removeItem('auth_token');
+    delete axios.defaults.headers.common['Authorization'];
+    
+    return apiClient.post('/auth/login', { username, password })
+      .then(response => {
+        // Store token in localStorage if it exists in response
+        if (response.data?.auth?.token) {
+          console.log('Login successful, saving auth token');
+          localStorage.setItem('auth_token', response.data.auth.token);
+          axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.auth.token}`;
+        }
+        return response;
+      });
   },
   
   logout: (): Promise<AxiosResponse<any>> => {
-    return apiClient.post('/auth/logout');
+    return apiClient.post('/auth/logout')
+      .finally(() => {
+        // Always clear token on logout regardless of API success/failure
+        console.log('Removing auth token from localStorage');
+        localStorage.removeItem('auth_token');
+        delete axios.defaults.headers.common['Authorization'];
+      });
   },
   
   getCurrentUser: (): Promise<AxiosResponse<any>> => {
-    return apiClient.get('/auth/me');
+    // Use token-based auth as fallback for cookie-based auth
+    const token = localStorage.getItem('auth_token');
+    const config: AxiosRequestConfig = {};
+    
+    if (token) {
+      config.headers = {
+        'Authorization': `Bearer ${token}`
+      };
+    }
+    
+    return apiClient.get('/auth/me', config);
   },
   
   switchTenant: (tenantId: number): Promise<AxiosResponse<any>> => {

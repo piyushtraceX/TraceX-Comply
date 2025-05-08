@@ -23,9 +23,21 @@ export function AuthDebugger() {
   const [goApiStatus, setGoApiStatus] = useState<'checking' | 'available' | 'unavailable' | 'error'>('checking');
   const [expressApiStatus, setExpressApiStatus] = useState<'checking' | 'available' | 'unavailable' | 'error'>('checking');
   
-  // Check API status on mount
+  // State for storing token information
+  const [authToken, setAuthToken] = useState<string | null>(null);
+  const [headerAuthToken, setHeaderAuthToken] = useState<string | null>(null);
+
+  // Check API status and auth token on mount
   useEffect(() => {
     checkApiStatus();
+    
+    // Get token from localStorage
+    const token = localStorage.getItem('auth_token');
+    setAuthToken(token);
+    
+    // Get token from axios headers
+    const axiosToken = axios.defaults.headers.common['Authorization'] as string;
+    setHeaderAuthToken(axiosToken || null);
   }, []);
   
   // Function to check the API status

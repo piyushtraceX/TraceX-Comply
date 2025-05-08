@@ -276,17 +276,40 @@ func handleGetCurrentUser(w http.ResponseWriter, r *http.Request) {
         
         log.Printf("Auth check - HasAuthHeader: %t, HasCookie: %t", hasAuth, hasCookie)
         
-        if hasAuth {
-                log.Printf("Auth header: %v", authHeader)
-        }
+        // First check cookie-based authentication
+        var isAuthenticated bool = false
         
         if hasCookie && cookie != nil {
                 log.Printf("Session cookie - Name: %s, Value: %s, Path: %s, Secure: %t, HttpOnly: %t, SameSite: %s",
                         cookie.Name, cookie.Value, cookie.Path, cookie.Secure, cookie.HttpOnly, getSameSiteString(cookie.SameSite))
+                
+                // Validate cookie value (would be more complex in a real app)
+                if strings.HasPrefix(cookie.Value, "auth-session") || cookie.Value == "dummy-session-token" {
+                        log.Printf("Authentication successful via cookie")
+                        isAuthenticated = true
+                }
         }
         
-        // If no authentication is present, return 401
-        if !hasAuth && (cookie == nil || !hasCookie) {
+        // Then check token-based authentication if cookie failed
+        if !isAuthenticated && hasAuth {
+                log.Printf("Attempting token-based authentication")
+                log.Printf("Auth header: %v", authHeader)
+                
+                authToken := authHeader[0]
+                if strings.HasPrefix(authToken, "Bearer ") {
+                        token := strings.TrimPrefix(authToken, "Bearer ")
+                        log.Printf("Extracted token: %s", token)
+                        
+                        // Validate token (would be more complex in a real app)
+                        if strings.HasPrefix(token, "auth-session") {
+                                log.Printf("Authentication successful via token")
+                                isAuthenticated = true
+                        }
+                }
+        }
+        
+        // If no valid authentication is present, return 401
+        if !isAuthenticated {
                 log.Printf("Authentication failed - returning 401")
                 w.Header().Set("Content-Type", "application/json")
                 w.WriteHeader(http.StatusUnauthorized)
