@@ -17,6 +17,7 @@ import Customers from "@/pages/Customers";
 import AddCustomer from "@/pages/AddCustomer";
 import Settings from "@/pages/Settings";
 import AuthPage from "@/pages/AuthPage";
+import UserManagement from "@/pages/UserManagement";
 import TestLanguage from "@/pages/TestLanguage";
 import TestPersona from "@/pages/TestPersona";
 import DebugPage from "@/pages/DebugPage";
@@ -133,6 +134,11 @@ function App() {
                       <Route path="/settings">
                         <SimpleProtectedRoute>
                           <Settings />
+                        </SimpleProtectedRoute>
+                      </Route>
+                      <Route path="/user-management">
+                        <SimpleProtectedRoute>
+                          <UserManagement />
                         </SimpleProtectedRoute>
                       </Route>
                       <Route path="/test-language">
