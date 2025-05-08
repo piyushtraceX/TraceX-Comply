@@ -3,7 +3,7 @@
 
 // In a real production environment, this would be configured
 // based on environment variables or build configuration
-export const API_BASE_URL = 'http://localhost:8080/api';
+export const API_BASE_URL = '/api';
 
 // Export functions to ensure all API requests go to the Go server
 export const getApiUrl = (path: string): string => {
