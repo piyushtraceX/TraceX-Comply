@@ -53,16 +53,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { 
     data, 
     isLoading, 
-    error 
+    error,
+    refetch 
   } = useQuery({
     queryKey: ['auth', 'me'],
     queryFn: async () => {
-      // If we're on the auth page, skip the API call to avoid unnecessary 401 errors
-      if (isAuthPage) {
-        console.log('On auth page, skipping auth check');
-        return null;
-      }
-      
       try {
         console.log('Fetching current user...');
         const response = await authApi.getCurrentUser();
@@ -88,11 +83,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Add these options to prevent excessive refetching
     refetchOnWindowFocus: false,
     refetchInterval: false,
-    staleTime: Infinity,
+    staleTime: 60000, // Cache for 1 minute
     retry: 1, // Allow one retry for potential network issues
     retryDelay: 1000, // Wait 1 second before retrying
-    // Skip the query if we're on the auth page
-    enabled: !isAuthPage,
   });
 
   // Extract user and tenant from data
@@ -134,11 +127,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         description: `Welcome back, ${response.data.user?.name || response.data.user?.username}!`,
       });
       
-      // Redirect to the dashboard after successful login
+      // Redirect to the dashboard after successful login and ensuring auth state is refreshed
       if (window.location.pathname === '/auth') {
+        // Manually refetch the query to ensure we have the updated user
+        console.log("Refetching auth state before redirecting...");
+        queryClient.invalidateQueries({queryKey: ['auth', 'me']});
+        
+        // Wait a bit longer to ensure the auth state is refreshed and cookie is set
         setTimeout(() => {
+          console.log("Login successful, redirecting to dashboard");
           window.location.href = '/dashboard';
-        }, 500);
+        }, 1500); // Longer delay to ensure auth state is refreshed
       }
     },
     onError: (error: any) => {

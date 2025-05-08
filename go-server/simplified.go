@@ -179,8 +179,8 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
                 Path:     "/",
                 MaxAge:   3600 * 24, // 1 day
                 HttpOnly: true,
-                Secure:   r.TLS != nil,
-                SameSite: http.SameSiteLaxMode,
+                Secure:   false, // Disable secure for development
+                SameSite: http.SameSiteNoneMode, // Allow cross-site cookies in development
         })
 
         // Return user data
@@ -202,8 +202,8 @@ func handleLogout(w http.ResponseWriter, r *http.Request) {
                 Path:     "/",
                 MaxAge:   -1, // Delete the cookie
                 HttpOnly: true,
-                Secure:   r.TLS != nil,
-                SameSite: http.SameSiteLaxMode,
+                Secure:   false, // Disable secure for development
+                SameSite: http.SameSiteNoneMode, // Allow cross-site cookies in development
         })
 
         w.Header().Set("Content-Type", "application/json")
