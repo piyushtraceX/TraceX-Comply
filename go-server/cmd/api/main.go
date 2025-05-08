@@ -5,6 +5,8 @@ import (
         "log"
         "net/http"
         "os"
+        "path/filepath"
+        "strings"
         "time"
 
         "github.com/gin-contrib/cors"
@@ -23,10 +25,10 @@ func main() {
 
         // Configure CORS
         router.Use(cors.New(cors.Config{
-                AllowOrigins:     []string{"*"},
+                AllowOrigins:     []string{"*", "http://localhost:5000", "https://*.replit.app"},
                 AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
-                AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
-                ExposeHeaders:    []string{"Content-Length"},
+                AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization", "Set-Cookie", "Cookie"},
+                ExposeHeaders:    []string{"Content-Length", "Set-Cookie"},
                 AllowCredentials: true,
                 MaxAge:           12 * time.Hour,
         }))
@@ -77,6 +79,42 @@ func main() {
                 })
         }
 
+        // Setup static file serving from client build directory
+        staticDir := os.Getenv("STATIC_DIR")
+        if staticDir == "" {
+                // Default to the client build directory
+                staticDir = "../client/dist"
+        }
+        
+        // Get absolute path to static directory
+        absStaticDir, err := filepath.Abs(staticDir)
+        if err != nil {
+                log.Printf("Warning: Could not resolve absolute path for static directory: %v", err)
+                absStaticDir = staticDir
+        }
+        
+        log.Printf("Serving static files from: %s", absStaticDir)
+        
+        // Serve static files
+        router.Static("/assets", filepath.Join(absStaticDir, "assets"))
+        router.Static("/src", filepath.Join(absStaticDir, "src"))  // For Vite dev
+        router.Static("/node_modules", filepath.Join(absStaticDir, "node_modules"))  // For Vite dev
+        router.Static("/@fs", filepath.Join(absStaticDir, "@fs"))  // For Vite dev
+        router.Static("/locales", filepath.Join(absStaticDir, "locales"))
+        router.StaticFile("/favicon.ico", filepath.Join(absStaticDir, "favicon.ico"))
+        
+        // Handle HTML5 history API for SPA routing
+        router.NoRoute(func(c *gin.Context) {
+                // Skip API routes
+                if strings.HasPrefix(c.Request.URL.Path, "/api") {
+                        c.JSON(http.StatusNotFound, gin.H{"error": "API endpoint not found"})
+                        return
+                }
+                
+                // For all other routes, serve the index.html file
+                c.File(filepath.Join(absStaticDir, "index.html"))
+        })
+        
         // Start server
         serverAddr := fmt.Sprintf("0.0.0.0:%s", port)
         log.Printf("Server running on %s", serverAddr)

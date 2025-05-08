@@ -3,7 +3,7 @@ import { API_BASE_URL } from './api-config';
 
 // API service settings
 type ApiType = 'express' | 'go';
-let currentApiType: ApiType = 'express';
+let currentApiType: ApiType = 'go';
 
 // A list of endpoints and their implementation status
 const ENDPOINTS = {
