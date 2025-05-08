@@ -23,7 +23,7 @@ import TestPersona from "@/pages/TestPersona";
 import { ThemeProvider } from "next-themes";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { PersonaProvider } from "./contexts/PersonaContext";
-import { AuthProvider, withAuth } from "./lib/auth/auth-context";
+import { AuthProvider, ProtectedRoute } from "./lib/auth/auth-context";
 import { Layout } from "@/components/layout/Layout";
 import React, { Suspense } from "react";
 
@@ -37,22 +37,7 @@ const Loading = () => (
   </div>
 );
 
-// Wrap components that need auth protection
-const ProtectedHomePage = withAuth(HomePage);
-const ProtectedDashboard = withAuth(Dashboard);
-const ProtectedSupplyChain = withAuth(SupplyChain);
-const ProtectedSourcingEntities = withAuth(SourcingEntities);
-const ProtectedImportSources = withAuth(ImportSources);
-const ProtectedAddSupplier = withAuth(AddSupplier);
-const ProtectedSupplierDetail = withAuth(SupplierDetail);
-const ProtectedCompliance = withAuth(Compliance);
-const ProtectedDeclarations = withAuth(Declarations);
-const ProtectedAddDeclaration = withAuth(AddDeclaration);
-const ProtectedCustomers = withAuth(Customers);
-const ProtectedAddCustomer = withAuth(AddCustomer);
-const ProtectedSettings = withAuth(Settings);
-const ProtectedTestLanguage = withAuth(TestLanguage);
-const ProtectedTestPersona = withAuth(TestPersona);
+// No need to pre-wrap components when using ProtectedRoute
 
 function App() {
   console.log("App component rendering");
@@ -71,54 +56,22 @@ function App() {
                       <Route path="/login">
                         <Login />
                       </Route>
-                      <Route path="/">
-                        <ProtectedHomePage />
-                      </Route>
-                      <Route path="/dashboard">
-                        <ProtectedDashboard />
-                      </Route>
-                      <Route path="/supply-chain">
-                        <ProtectedSupplyChain />
-                      </Route>
-                      <Route path="/sourcing-entities">
-                        <ProtectedSourcingEntities />
-                      </Route>
-                      <Route path="/import-sources">
-                        <ProtectedImportSources />
-                      </Route>
-                      <Route path="/add-supplier">
-                        <ProtectedAddSupplier />
-                      </Route>
-                      <Route path="/supplier/:id">
-                        <ProtectedSupplierDetail />
-                      </Route>
-                      <Route path="/compliance">
-                        <ProtectedCompliance />
-                      </Route>
-                      <Route path="/declarations">
-                        <ProtectedDeclarations />
-                      </Route>
-                      <Route path="/add-declaration">
-                        <ProtectedAddDeclaration />
-                      </Route>
-                      <Route path="/customers">
-                        <ProtectedCustomers />
-                      </Route>
-                      <Route path="/customer">
-                        <ProtectedCustomers />
-                      </Route>
-                      <Route path="/add-customer">
-                        <ProtectedAddCustomer />
-                      </Route>
-                      <Route path="/settings">
-                        <ProtectedSettings />
-                      </Route>
-                      <Route path="/test-language">
-                        <ProtectedTestLanguage />
-                      </Route>
-                      <Route path="/test-persona">
-                        <ProtectedTestPersona />
-                      </Route>
+                      <ProtectedRoute path="/" component={HomePage} />
+                      <ProtectedRoute path="/dashboard" component={Dashboard} />
+                      <ProtectedRoute path="/supply-chain" component={SupplyChain} />
+                      <ProtectedRoute path="/sourcing-entities" component={SourcingEntities} />
+                      <ProtectedRoute path="/import-sources" component={ImportSources} />
+                      <ProtectedRoute path="/add-supplier" component={AddSupplier} />
+                      <ProtectedRoute path="/supplier/:id" component={SupplierDetail} />
+                      <ProtectedRoute path="/compliance" component={Compliance} />
+                      <ProtectedRoute path="/declarations" component={Declarations} />
+                      <ProtectedRoute path="/add-declaration" component={AddDeclaration} />
+                      <ProtectedRoute path="/customers" component={Customers} />
+                      <ProtectedRoute path="/customer" component={Customers} />
+                      <ProtectedRoute path="/add-customer" component={AddCustomer} />
+                      <ProtectedRoute path="/settings" component={Settings} />
+                      <ProtectedRoute path="/test-language" component={TestLanguage} />
+                      <ProtectedRoute path="/test-persona" component={TestPersona} />
                       <Route path="/debug">
                         <div className="p-10">Debug Page Working</div>
                       </Route>
