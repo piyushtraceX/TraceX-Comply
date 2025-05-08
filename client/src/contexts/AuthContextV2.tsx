@@ -1,8 +1,10 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { authApi } from '@/lib/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { LoaderIcon } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import axios from 'axios';
+import { useLocation } from 'wouter';
 
 // Types for our auth context
 interface User {
@@ -216,10 +218,11 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   path,
   component: Component,
   fallback = <div className="flex items-center justify-center h-screen">
-    <LoaderIcon className="h-8 w-8 animate-spin" />
+    <Loader2 className="h-8 w-8 animate-spin" />
   </div> 
 }) => {
   const { user, isLoading } = useAuth();
+  const [, setLocation] = useLocation();
 
   // Show loading state
   if (isLoading) {
@@ -228,9 +231,15 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // If not authenticated, redirect to login
   if (!user) {
-    // Use react router instead of hard redirect to prevent refresh loops
+    // Use wouter for client-side navigation to prevent page refreshes
+    console.log("User not authenticated, redirecting to /auth");
+    
+    // Only redirect if we're not already on the auth page
     if (window.location.pathname !== '/auth') {
-      window.location.href = '/auth';
+      // Use setTimeout to avoid React state updates during render
+      setTimeout(() => {
+        setLocation('/auth');
+      }, 0);
     }
     return null;
   }
@@ -244,5 +253,3 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   return <>{children}</>;
 };
 
-// For importing axios in the component
-import axios from 'axios';
