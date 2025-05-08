@@ -129,12 +129,16 @@ const supplierData = {
   }
 };
 
-// This component would receive the supplier ID from the URL in a real application
-export default function SupplierDetail() {
+// This component receives a supplier ID as prop or from URL params
+interface SupplierDetailProps {
+  id?: string; // Optional id prop for direct passing
+}
+
+export default function SupplierDetail({ id }: SupplierDetailProps) {
   const { t } = useTranslation();
   const { isRTL } = useLanguage();
   const params = useParams();
-  const supplierId = params.id; // For a real application, fetch the supplier by ID
+  const supplierId = id || params.id; // Use prop id if provided, otherwise use URL param
   const [activeTab, setActiveTab] = useState('profile');
   
   // Get supplier status badge

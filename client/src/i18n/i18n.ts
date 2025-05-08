@@ -24,6 +24,9 @@ i18n
     backend: {
       // Path to load translations from
       loadPath: '/locales/{{lng}}/{{ns}}.json',
+      requestOptions: {
+        cache: 'no-store'
+      }
     },
     detection: {
       // Order of language detection methods

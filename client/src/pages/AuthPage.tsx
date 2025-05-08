@@ -98,16 +98,16 @@ const AuthPage: React.FC = () => {
         <Card className="w-full max-w-md">
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl font-bold text-center">
-              {activeTab === 'login' ? t('auth.login') : t('auth.register')}
+              {activeTab === 'login' ? t('auth:login') : t('auth:register')}
             </CardTitle>
             <CardDescription className="text-center">
-              {activeTab === 'login' ? t('auth.loginDescription') : t('auth.registerDescription')}
+              {activeTab === 'login' ? t('auth:loginDescription') : t('auth:registerDescription')}
             </CardDescription>
           </CardHeader>
           <Tabs defaultValue="login" value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid grid-cols-2 w-full">
-              <TabsTrigger value="login">{t('auth.login')}</TabsTrigger>
-              <TabsTrigger value="register">{t('auth.register')}</TabsTrigger>
+              <TabsTrigger value="login">{t('auth:login')}</TabsTrigger>
+              <TabsTrigger value="register">{t('auth:register')}</TabsTrigger>
             </TabsList>
 
             {/* Login Form */}

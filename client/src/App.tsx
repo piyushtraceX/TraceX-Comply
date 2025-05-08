@@ -55,58 +55,88 @@ function App() {
                       <Route path="/auth">
                         <AuthPage />
                       </Route>
-                      <ProtectedRoute path="/">
-                        <HomePage />
-                      </ProtectedRoute>
-                      <ProtectedRoute path="/dashboard">
-                        <Dashboard />
-                      </ProtectedRoute>
-                      <ProtectedRoute path="/supply-chain">
-                        <SupplyChain />
-                      </ProtectedRoute>
-                      <ProtectedRoute path="/sourcing-entities">
-                        <SourcingEntities />
-                      </ProtectedRoute>
-                      <ProtectedRoute path="/import-sources">
-                        <ImportSources />
-                      </ProtectedRoute>
-                      <ProtectedRoute path="/add-supplier">
-                        <AddSupplier />
-                      </ProtectedRoute>
+                      <Route path="/">
+                        <ProtectedRoute>
+                          <HomePage />
+                        </ProtectedRoute>
+                      </Route>
+                      <Route path="/dashboard">
+                        <ProtectedRoute>
+                          <Dashboard />
+                        </ProtectedRoute>
+                      </Route>
+                      <Route path="/supply-chain">
+                        <ProtectedRoute>
+                          <SupplyChain />
+                        </ProtectedRoute>
+                      </Route>
+                      <Route path="/sourcing-entities">
+                        <ProtectedRoute>
+                          <SourcingEntities />
+                        </ProtectedRoute>
+                      </Route>
+                      <Route path="/import-sources">
+                        <ProtectedRoute>
+                          <ImportSources />
+                        </ProtectedRoute>
+                      </Route>
+                      <Route path="/add-supplier">
+                        <ProtectedRoute>
+                          <AddSupplier />
+                        </ProtectedRoute>
+                      </Route>
                       <Route path="/supplier/:id">
-                        {(params) => (
+                        {(params: { id: string }) => (
                           <ProtectedRoute>
                             <SupplierDetail id={params.id} />
                           </ProtectedRoute>
                         )}
                       </Route>
-                      <ProtectedRoute path="/compliance">
-                        <Compliance />
-                      </ProtectedRoute>
-                      <ProtectedRoute path="/declarations">
-                        <Declarations />
-                      </ProtectedRoute>
-                      <ProtectedRoute path="/add-declaration">
-                        <AddDeclaration />
-                      </ProtectedRoute>
-                      <ProtectedRoute path="/customers">
-                        <Customers />
-                      </ProtectedRoute>
-                      <ProtectedRoute path="/customer">
-                        <Customers />
-                      </ProtectedRoute>
-                      <ProtectedRoute path="/add-customer">
-                        <AddCustomer />
-                      </ProtectedRoute>
-                      <ProtectedRoute path="/settings">
-                        <Settings />
-                      </ProtectedRoute>
-                      <ProtectedRoute path="/test-language">
-                        <TestLanguage />
-                      </ProtectedRoute>
-                      <ProtectedRoute path="/test-persona">
-                        <TestPersona />
-                      </ProtectedRoute>
+                      <Route path="/compliance">
+                        <ProtectedRoute>
+                          <Compliance />
+                        </ProtectedRoute>
+                      </Route>
+                      <Route path="/declarations">
+                        <ProtectedRoute>
+                          <Declarations />
+                        </ProtectedRoute>
+                      </Route>
+                      <Route path="/add-declaration">
+                        <ProtectedRoute>
+                          <AddDeclaration />
+                        </ProtectedRoute>
+                      </Route>
+                      <Route path="/customers">
+                        <ProtectedRoute>
+                          <Customers />
+                        </ProtectedRoute>
+                      </Route>
+                      <Route path="/customer">
+                        <ProtectedRoute>
+                          <Customers />
+                        </ProtectedRoute>
+                      </Route>
+                      <Route path="/add-customer">
+                        <ProtectedRoute>
+                          <AddCustomer />
+                        </ProtectedRoute>
+                      </Route>
+                      <Route path="/settings">
+                        <ProtectedRoute>
+                          <Settings />
+                        </ProtectedRoute>
+                      </Route>
+                      <Route path="/test-language">
+                        <ProtectedRoute>
+                          <TestLanguage />
+                        </ProtectedRoute>
+                      </Route>
+                      <Route path="/test-persona">
+                        <ProtectedRoute>
+                          <TestPersona />
+                        </ProtectedRoute>
+                      </Route>
                       <Route path="/debug">
                         <div className="p-10">Debug Page Working</div>
                       </Route>
