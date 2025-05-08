@@ -24,7 +24,6 @@ import { ThemeProvider } from "next-themes";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { PersonaProvider } from "./contexts/PersonaContext";
 import { AuthProvider, ProtectedRoute } from "./contexts/AuthContextV2";
-import { Layout } from "@/components/layout/Layout";
 import React, { Suspense } from "react";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
@@ -38,11 +37,11 @@ const Loading = () => (
   </div>
 );
 
-// Custom wrapper component to handle layout for protected routes
-const ProtectedRouteWithLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+// Simplified protected route component - no layout here since pages include their own layout
+const SimpleProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <ProtectedRoute>
-      <Layout>{children}</Layout>
+      {children}
     </ProtectedRoute>
   );
 };
@@ -65,86 +64,86 @@ function App() {
                         <AuthPage />
                       </Route>
                       <Route path="/">
-                        <ProtectedRouteWithLayout>
+                        <SimpleProtectedRoute>
                           <Dashboard />
-                        </ProtectedRouteWithLayout>
+                        </SimpleProtectedRoute>
                       </Route>
                       <Route path="/dashboard">
-                        <ProtectedRouteWithLayout>
+                        <SimpleProtectedRoute>
                           <Dashboard />
-                        </ProtectedRouteWithLayout>
+                        </SimpleProtectedRoute>
                       </Route>
                       <Route path="/supply-chain">
-                        <ProtectedRouteWithLayout>
+                        <SimpleProtectedRoute>
                           <SupplyChain />
-                        </ProtectedRouteWithLayout>
+                        </SimpleProtectedRoute>
                       </Route>
                       <Route path="/sourcing-entities">
-                        <ProtectedRouteWithLayout>
+                        <SimpleProtectedRoute>
                           <SourcingEntities />
-                        </ProtectedRouteWithLayout>
+                        </SimpleProtectedRoute>
                       </Route>
                       <Route path="/import-sources">
-                        <ProtectedRouteWithLayout>
+                        <SimpleProtectedRoute>
                           <ImportSources />
-                        </ProtectedRouteWithLayout>
+                        </SimpleProtectedRoute>
                       </Route>
                       <Route path="/add-supplier">
-                        <ProtectedRouteWithLayout>
+                        <SimpleProtectedRoute>
                           <AddSupplier />
-                        </ProtectedRouteWithLayout>
+                        </SimpleProtectedRoute>
                       </Route>
                       <Route path="/supplier/:id">
                         {(params: { id: string }) => (
-                          <ProtectedRouteWithLayout>
+                          <SimpleProtectedRoute>
                             <SupplierDetail id={params.id} />
-                          </ProtectedRouteWithLayout>
+                          </SimpleProtectedRoute>
                         )}
                       </Route>
                       <Route path="/compliance">
-                        <ProtectedRouteWithLayout>
+                        <SimpleProtectedRoute>
                           <Compliance />
-                        </ProtectedRouteWithLayout>
+                        </SimpleProtectedRoute>
                       </Route>
                       <Route path="/declarations">
-                        <ProtectedRouteWithLayout>
+                        <SimpleProtectedRoute>
                           <Declarations />
-                        </ProtectedRouteWithLayout>
+                        </SimpleProtectedRoute>
                       </Route>
                       <Route path="/add-declaration">
-                        <ProtectedRouteWithLayout>
+                        <SimpleProtectedRoute>
                           <AddDeclaration />
-                        </ProtectedRouteWithLayout>
+                        </SimpleProtectedRoute>
                       </Route>
                       <Route path="/customers">
-                        <ProtectedRouteWithLayout>
+                        <SimpleProtectedRoute>
                           <Customers />
-                        </ProtectedRouteWithLayout>
+                        </SimpleProtectedRoute>
                       </Route>
                       <Route path="/customer">
-                        <ProtectedRouteWithLayout>
+                        <SimpleProtectedRoute>
                           <Customers />
-                        </ProtectedRouteWithLayout>
+                        </SimpleProtectedRoute>
                       </Route>
                       <Route path="/add-customer">
-                        <ProtectedRouteWithLayout>
+                        <SimpleProtectedRoute>
                           <AddCustomer />
-                        </ProtectedRouteWithLayout>
+                        </SimpleProtectedRoute>
                       </Route>
                       <Route path="/settings">
-                        <ProtectedRouteWithLayout>
+                        <SimpleProtectedRoute>
                           <Settings />
-                        </ProtectedRouteWithLayout>
+                        </SimpleProtectedRoute>
                       </Route>
                       <Route path="/test-language">
-                        <ProtectedRouteWithLayout>
+                        <SimpleProtectedRoute>
                           <TestLanguage />
-                        </ProtectedRouteWithLayout>
+                        </SimpleProtectedRoute>
                       </Route>
                       <Route path="/test-persona">
-                        <ProtectedRouteWithLayout>
+                        <SimpleProtectedRoute>
                           <TestPersona />
-                        </ProtectedRouteWithLayout>
+                        </SimpleProtectedRoute>
                       </Route>
                       <Route path="/debug">
                         <DebugPage />
