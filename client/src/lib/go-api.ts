@@ -4,15 +4,23 @@ import axios, { AxiosInstance, AxiosResponse, AxiosRequestConfig } from 'axios';
 // Get the hostname from window.location to ensure we're using the correct host
 const getApiBaseUrl = () => {
   const host = window.location.hostname;
-  const port = '5000'; // Fixed port for Go API
   const protocol = window.location.protocol;
   
-  // Use the explicit port only in development mode or when not on Replit
+  // Add debugging logs for API URL construction
+  console.log('Building API URL with:', { protocol, host });
+  
+  // On Replit, use the same host for the API (handled by Go server)
   if (host.includes('replit') || host.includes('repl.co')) {
-    return `${protocol}//${host}/api`;
+    const apiUrl = `${protocol}//${host}/api`;
+    console.log('Using Replit API URL:', apiUrl);
+    return apiUrl;
   }
   
-  return `${protocol}//${host}:${port}/api`;
+  // In local development, use port 5000
+  const port = '5000'; // Fixed port for Go API
+  const localApiUrl = `${protocol}//${host}:${port}/api`;
+  console.log('Using local API URL:', localApiUrl);
+  return localApiUrl;
 };
 
 const apiClient: AxiosInstance = axios.create({

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContextV2';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,19 +6,22 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { setApiEndpoint } from '@/lib/api';
-import { Loader2 } from 'lucide-react';
+import { Loader2, CheckCircle, XCircle } from 'lucide-react';
 import { queryClient } from '@/lib/queryClient';
+import axios from 'axios';
 
 /**
  * Debug component to test authentication and API switching
  */
 export function AuthDebugger() {
   const { user, tenant, isLoading, login, logout } = useAuth();
-  const [username, setUsername] = useState('admin');
+  const [username, setUsername] = useState('demouser');
   const [password, setPassword] = useState('password');
-  const [useGoBackend, setUseGoBackend] = useState(false);
+  const [useGoBackend, setUseGoBackend] = useState(true); // Default to Go backend
   const [loginInProgress, setLoginInProgress] = useState(false);
   const [logoutInProgress, setLogoutInProgress] = useState(false);
+  const [goApiStatus, setGoApiStatus] = useState<'checking' | 'available' | 'unavailable' | 'error'>('checking');
+  const [expressApiStatus, setExpressApiStatus] = useState<'checking' | 'available' | 'unavailable' | 'error'>('checking');
   
   // Handle API backend switch
   const handleBackendSwitch = (checked: boolean) => {

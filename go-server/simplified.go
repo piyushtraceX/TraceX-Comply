@@ -141,17 +141,23 @@ func main() {
 
 func corsMiddleware(next http.Handler) http.Handler {
         return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-                // Set CORS headers - allow specific origins including replit.app domains
+                // Set CORS headers - allow any origin in development
                 origin := r.Header.Get("Origin")
+                
+                // Always allow any origin in development
                 if origin != "" {
                         w.Header().Set("Access-Control-Allow-Origin", origin)
                 } else {
-                        w.Header().Set("Access-Control-Allow-Origin", "*")
+                        // For APIs, we need to be explicit about the allowed origins when credentials are used
+                        w.Header().Set("Access-Control-Allow-Origin", "https://8d9e1fd6-0f97-43eb-adcd-2f98ad7d8288-00-3o9u7z9m8zzsa.worf.replit.dev")
                 }
+                
+                // Set very permissive CORS headers for development
                 w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
-                w.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization, Set-Cookie, Cookie")
+                w.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization, X-Requested-With, Set-Cookie, Cookie")
                 w.Header().Set("Access-Control-Expose-Headers", "Content-Length, Set-Cookie")
                 w.Header().Set("Access-Control-Allow-Credentials", "true")
+                w.Header().Set("Access-Control-Max-Age", "3600")
 
                 // Handle preflight requests
                 if r.Method == "OPTIONS" {
