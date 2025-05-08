@@ -298,5 +298,38 @@ router.post('/initialize-policies',
   }
 );
 
+// Simple username/password authentication for direct login
+router.post('/login', async (req: Request, res: Response) => {
+  try {
+    const { username, password } = req.body;
+    
+    if (!username || !password) {
+      return res.status(400).json({ 
+        error: 'Username and password are required' 
+      });
+    }
+    
+    // For development purposes, accept any credentials
+    // In production, this would validate against the database
+    const user = {
+      id: 1,
+      username: username,
+      name: 'Demo User',
+      email: `${username}@example.com`,
+      tenantId: 1,
+      isSuperAdmin: username === 'admin'
+    };
+    
+    // Set user in session
+    req.session.userId = user.id;
+    req.session.tenantId = user.tenantId;
+    
+    res.json({ user });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ error: 'Authentication failed' });
+  }
+});
+
 // Export routes
 export default router;

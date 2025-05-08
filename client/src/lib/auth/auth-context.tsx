@@ -79,7 +79,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   // Login mutation
   const loginMutation = useMutation<User, Error, LoginCredentials>({
     mutationFn: async (credentials) => {
-      const res = await apiRequest('POST', '/api/auth/login', credentials);
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(credentials),
+      });
       
       if (!res.ok) {
         const errorData = await res.json();
