@@ -2,9 +2,13 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 import axios from "axios";
 import { API_BASE_URL, getApiUrl } from "./api-config";
 
-// Create a reusable axios instance configured for the Go API
+// TEMPORARY SOLUTION: Use Express API endpoint while Go server is being set up
+const USE_EXPRESS_API = true;
+const EXPRESS_API_URL = '/api';
+
+// Create a reusable axios instance configured for the API
 const apiClient = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: USE_EXPRESS_API ? EXPRESS_API_URL : API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -14,6 +18,12 @@ const apiClient = axios.create({
 // Log requests in development
 apiClient.interceptors.request.use((config) => {
   console.log(`API Request: ${config.method?.toUpperCase()} ${config.url}`);
+  
+  // Log which API backend we're using
+  if (config.baseURL) {
+    console.log(`Using API at: ${config.baseURL}`);
+  }
+  
   return config;
 });
 
@@ -24,6 +34,13 @@ apiClient.interceptors.response.use(
   },
   (error) => {
     console.error("API Error:", error.message);
+    
+    if (axios.isAxiosError(error)) {
+      console.error("Response details:", {
+        status: error.response?.status,
+        data: error.response?.data
+      });
+    }
     
     // For unauthorized errors, redirect to login if not already there
     if (error.response?.status === 401 && window.location.pathname !== '/auth') {

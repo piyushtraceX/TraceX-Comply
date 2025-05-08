@@ -10,6 +10,10 @@ import { useToast } from "@/hooks/use-toast";
 import axios from 'axios';
 import { API_BASE_URL } from '@/lib/api-config';
 
+// TEMPORARY: Use Express API for testing while Go server is being fixed
+const USE_EXPRESS_API = true;
+const EXPRESS_API_URL = '';
+
 // Endpoint types for testing
 type Endpoint = {
   name: string;
@@ -100,7 +104,9 @@ export const GoApiTester: React.FC = () => {
     setLoading(true);
     setError(null);
     
-    const url = `${API_BASE_URL}${endpoint.path}`;
+    // TEMPORARY: Use Express API for testing while Go server is being fixed
+    const baseUrl = USE_EXPRESS_API ? '/api' : API_BASE_URL;
+    const url = `${baseUrl}${endpoint.path}`;
     let bodyData = {};
     
     try {
@@ -190,12 +196,18 @@ export const GoApiTester: React.FC = () => {
   return (
     <Card className="w-full max-w-4xl">
       <CardHeader>
-        <CardTitle>Go API Tester</CardTitle>
+        <CardTitle>API Tester</CardTitle>
         <CardDescription>
-          Test the standalone Go API server directly
-          <div className="mt-2 bg-muted px-3 py-1 rounded text-sm">
-            URL: {API_BASE_URL}
+          Test API endpoints
+          <div className="mt-2 bg-muted px-3 py-1 rounded text-sm flex justify-between">
+            <span>Using: {USE_EXPRESS_API ? 'Express API (temporary)' : 'Go API'}</span>
+            <span>URL: {USE_EXPRESS_API ? '/api' : API_BASE_URL}</span>
           </div>
+          {USE_EXPRESS_API && (
+            <div className="mt-2 p-2 text-sm bg-yellow-50 text-yellow-800 border border-yellow-200 rounded-md">
+              <strong>Note:</strong> Currently using Express API while Go server is being configured.
+            </div>
+          )}
         </CardDescription>
       </CardHeader>
       
@@ -360,7 +372,7 @@ export const GoApiTester: React.FC = () => {
           Clear Response
         </Button>
         <p className="text-sm text-muted-foreground">
-          Testing Direct Go API Connection
+          Testing {USE_EXPRESS_API ? 'Express API (temporary)' : 'Direct Go API Connection'}
         </p>
       </CardFooter>
     </Card>
