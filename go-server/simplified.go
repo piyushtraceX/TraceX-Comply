@@ -22,9 +22,19 @@ func main() {
 
         // API routes
         mux.HandleFunc("/api/health", func(w http.ResponseWriter, r *http.Request) {
+                cookie, hasCookie := r.Cookie("session")
+                
                 w.Header().Set("Content-Type", "application/json")
                 w.WriteHeader(http.StatusOK)
-                fmt.Fprintf(w, `{"status":"ok","message":"Go API server is running","timestamp":"%s","version":"1.0.0"}`, time.Now().Format(time.RFC3339))
+                
+                if !hasCookie || cookie == nil {
+                        fmt.Fprintf(w, `{"status":"ok","authenticated":false,"message":"Go API server is running","timestamp":"%s","version":"1.0.0"}`, time.Now().Format(time.RFC3339))
+                        return
+                }
+                
+                // Include session info for debugging
+                fmt.Fprintf(w, `{"status":"ok","authenticated":true,"sessionToken":"%s","cookieInfo":{"path":"%s","secure":%t,"httpOnly":%t,"sameSite":"%s"},"message":"Go API server is running with authentication","timestamp":"%s","version":"1.0.0"}`, 
+                        cookie.Value, cookie.Path, cookie.Secure, cookie.HttpOnly, getSameSiteString(cookie.SameSite), time.Now().Format(time.RFC3339))
         })
 
         // Auth routes (both with /api/auth/* and legacy paths)
@@ -172,27 +182,48 @@ func corsMiddleware(next http.Handler) http.Handler {
 
 // Auth handlers
 func handleLogin(w http.ResponseWriter, r *http.Request) {
+        // Log the request details for debugging
+        log.Printf("Login request from: %s, Method: %s", r.RemoteAddr, r.Method)
+        
         if r.Method != "POST" {
                 w.WriteHeader(http.StatusMethodNotAllowed)
                 return
         }
-
-        // In a real app, you would parse the request body and validate credentials
-        // Here we'll set a cookie to simulate a logged-in session
-        http.SetCookie(w, &http.Cookie{
+        
+        // Set CORS headers specifically for the login endpoint
+        origin := r.Header.Get("Origin")
+        if origin != "" {
+                w.Header().Set("Access-Control-Allow-Origin", origin)
+                w.Header().Set("Access-Control-Allow-Credentials", "true")
+        }
+        
+        // Add cache control headers to prevent caching
+        w.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate")
+        w.Header().Set("Pragma", "no-cache")
+        w.Header().Set("Expires", "0")
+        
+        // Log cookie settings for debugging
+        cookie := &http.Cookie{
                 Name:     "session",
-                Value:    "dummy-session-token",
+                Value:    "auth-session-" + time.Now().Format("20060102150405"), // Add timestamp to make it unique
                 Path:     "/",
                 MaxAge:   3600 * 24, // 1 day
                 HttpOnly: true,
                 Secure:   false, // Disable secure for development
                 SameSite: http.SameSiteNoneMode, // Allow cross-site cookies in development
-        })
-
+        }
+        
+        log.Printf("Setting cookie - Name: %s, Value: %s, Path: %s, Secure: %t, HttpOnly: %t, SameSite: %s", 
+                cookie.Name, cookie.Value, cookie.Path, cookie.Secure, cookie.HttpOnly, getSameSiteString(cookie.SameSite))
+        
+        http.SetCookie(w, cookie)
+        
         // Return user data
         w.Header().Set("Content-Type", "application/json")
         w.WriteHeader(http.StatusOK)
-        fmt.Fprint(w, `{"user":{"id":1,"username":"demouser","name":"Demo User","email":"demo@example.com","isSuperAdmin":true}}`)
+        
+        // Include the auth token in the response body as well for client-side storage
+        fmt.Fprintf(w, `{"user":{"id":1,"username":"demouser","name":"Demo User","email":"demo@example.com","isSuperAdmin":true},"auth":{"token":"%s","expiresIn":86400}}`, cookie.Value)
 }
 
 func handleLogout(w http.ResponseWriter, r *http.Request) {
@@ -218,24 +249,57 @@ func handleLogout(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleGetCurrentUser(w http.ResponseWriter, r *http.Request) {
+        // Log the request details for debugging
+        log.Printf("GetCurrentUser request from: %s, Method: %s", r.RemoteAddr, r.Method)
+        
         if r.Method != "GET" {
                 w.WriteHeader(http.StatusMethodNotAllowed)
                 return
         }
-
-        // Check for an Authorization header or cookie (simplified for demo)
-        _, hasAuth := r.Header["Authorization"]
+        
+        // Set CORS headers specifically for this endpoint
+        origin := r.Header.Get("Origin")
+        if origin != "" {
+                w.Header().Set("Access-Control-Allow-Origin", origin)
+                w.Header().Set("Access-Control-Allow-Credentials", "true")
+        }
+        
+        // Log all request headers for debugging
+        log.Printf("Request headers:")
+        for name, values := range r.Header {
+                log.Printf("  %s: %v", name, values)
+        }
+        
+        // Check for an Authorization header or cookie
+        authHeader, hasAuth := r.Header["Authorization"]
         cookie, hasCookie := r.Cookie("session")
+        
+        log.Printf("Auth check - HasAuthHeader: %t, HasCookie: %t", hasAuth, hasCookie)
+        
+        if hasAuth {
+                log.Printf("Auth header: %v", authHeader)
+        }
+        
+        if hasCookie && cookie != nil {
+                log.Printf("Session cookie - Name: %s, Value: %s, Path: %s, Secure: %t, HttpOnly: %t, SameSite: %s",
+                        cookie.Name, cookie.Value, cookie.Path, cookie.Secure, cookie.HttpOnly, getSameSiteString(cookie.SameSite))
+        }
         
         // If no authentication is present, return 401
         if !hasAuth && (cookie == nil || !hasCookie) {
+                log.Printf("Authentication failed - returning 401")
                 w.Header().Set("Content-Type", "application/json")
                 w.WriteHeader(http.StatusUnauthorized)
                 fmt.Fprint(w, `{"error":"Not authenticated"}`)
                 return
         }
 
+        // Add cache control headers
+        w.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate")
+        w.Header().Set("Pragma", "no-cache")
+        
         // Return mock user data (this would be fetched from database in a real app)
+        log.Printf("Authentication successful - returning user data")
         w.Header().Set("Content-Type", "application/json")
         w.WriteHeader(http.StatusOK)
         fmt.Fprint(w, `{"user":{"id":1,"username":"demouser","name":"Demo User","email":"demo@example.com","isSuperAdmin":true}}`)
@@ -252,4 +316,20 @@ func handleSwitchTenant(w http.ResponseWriter, r *http.Request) {
         w.Header().Set("Content-Type", "application/json")
         w.WriteHeader(http.StatusOK)
         fmt.Fprint(w, `{"tenant":{"id":1,"name":"Tenant 1","description":"Demo tenant"}}`)
+}
+
+// Helper function to convert SameSite mode to string
+func getSameSiteString(sameSite http.SameSite) string {
+        switch sameSite {
+        case http.SameSiteDefaultMode:
+                return "Default"
+        case http.SameSiteNoneMode:
+                return "None"
+        case http.SameSiteLaxMode:
+                return "Lax"
+        case http.SameSiteStrictMode:
+                return "Strict"
+        default:
+                return "Unknown"
+        }
 }

@@ -105,6 +105,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         const response = await authApi.login(credentials.username, credentials.password);
         console.log('Login successful, response:', response.data);
+        
+        // If the response includes an auth token, store it in localStorage as a fallback
+        if (response.data.auth?.token) {
+          console.log('Saving auth token to localStorage');
+          localStorage.setItem('auth_token', response.data.auth.token);
+          
+          // Add the token to the Axios default headers
+          axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.auth.token}`;
+        }
+        
         return response;
       } catch (error: any) {
         console.error('Login error:', error);
@@ -136,8 +146,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Wait a bit longer to ensure the auth state is refreshed and cookie is set
         setTimeout(() => {
           console.log("Login successful, redirecting to dashboard");
+          // Use React Router for navigation to avoid page reload
           window.location.href = '/dashboard';
-        }, 1500); // Longer delay to ensure auth state is refreshed
+        }, 2000); // Even longer delay to ensure auth state is refreshed
       }
     },
     onError: (error: any) => {

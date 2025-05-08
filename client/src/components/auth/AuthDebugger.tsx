@@ -23,6 +23,54 @@ export function AuthDebugger() {
   const [goApiStatus, setGoApiStatus] = useState<'checking' | 'available' | 'unavailable' | 'error'>('checking');
   const [expressApiStatus, setExpressApiStatus] = useState<'checking' | 'available' | 'unavailable' | 'error'>('checking');
   
+  // Check API status on mount
+  useEffect(() => {
+    checkApiStatus();
+  }, []);
+  
+  // Function to check the API status
+  const checkApiStatus = async () => {
+    // Check Go API
+    setGoApiStatus('checking');
+    try {
+      const host = window.location.hostname;
+      const goApiUrl = `${window.location.protocol}//${host}/api/health`;
+      console.log('Checking Go API at:', goApiUrl);
+      
+      const goResponse = await axios.get(goApiUrl, { timeout: 3000 });
+      if (goResponse.status === 200) {
+        console.log('Go API is available');
+        setGoApiStatus('available');
+      } else {
+        console.log('Go API returned unexpected status:', goResponse.status);
+        setGoApiStatus('error');
+      }
+    } catch (error) {
+      console.error('Error checking Go API:', error);
+      setGoApiStatus('unavailable');
+    }
+    
+    // Check Express API
+    setExpressApiStatus('checking');
+    try {
+      // Express API should be available on the same host during development
+      const expressApiUrl = `/api/test`;
+      console.log('Checking Express API at:', expressApiUrl);
+      
+      const expressResponse = await axios.get(expressApiUrl, { timeout: 3000 });
+      if (expressResponse.status === 200) {
+        console.log('Express API is available');
+        setExpressApiStatus('available');
+      } else {
+        console.log('Express API returned unexpected status:', expressResponse.status);
+        setExpressApiStatus('error');
+      }
+    } catch (error) {
+      console.error('Error checking Express API:', error);
+      setExpressApiStatus('unavailable');
+    }
+  };
+  
   // Handle API backend switch
   const handleBackendSwitch = (checked: boolean) => {
     console.log(`Switching to ${checked ? 'Go' : 'Express'} backend`);
@@ -134,19 +182,65 @@ export function AuthDebugger() {
         </div>
         
         <div className="space-y-2">
-          <Label>API Health Check</Label>
+          <div className="flex items-center justify-between">
+            <Label>API Health Check</Label>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={checkApiStatus} 
+              className="h-8 px-2 text-xs"
+            >
+              Refresh
+            </Button>
+          </div>
           <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded text-sm">
             <div className="flex items-center justify-between">
               <span>Express API:</span> 
-              <span className={`px-2 py-1 rounded text-xs ${user ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'}`}>
-                {user ? 'Connected' : 'Not Authenticated'}
-              </span>
+              {expressApiStatus === 'checking' ? (
+                <span className="px-2 py-1 rounded text-xs bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 flex items-center">
+                  <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                  Checking
+                </span>
+              ) : expressApiStatus === 'available' ? (
+                <span className="px-2 py-1 rounded text-xs bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 flex items-center">
+                  <CheckCircle className="mr-1 h-3 w-3" />
+                  Available
+                </span>
+              ) : expressApiStatus === 'unavailable' ? (
+                <span className="px-2 py-1 rounded text-xs bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 flex items-center">
+                  <XCircle className="mr-1 h-3 w-3" />
+                  Unavailable
+                </span>
+              ) : (
+                <span className="px-2 py-1 rounded text-xs bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 flex items-center">
+                  <XCircle className="mr-1 h-3 w-3" />
+                  Error
+                </span>
+              )}
             </div>
             <div className="flex items-center justify-between mt-2">
               <span>Go API:</span> 
-              <span className="px-2 py-1 rounded text-xs bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-400">
-                Not Tested
-              </span>
+              {goApiStatus === 'checking' ? (
+                <span className="px-2 py-1 rounded text-xs bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 flex items-center">
+                  <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                  Checking
+                </span>
+              ) : goApiStatus === 'available' ? (
+                <span className="px-2 py-1 rounded text-xs bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 flex items-center">
+                  <CheckCircle className="mr-1 h-3 w-3" />
+                  Available
+                </span>
+              ) : goApiStatus === 'unavailable' ? (
+                <span className="px-2 py-1 rounded text-xs bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 flex items-center">
+                  <XCircle className="mr-1 h-3 w-3" />
+                  Unavailable
+                </span>
+              ) : (
+                <span className="px-2 py-1 rounded text-xs bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 flex items-center">
+                  <XCircle className="mr-1 h-3 w-3" />
+                  Error
+                </span>
+              )}
             </div>
           </div>
         </div>
