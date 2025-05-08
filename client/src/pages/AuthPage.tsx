@@ -120,9 +120,9 @@ const AuthPage: React.FC = () => {
                       name="username"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t('auth.username')}</FormLabel>
+                          <FormLabel>{t('auth:username')}</FormLabel>
                           <FormControl>
-                            <Input placeholder={t('auth.usernamePlaceholder')} {...field} />
+                            <Input placeholder={t('auth:usernamePlaceholder')} {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -133,9 +133,9 @@ const AuthPage: React.FC = () => {
                       name="password"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t('auth.password')}</FormLabel>
+                          <FormLabel>{t('auth:password')}</FormLabel>
                           <FormControl>
-                            <Input type="password" placeholder={t('auth.passwordPlaceholder')} {...field} />
+                            <Input type="password" placeholder={t('auth:passwordPlaceholder')} {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -150,7 +150,7 @@ const AuthPage: React.FC = () => {
                           {t('common.processing')}
                         </>
                       ) : (
-                        t('auth.loginButton')
+                        t('auth:loginButton')
                       )}
                     </Button>
                   </CardFooter>
@@ -168,9 +168,9 @@ const AuthPage: React.FC = () => {
                       name="username"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t('auth.username')}</FormLabel>
+                          <FormLabel>{t('auth:username')}</FormLabel>
                           <FormControl>
-                            <Input placeholder={t('auth.usernamePlaceholder')} {...field} />
+                            <Input placeholder={t('auth:usernamePlaceholder')} {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -181,9 +181,9 @@ const AuthPage: React.FC = () => {
                       name="email"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t('auth.email')}</FormLabel>
+                          <FormLabel>{t('auth:email')}</FormLabel>
                           <FormControl>
-                            <Input placeholder={t('auth.emailPlaceholder')} {...field} />
+                            <Input placeholder={t('auth:emailPlaceholder')} {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -194,9 +194,9 @@ const AuthPage: React.FC = () => {
                       name="name"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t('auth.name')}</FormLabel>
+                          <FormLabel>{t('auth:name')}</FormLabel>
                           <FormControl>
-                            <Input placeholder={t('auth.namePlaceholder')} {...field} />
+                            <Input placeholder={t('auth:namePlaceholder')} {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -207,9 +207,9 @@ const AuthPage: React.FC = () => {
                       name="password"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t('auth.password')}</FormLabel>
+                          <FormLabel>{t('auth:password')}</FormLabel>
                           <FormControl>
-                            <Input type="password" placeholder={t('auth.passwordPlaceholder')} {...field} />
+                            <Input type="password" placeholder={t('auth:passwordPlaceholder')} {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -220,9 +220,9 @@ const AuthPage: React.FC = () => {
                       name="confirmPassword"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t('auth.confirmPassword')}</FormLabel>
+                          <FormLabel>{t('auth:confirmPassword')}</FormLabel>
                           <FormControl>
-                            <Input type="password" placeholder={t('auth.confirmPasswordPlaceholder')} {...field} />
+                            <Input type="password" placeholder={t('auth:confirmPasswordPlaceholder')} {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -237,7 +237,7 @@ const AuthPage: React.FC = () => {
                           {t('common.processing')}
                         </>
                       ) : (
-                        t('auth.registerButton')
+                        t('auth:registerButton')
                       )}
                     </Button>
                   </CardFooter>
@@ -252,23 +252,23 @@ const AuthPage: React.FC = () => {
       <div className="hidden lg:flex flex-1 bg-primary p-12 text-primary-foreground justify-center items-center flex-col">
         <div className="max-w-md space-y-6">
           <h1 className="text-4xl font-bold">{t('app.name')}</h1>
-          <p className="text-xl">{t('auth.heroTitle')}</p>
+          <p className="text-xl">{t('auth:heroTitle')}</p>
           <ul className="space-y-2">
             <li className="flex items-center space-x-2">
               <span className="rounded-full bg-primary-foreground text-primary h-6 w-6 flex items-center justify-center text-sm">✓</span>
-              <span>{t('auth.feature1')}</span>
+              <span>{t('auth:feature1')}</span>
             </li>
             <li className="flex items-center space-x-2">
               <span className="rounded-full bg-primary-foreground text-primary h-6 w-6 flex items-center justify-center text-sm">✓</span>
-              <span>{t('auth.feature2')}</span>
+              <span>{t('auth:feature2')}</span>
             </li>
             <li className="flex items-center space-x-2">
               <span className="rounded-full bg-primary-foreground text-primary h-6 w-6 flex items-center justify-center text-sm">✓</span>
-              <span>{t('auth.feature3')}</span>
+              <span>{t('auth:feature3')}</span>
             </li>
             <li className="flex items-center space-x-2">
               <span className="rounded-full bg-primary-foreground text-primary h-6 w-6 flex items-center justify-center text-sm">✓</span>
-              <span>{t('auth.feature4')}</span>
+              <span>{t('auth:feature4')}</span>
             </li>
           </ul>
         </div>
