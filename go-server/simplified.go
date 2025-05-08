@@ -79,6 +79,17 @@ func main() {
                 http.ServeFile(w, r, filepath.Join(staticDir, "favicon.ico"))
         })
 
+        // Specific Vite dev server endpoints
+        mux.HandleFunc("/@vite/client", func(w http.ResponseWriter, r *http.Request) {
+                // In development mode, proxy this to the Vite dev server
+                http.Redirect(w, r, "https://8d9e1fd6-0f97-43eb-adcd-2f98ad7d8288-00-3o9u7z9m8zzsa.worf.replit.dev/@vite/client", http.StatusTemporaryRedirect)
+        })
+        
+        mux.HandleFunc("/@react-refresh", func(w http.ResponseWriter, r *http.Request) {
+                // In development mode, proxy this to the Vite dev server
+                http.Redirect(w, r, "https://8d9e1fd6-0f97-43eb-adcd-2f98ad7d8288-00-3o9u7z9m8zzsa.worf.replit.dev/@react-refresh", http.StatusTemporaryRedirect)
+        })
+
         // Handle SPA routes - serve index.html for any unmatched route
         mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
                 // Skip API routes which are handled separately
@@ -86,6 +97,19 @@ func main() {
                         w.Header().Set("Content-Type", "application/json")
                         w.WriteHeader(http.StatusNotFound)
                         fmt.Fprintf(w, `{"error":"API endpoint not found"}`)
+                        return
+                }
+
+                // In development, proxy to the Vite dev server for source files
+                if os.Getenv("NODE_ENV") == "development" && (
+                        strings.HasPrefix(r.URL.Path, "/src/") ||
+                        strings.HasPrefix(r.URL.Path, "/node_modules/") ||
+                        strings.HasPrefix(r.URL.Path, "/@fs/") ||
+                        strings.HasPrefix(r.URL.Path, "/@vite/") ||
+                        strings.HasPrefix(r.URL.Path, "/@react-refresh") ||
+                        r.URL.Path == "/main.tsx") {
+                        targetURL := fmt.Sprintf("https://8d9e1fd6-0f97-43eb-adcd-2f98ad7d8288-00-3o9u7z9m8zzsa.worf.replit.dev%s", r.URL.Path)
+                        http.Redirect(w, r, targetURL, http.StatusTemporaryRedirect)
                         return
                 }
 

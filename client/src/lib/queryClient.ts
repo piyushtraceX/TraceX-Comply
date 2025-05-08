@@ -4,11 +4,18 @@ import { API_BASE_URL, getApiUrl } from "./api-config";
 
 // Now use the Go server for all API requests
 const USE_EXPRESS_API = false;
-const EXPRESS_API_URL = '/api';
+// Get the current hostname dynamically
+const host = window.location.hostname;
+const port = window.location.port ? `:${window.location.port}` : '';
+const protocol = window.location.protocol;
+const API_URL = `${protocol}//${host}${port}/api`;
+
+// Log the API URL being used
+console.log('Using API URL:', API_URL);
 
 // Create a reusable axios instance configured for the API
 const apiClient = axios.create({
-  baseURL: USE_EXPRESS_API ? EXPRESS_API_URL : API_BASE_URL,
+  baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json, text/plain, */*',
@@ -67,8 +74,8 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  // When in EXPRESS API mode, ignore any Go API routing
-  const fullUrl = USE_EXPRESS_API ? url : getApiUrl(url);
+  // Always use the direct API URL
+  const fullUrl = url.startsWith('/api/') ? url.substring(5) : url;
   
   try {
     let response;
@@ -128,8 +135,8 @@ export const getQueryFn: <T>(options: {
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
     const path = queryKey[0] as string;
-    // When in EXPRESS API mode, ignore any Go API routing
-    const url = USE_EXPRESS_API ? path : getApiUrl(path);
+    // Always use direct path, removing /api/ prefix if present
+    const url = path.startsWith('/api/') ? path.substring(5) : path;
     
     try {
       // Use consistent API client for all requests
