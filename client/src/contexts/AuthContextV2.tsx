@@ -190,11 +190,17 @@ export const useAuth = () => {
 };
 
 // ProtectedRoute component
-export const ProtectedRoute: React.FC<{ 
-  children: React.ReactNode,
-  fallback?: React.ReactNode
-}> = ({ 
+interface ProtectedRouteProps {
+  children: React.ReactNode;
+  path?: string; // Optional path for compatibility with Route component
+  component?: React.ComponentType<any>; // Optional component prop for backward compatibility
+  fallback?: React.ReactNode;
+}
+
+export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
   children, 
+  path,
+  component: Component,
   fallback = <div className="flex items-center justify-center h-screen">
     <LoaderIcon className="h-8 w-8 animate-spin" />
   </div> 
@@ -211,6 +217,11 @@ export const ProtectedRoute: React.FC<{
     // Use window.location for hard redirect to ensure context is reset
     window.location.href = '/auth';
     return null;
+  }
+
+  // Render the Component if provided (for backward compatibility)
+  if (Component) {
+    return <Component />;
   }
 
   // Render the children if authenticated

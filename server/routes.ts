@@ -1,29 +1,13 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
-import session from "express-session";
-import authRoutes from "./auth/routes";
-import { initCasbinEnforcer, syncPermissionsWithCasbin } from "./auth/casbin";
-import { authenticate, requireTenant } from "./auth/middleware";
+import { setupSessionMiddleware, setupAuthRoutes, authenticate } from "./auth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize session middleware
-  app.use(session({
-    secret: process.env.SESSION_SECRET || 'your-secret-key',
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    },
-    store: storage.sessionStore,
-  }));
-
-  // Initialize Casbin enforcer - temporarily disabled
-  // await initCasbinEnforcer();
+  setupSessionMiddleware(app);
   
-  // Register authentication and authorization routes
-  app.use('/api/auth', authRoutes);
+  // Register authentication routes
+  setupAuthRoutes(app);
   
   // Example protected API route
   app.get('/api/protected', authenticate, (req, res) => {
@@ -34,57 +18,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
   
-  // Example tenant-specific API route
-  app.get('/api/tenants/:tenantId/data', 
-    authenticate, 
-    (req, res, next) => requireTenant(Number(req.params.tenantId))(req, res, next),
-    (req, res) => {
-      res.json({
-        message: `Data for tenant ${req.params.tenantId}`,
-        user: req.user
-      });
-    }
-  );
-  
-  // User management API routes
-  app.get('/api/users', authenticate, async (req, res) => {
-    try {
-      // Get tenant ID from query param or current tenant
-      const tenantId = req.query.tenantId 
-        ? Number(req.query.tenantId) 
-        : (req.tenant ? req.tenant.id : undefined);
-        
-      const users = await storage.listUsers(tenantId);
-      
-      // Remove sensitive information
-      const safeUsers = users.map(user => {
-        const { password, ...safeUser } = user;
-        return safeUser;
-      });
-      
-      res.json(safeUsers);
-    } catch (error) {
-      console.error('User listing error:', error);
-      res.status(500).json({ error: 'Failed to list users' });
-    }
+  // Example API routes that handle specific resources
+  app.get('/api/users', authenticate, (req, res) => {
+    // Return mock users for development
+    const users = [
+      {
+        id: 1,
+        username: 'admin',
+        name: 'Admin User',
+        email: 'admin@example.com',
+        tenantId: 1,
+        isSuperAdmin: true
+      },
+      {
+        id: 2,
+        username: 'manager',
+        name: 'Manager User',
+        email: 'manager@example.com',
+        tenantId: 1,
+        isSuperAdmin: false
+      }
+    ];
+    
+    res.json(users);
   });
   
-  app.post('/api/users', authenticate, async (req, res) => {
-    try {
-      const user = await storage.createUser(req.body);
-      
-      // Remove password from response
-      const { password, ...safeUser } = user;
-      
-      res.status(201).json(safeUser);
-    } catch (error) {
-      console.error('User creation error:', error);
-      res.status(500).json({ error: 'Failed to create user' });
-    }
+  app.get('/api/tenants', authenticate, (req, res) => {
+    // Return mock tenants for development
+    const tenants = [
+      {
+        id: 1,
+        name: 'Main Organization',
+        description: 'Main tenant for the organization'
+      },
+      {
+        id: 2,
+        name: 'Partner Organization',
+        description: 'Partner tenant for collaboration'
+      }
+    ];
+    
+    res.json(tenants);
   });
   
-  // Add more API routes as needed...
-
   const httpServer = createServer(app);
 
   return httpServer;

@@ -73,9 +73,13 @@ function App() {
                       <ProtectedRoute path="/add-supplier">
                         <AddSupplier />
                       </ProtectedRoute>
-                      <ProtectedRoute path="/supplier/:id">
-                        {(params) => <SupplierDetail id={params.id} />}
-                      </ProtectedRoute>
+                      <Route path="/supplier/:id">
+                        {(params) => (
+                          <ProtectedRoute>
+                            <SupplierDetail id={params.id} />
+                          </ProtectedRoute>
+                        )}
+                      </Route>
                       <ProtectedRoute path="/compliance">
                         <Compliance />
                       </ProtectedRoute>
