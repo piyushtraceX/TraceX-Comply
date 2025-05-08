@@ -17,7 +17,7 @@ import { pool } from "./db";
 // Storage interface with extended CRUD operations
 export interface IStorage {
   // Session store for express-session
-  sessionStore: session.SessionStore;
+  sessionStore: any; // Using any to avoid type issues with session store
 
   // User operations
   getUser(id: number): Promise<User | undefined>;
@@ -65,7 +65,7 @@ export interface IStorage {
 
 // Implementation of the storage interface using PostgreSQL
 export class DatabaseStorage implements IStorage {
-  sessionStore: session.SessionStore;
+  sessionStore: any;
 
   constructor() {
     const PostgresSessionStore = connectPg(session);
@@ -196,7 +196,28 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserRoles(userId: number, tenantId?: number): Promise<Role[]> {
-    const query = db.select({
+    // When tenantId is provided, we need to filter by both userId and tenantId
+    if (tenantId) {
+      return await db.select({
+        id: roles.id,
+        name: roles.name,
+        displayName: roles.displayName,
+        description: roles.description,
+        tenantId: roles.tenantId,
+        parentRoleId: roles.parentRoleId,
+        createdAt: roles.createdAt,
+        updatedAt: roles.updatedAt,
+      })
+      .from(userRoles)
+      .innerJoin(roles, eq(userRoles.roleId, roles.id))
+      .where(and(
+        eq(userRoles.userId, userId),
+        eq(userRoles.tenantId, tenantId)
+      ));
+    }
+    
+    // Otherwise just filter by userId
+    return await db.select({
       id: roles.id,
       name: roles.name,
       displayName: roles.displayName,
@@ -209,12 +230,6 @@ export class DatabaseStorage implements IStorage {
     .from(userRoles)
     .innerJoin(roles, eq(userRoles.roleId, roles.id))
     .where(eq(userRoles.userId, userId));
-
-    if (tenantId) {
-      query.where(eq(userRoles.tenantId, tenantId));
-    }
-
-    return await query;
   }
 
   // Resource operations
