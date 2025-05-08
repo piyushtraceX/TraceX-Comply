@@ -20,6 +20,7 @@ import Settings from "@/pages/Settings";
 import AuthPage from "@/pages/AuthPage";
 import TestLanguage from "@/pages/TestLanguage";
 import TestPersona from "@/pages/TestPersona";
+import DebugPage from "@/pages/DebugPage";
 import { ThemeProvider } from "next-themes";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { PersonaProvider } from "./contexts/PersonaContext";
@@ -138,7 +139,9 @@ function App() {
                         </ProtectedRoute>
                       </Route>
                       <Route path="/debug">
-                        <div className="p-10">Debug Page Working</div>
+                        <Suspense fallback={<Loading />}>
+                          <DebugPage />
+                        </Suspense>
                       </Route>
                       <Route>
                         <NotFound />

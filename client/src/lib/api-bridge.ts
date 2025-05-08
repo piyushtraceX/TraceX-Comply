@@ -17,7 +17,7 @@ const API_CONFIGS = {
     timeout: 10000,
   },
   go: {
-    baseURL: process.env.GO_API_URL || 'http://localhost:8080/api',
+    baseURL: import.meta.env.VITE_GO_API_URL || 'http://localhost:8080/api',
     timeout: 10000,
   }
 };
