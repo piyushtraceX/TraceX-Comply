@@ -164,18 +164,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         description: `Welcome back, ${response.data.user?.name || response.data.user?.username}!`,
       });
       
-      // Redirect to the dashboard after successful login and ensuring auth state is refreshed
+      // Redirect to the dashboard after successful login with a more robust approach
       if (window.location.pathname === '/auth') {
+        // Store a flag in localStorage to indicate we've just logged in
+        localStorage.setItem('just_logged_in', 'true');
+        
+        // Store user data directly in localStorage as backup
+        try {
+          if (response.data.user) {
+            localStorage.setItem('user_data', JSON.stringify(response.data.user));
+          }
+        } catch (e) {
+          console.error('Failed to store user data in localStorage', e);
+        }
+        
         // Manually refetch the query to ensure we have the updated user
         console.log("Refetching auth state before redirecting...");
         queryClient.invalidateQueries({queryKey: ['auth', 'me']});
         
-        // Wait a bit longer to ensure the auth state is refreshed and cookie is set
-        setTimeout(() => {
-          console.log("Login successful, redirecting to dashboard");
-          // Use React Router for navigation to avoid page reload
-          window.location.href = '/dashboard';
-        }, 2000); // Even longer delay to ensure auth state is refreshed
+        // Redirect directly without setTimeout to avoid race conditions
+        console.log("Login successful, redirecting to dashboard immediately");
+        window.location.href = '/'; // Redirect to root which should show dashboard if authenticated
       }
     },
     onError: (error: any) => {
@@ -334,14 +343,51 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 }) => {
   const { user, isLoading } = useAuth();
   const [, setLocation] = useLocation();
+  const [checkedLocalStorage, setCheckedLocalStorage] = useState(false);
+  const [localUserData, setLocalUserData] = useState<any>(null);
+  
+  // Check localStorage for user data as fallback
+  useEffect(() => {
+    if (!user && !isLoading && !checkedLocalStorage) {
+      try {
+        const storedUserData = localStorage.getItem('user_data');
+        const justLoggedIn = localStorage.getItem('just_logged_in');
+        
+        if (storedUserData) {
+          console.log('Found user data in localStorage, using as fallback');
+          const parsedData = JSON.parse(storedUserData);
+          setLocalUserData(parsedData);
+        }
+        
+        // If we just logged in, this is likely a race condition
+        if (justLoggedIn === 'true') {
+          console.log('Just logged in flag found in localStorage, refusing to redirect to auth');
+          // Clear the flag after 30 seconds to prevent permanent blocking
+          setTimeout(() => {
+            localStorage.removeItem('just_logged_in');
+          }, 30000);
+        }
+      } catch (error) {
+        console.error('Error reading from localStorage:', error);
+      } finally {
+        setCheckedLocalStorage(true);
+      }
+    }
+  }, [user, isLoading, checkedLocalStorage]);
 
   // Show loading state
   if (isLoading) {
     return <>{fallback}</>;
   }
 
-  // If not authenticated, redirect to login
-  if (!user) {
+  // If we just logged in, don't redirect immediately, wait for the auth state to sync
+  const justLoggedIn = localStorage.getItem('just_logged_in') === 'true';
+  
+  // Use either the auth context user or the localStorage fallback
+  const effectiveUser = user || localUserData;
+  
+  // If not authenticated and not just logged in, redirect to login
+  if (!effectiveUser && !justLoggedIn) {
     // Use wouter for client-side navigation to prevent page refreshes
     console.log("User not authenticated, redirecting to /auth");
     
@@ -353,6 +399,12 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       }, 0);
     }
     return null;
+  }
+  
+  // If we have localUserData but no user, use it as a temporary fallback
+  // but also refresh the auth state
+  if (!user && localUserData && !justLoggedIn) {
+    console.log('Using localStorage user data as fallback while refreshing auth state');
   }
 
   // Render the Component if provided (for backward compatibility)

@@ -87,6 +87,45 @@ export function AuthDebugger() {
     }
   };
   
+  // Test session debugging in the health endpoint
+  const testSessionEndpoint = async () => {
+    setSessionCheckStatus('checking');
+    setSessionCheckResult('');
+    
+    try {
+      const host = window.location.hostname;
+      const sessionApiUrl = `${window.location.protocol}//${host}/api/health/session`;
+      console.log('Testing session endpoint at:', sessionApiUrl);
+      
+      const headers: Record<string, string> = {};
+      const token = localStorage.getItem('auth_token');
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
+      const sessionResponse = await axios.get(sessionApiUrl, { 
+        withCredentials: true,
+        headers,
+        timeout: 5000 
+      });
+      
+      console.log('Session endpoint test result:', sessionResponse);
+      setSessionCheckStatus('success');
+      setSessionCheckResult(JSON.stringify(sessionResponse.data, null, 2));
+    } catch (error: any) {
+      console.error('Error testing session endpoint:', error);
+      setSessionCheckStatus('failed');
+      
+      if (axios.isAxiosError(error)) {
+        const statusCode = error.response?.status;
+        const data = error.response?.data;
+        setSessionCheckResult(`Status: ${statusCode}\nData: ${JSON.stringify(data, null, 2)}`);
+      } else {
+        setSessionCheckResult(error.message);
+      }
+    }
+  };
+  
   // Function to check the API status
   const checkApiStatus = async () => {
     // Check Go API
@@ -253,13 +292,7 @@ export function AuthDebugger() {
                   variant="outline"
                   size="sm"
                   className="mt-2 h-7 text-xs"
-                  onClick={() => {
-                    // Refresh token state
-                    const token = localStorage.getItem('auth_token');
-                    setAuthToken(token);
-                    const axiosToken = axios.defaults.headers.common['Authorization'] as string;
-                    setHeaderAuthToken(axiosToken || null);
-                  }}
+                  onClick={refreshTokenInfo}
                 >
                   Refresh Token Info
                 </Button>
@@ -313,6 +346,51 @@ export function AuthDebugger() {
           </div>
         </div>
         
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label>Test Session Endpoint</Label>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={testSessionEndpoint} 
+              className="h-8 px-2 text-xs"
+            >
+              Test Session
+            </Button>
+          </div>
+          <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded text-sm">
+            <div className="flex items-center justify-between mb-2">
+              <span>Session Endpoint Status:</span> 
+              {sessionCheckStatus === 'idle' ? (
+                <span className="px-2 py-1 rounded text-xs bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-300 flex items-center">
+                  Not Tested
+                </span>
+              ) : sessionCheckStatus === 'checking' ? (
+                <span className="px-2 py-1 rounded text-xs bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 flex items-center">
+                  <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                  Testing...
+                </span>
+              ) : sessionCheckStatus === 'success' ? (
+                <span className="px-2 py-1 rounded text-xs bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 flex items-center">
+                  <CheckCircle className="mr-1 h-3 w-3" />
+                  Success
+                </span>
+              ) : (
+                <span className="px-2 py-1 rounded text-xs bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 flex items-center">
+                  <XCircle className="mr-1 h-3 w-3" />
+                  Failed
+                </span>
+              )}
+            </div>
+            
+            {sessionCheckResult && (
+              <div className="text-xs mt-2 p-2 bg-black/10 dark:bg-white/5 rounded font-mono whitespace-pre-wrap break-all">
+                {sessionCheckResult}
+              </div>
+            )}
+          </div>
+        </div>
+
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label>API Health Check</Label>
