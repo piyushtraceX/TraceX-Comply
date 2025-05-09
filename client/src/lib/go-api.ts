@@ -111,7 +111,7 @@ export const authApi = {
     
     console.log('Login attempt with username:', username);
     
-    return apiClient.post('/api/login', { username, password })
+    return apiClient.post('/api/auth/login', { username, password })
       .then(response => {
         console.log('Login response received:', response.data);
         
@@ -176,7 +176,7 @@ export const authApi = {
   },
   
   logout: (): Promise<AxiosResponse<any>> => {
-    return apiClient.post('/api/logout')
+    return apiClient.post('/api/auth/logout')
       .finally(() => {
         // Always clear all auth data on logout regardless of API success/failure
         console.log('Clearing all auth data from localStorage');
@@ -205,7 +205,7 @@ export const authApi = {
     }
     
     // Try to get user from API first
-    return apiClient.get('/api/user', config)
+    return apiClient.get('/api/auth/me', config)
       .catch(error => {
         console.error('[API] Error in getCurrentUser:', error);
         
