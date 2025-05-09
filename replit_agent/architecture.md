@@ -2,14 +2,14 @@
 
 ## 1. Overview
 
-This application is a full-stack web platform designed for managing supply chain compliance, particularly focused on EU Deforestation Regulation (EUDR). The system provides functionality for tracking suppliers, managing declarations, monitoring compliance, and generating reports. It features a modern React frontend with a Node.js/Express backend, connected to a PostgreSQL database.
+This application is a full-stack web platform designed for managing supply chain compliance, particularly focused on EU Deforestation Regulation (EUDR). The system provides functionality for tracking suppliers, managing declarations, monitoring compliance, and generating reports. It features a modern React frontend with a Go (Golang) backend, connected to a PostgreSQL database.
 
 The application follows a client-server architecture with clearly separated concerns:
 - A React-based single-page application (SPA) for the frontend
-- An Express.js RESTful API server for the backend
-- PostgreSQL database for data persistence using Drizzle ORM
+- A Go (Golang) RESTful API server for the backend
+- PostgreSQL database for data persistence
 - Internationalization support with multiple languages
-- Role-based access control through a persona system
+- Role-based access control through Casdoor for authentication and Casbin for authorization
 
 ## 2. System Architecture
 
@@ -18,14 +18,14 @@ The application follows a client-server architecture with clearly separated conc
 The application follows a three-tier architecture:
 
 1. **Presentation Layer**: React-based frontend with TailwindCSS and shadcn/ui components
-2. **Application Layer**: Express.js server handling business logic and API requests
-3. **Data Layer**: PostgreSQL database accessed via Drizzle ORM
+2. **Application Layer**: Go (Golang) server handling business logic and API requests
+3. **Data Layer**: PostgreSQL database 
 
 ```
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
 │                 │     │                 │     │                 │
-│  React Frontend │────▶│ Express Backend │────▶│    PostgreSQL   │
-│  (SPA)          │◀────│ (REST API)      │◀────│    Database     │
+│  React Frontend │────▶│   Go Backend    │────▶│    PostgreSQL   │
+│  (SPA)          │◀────│   (REST API)    │◀────│    Database     │
 │                 │     │                 │     │                 │
 └─────────────────┘     └─────────────────┘     └─────────────────┘
 ```
