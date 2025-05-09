@@ -81,27 +81,19 @@ func main() {
                 })
         })
 
-        // API routes that require authentication
+        // API routes that don't require authentication
         api := r.Group("/api")
         {
                 api.POST("/auth/login", handlers.Login(db))
                 api.POST("/auth/register", handlers.Register(db))
+                api.POST("/auth/seed-demo-user", handlers.SeedDemoUser(db))
                 
-                // Setup routes that require authentication
+                // Routes that require authentication
                 authRequired := api.Group("/")
                 authRequired.Use(middleware.AuthRequired())
-                {
-                        // User authenticated routes
-                        authRequired.GET("/auth/me", handlers.GetCurrentUser(db))
-                        authRequired.POST("/auth/logout", handlers.Logout)
-                        authRequired.POST("/auth/switch-tenant", handlers.SwitchTenant(db))
-                        
-                        // Register other routes
-                        routes.RegisterUserRoutes(authRequired, db)
-                        routes.RegisterRoleRoutes(authRequired, db)
-                        routes.RegisterTenantRoutes(authRequired, db)
-                        routes.RegisterPermissionRoutes(authRequired, db)
-                }
+                
+                // Register all routes
+                routes.RegisterAllRoutes(authRequired, db)
         }
 
         // Get port from environment

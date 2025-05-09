@@ -1,9 +1,12 @@
 #!/bin/bash
 
-echo "Building and running Go server..."
+echo "Building and running Go server alongside Express server..."
 
 # Set environment variables if not already set
-export PORT=${PORT:-8080}
+export GO_PORT=${GO_PORT:-8081}
+export PORT=${PORT:-3000}
+export SESSION_SECRET=${SESSION_SECRET:-"dev-session-secret-replace-in-production"}
+
 if [ -z "$DATABASE_URL" ]; then
   echo "Using default database URL since DATABASE_URL is not set"
   export DATABASE_URL=${DATABASE_URL:-"postgresql://postgres:postgres@localhost:5432/postgres?sslmode=disable"}
@@ -19,14 +22,29 @@ if ! command -v go &> /dev/null; then
   exit 1
 fi
 
-# Download dependencies
-echo "Downloading dependencies..."
-go mod download
+# Create bin directory if it doesn't exist
+mkdir -p bin
 
-# Build the server
-echo "Building the server..."
+# Download Go dependencies
+echo "Downloading Go dependencies..."
+cd go-server && go mod download && cd ..
+
+# Build the Go server
+echo "Building the Go server..."
 go build -o bin/eudr-comply-server go-server/main.go
 
-# Run the server
-echo "Starting the server on port $PORT..."
-./bin/eudr-comply-server
+# Start the Go server in the background
+echo "Starting the Go server on port $GO_PORT..."
+PORT=$GO_PORT ./bin/eudr-comply-server &
+GO_PID=$!
+
+# Start the React/Express app
+echo "Starting the Express server on port $PORT..."
+npm run dev &
+EXPRESS_PID=$!
+
+# Handle termination
+trap 'echo "Shutting down servers..."; kill $GO_PID $EXPRESS_PID; exit 0' SIGINT SIGTERM
+
+# Wait for both processes
+wait
