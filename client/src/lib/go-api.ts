@@ -233,7 +233,7 @@ export const authApi = {
   },
   
   switchTenant: (tenantId: number): Promise<AxiosResponse<any>> => {
-    return apiClient.post('/api/switch-tenant', { tenantId });
+    return apiClient.post('/api/auth/switch-tenant', { tenantId });
   },
 };
 
