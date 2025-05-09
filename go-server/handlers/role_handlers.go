@@ -2,16 +2,16 @@ package handlers
 
 import (
 	"database/sql"
-	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 
+	"eudr-comply/go-server/middleware"
 	"eudr-comply/go-server/models"
 )
 
-// GetRoles retrieves all roles
+// GetRoles gets all roles
 func GetRoles(db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Check if tenant filter is provided
@@ -37,9 +37,10 @@ func GetRoles(db *sql.DB) gin.HandlerFunc {
 	}
 }
 
-// GetRole retrieves a role by ID
+// GetRole gets a role by ID
 func GetRole(db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// Get role ID from path
 		idStr := c.Param("id")
 		id, err := strconv.Atoi(idStr)
 		if err != nil {
@@ -50,6 +51,10 @@ func GetRole(db *sql.DB) gin.HandlerFunc {
 		// Get role
 		role, err := models.GetRoleByID(db, id)
 		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get role: " + err.Error()})
+			return
+		}
+		if role == nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Role not found"})
 			return
 		}
@@ -63,27 +68,40 @@ func CreateRole(db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Check if user has permission
 		isSuperAdmin, exists := c.Get("isSuperAdmin")
-		
-		// Temporarily bypass superadmin check for testing
-		_ = exists
-		_ = isSuperAdmin
-		
-		// Original permission check
-		/*if !exists || !isSuperAdmin.(bool) {
-			c.JSON(http.StatusForbidden, gin.H{"error": "Superadmin privileges required"})
-			return
-		}*/
+		if !exists || !isSuperAdmin.(bool) {
+			userID, _ := middleware.GetUserIDFromContext(c)
+			if !middleware.CheckPermissionForRequest(c, userID, "roles", "create", db) {
+				c.JSON(http.StatusForbidden, gin.H{"error": "Permission denied"})
+				return
+			}
+		}
 
+		// Parse request
 		var input models.CreateRoleInput
 		if err := c.ShouldBindJSON(&input); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 
-		// Check if role name already exists for the tenant
-		existingRole, err := models.GetRoleByName(db, input.Name, input.TenantID)
-		if err == nil && existingRole != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Role name already exists for this tenant"})
+		// Check if role name already exists in this tenant
+		existingRole, err := models.GetRoleByName(db, input.Name, &input.TenantID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to check role name: " + err.Error()})
+			return
+		}
+		if existingRole != nil {
+			c.JSON(http.StatusConflict, gin.H{"error": "Role name already exists in this tenant"})
+			return
+		}
+
+		// Check if tenant exists
+		tenant, err := models.GetTenantByID(db, input.TenantID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to check tenant: " + err.Error()})
+			return
+		}
+		if tenant == nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Tenant not found"})
 			return
 		}
 
@@ -101,13 +119,6 @@ func CreateRole(db *sql.DB) gin.HandlerFunc {
 // UpdateRole updates a role
 func UpdateRole(db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Check if user has permission
-		isSuperAdmin, exists := c.Get("isSuperAdmin")
-		if !exists || !isSuperAdmin.(bool) {
-			c.JSON(http.StatusForbidden, gin.H{"error": "Superadmin privileges required"})
-			return
-		}
-
 		// Get role ID from path
 		idStr := c.Param("id")
 		id, err := strconv.Atoi(idStr)
@@ -116,50 +127,68 @@ func UpdateRole(db *sql.DB) gin.HandlerFunc {
 			return
 		}
 
-		// Parse request body
+		// Check if role exists
+		role, err := models.GetRoleByID(db, id)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get role: " + err.Error()})
+			return
+		}
+		if role == nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Role not found"})
+			return
+		}
+
+		// Parse request
 		var input models.UpdateRoleInput
 		if err := c.ShouldBindJSON(&input); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 
-		// Check if role exists
-		existingRole, err := models.GetRoleByID(db, id)
-		if err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Role not found"})
-			return
+		// Check if role name is being changed and already exists in this tenant
+		if input.Name != nil && *input.Name != role.Name {
+			tenantID := role.TenantID
+			if input.TenantID != nil {
+				tenantID = *input.TenantID
+			}
+			existingRole, err := models.GetRoleByName(db, *input.Name, &tenantID)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to check role name: " + err.Error()})
+				return
+			}
+			if existingRole != nil {
+				c.JSON(http.StatusConflict, gin.H{"error": "Role name already exists in this tenant"})
+				return
+			}
 		}
 
-		// Check if role name already exists for the tenant (if name is being changed)
-		if input.Name != nil && *input.Name != existingRole.Name {
-			duplicateRole, err := models.GetRoleByName(db, *input.Name, input.TenantID)
-			if err == nil && duplicateRole != nil && duplicateRole.ID != id {
-				c.JSON(http.StatusBadRequest, gin.H{"error": "Role name already exists for this tenant"})
+		// Check if tenant is being changed and exists
+		if input.TenantID != nil {
+			tenant, err := models.GetTenantByID(db, *input.TenantID)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to check tenant: " + err.Error()})
+				return
+			}
+			if tenant == nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Tenant not found"})
 				return
 			}
 		}
 
 		// Update role
-		role, err := models.UpdateRole(db, id, input)
+		updatedRole, err := models.UpdateRole(db, id, input)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update role: " + err.Error()})
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"role": role})
+		c.JSON(http.StatusOK, gin.H{"role": updatedRole})
 	}
 }
 
 // DeleteRole deletes a role
 func DeleteRole(db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Only superadmins can delete roles
-		isSuperAdmin, exists := c.Get("isSuperAdmin")
-		if !exists || !isSuperAdmin.(bool) {
-			c.JSON(http.StatusForbidden, gin.H{"error": "Superadmin privileges required"})
-			return
-		}
-
 		// Get role ID from path
 		idStr := c.Param("id")
 		id, err := strconv.Atoi(idStr)
@@ -169,8 +198,12 @@ func DeleteRole(db *sql.DB) gin.HandlerFunc {
 		}
 
 		// Check if role exists
-		_, err = models.GetRoleByID(db, id)
+		role, err := models.GetRoleByID(db, id)
 		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get role: " + err.Error()})
+			return
+		}
+		if role == nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Role not found"})
 			return
 		}

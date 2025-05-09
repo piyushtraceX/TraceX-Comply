@@ -7,10 +7,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"eudr-comply/go-server/middleware"
 	"eudr-comply/go-server/models"
 )
 
-// GetTenants retrieves all tenants
+// GetTenants gets all tenants
 func GetTenants(db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Get tenants
@@ -24,9 +25,10 @@ func GetTenants(db *sql.DB) gin.HandlerFunc {
 	}
 }
 
-// GetTenant retrieves a tenant by ID
+// GetTenant gets a tenant by ID
 func GetTenant(db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// Get tenant ID from path
 		idStr := c.Param("id")
 		id, err := strconv.Atoi(idStr)
 		if err != nil {
@@ -37,6 +39,10 @@ func GetTenant(db *sql.DB) gin.HandlerFunc {
 		// Get tenant
 		tenant, err := models.GetTenantByID(db, id)
 		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get tenant: " + err.Error()})
+			return
+		}
+		if tenant == nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Tenant not found"})
 			return
 		}
@@ -50,17 +56,15 @@ func CreateTenant(db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Check if user has permission
 		isSuperAdmin, exists := c.Get("isSuperAdmin")
-		
-		// Temporarily bypass superadmin check for testing
-		_ = exists
-		_ = isSuperAdmin
-		
-		// Original permission check
-		/*if !exists || !isSuperAdmin.(bool) {
-			c.JSON(http.StatusForbidden, gin.H{"error": "Superadmin privileges required"})
-			return
-		}*/
+		if !exists || !isSuperAdmin.(bool) {
+			userID, _ := middleware.GetUserIDFromContext(c)
+			if !middleware.CheckPermissionForRequest(c, userID, "tenants", "create", db) {
+				c.JSON(http.StatusForbidden, gin.H{"error": "Permission denied"})
+				return
+			}
+		}
 
+		// Parse request
 		var input models.CreateTenantInput
 		if err := c.ShouldBindJSON(&input); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -69,8 +73,12 @@ func CreateTenant(db *sql.DB) gin.HandlerFunc {
 
 		// Check if tenant name already exists
 		existingTenant, err := models.GetTenantByName(db, input.Name)
-		if err == nil && existingTenant != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Tenant name already exists"})
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to check tenant name: " + err.Error()})
+			return
+		}
+		if existingTenant != nil {
+			c.JSON(http.StatusConflict, gin.H{"error": "Tenant name already exists"})
 			return
 		}
 
@@ -88,13 +96,6 @@ func CreateTenant(db *sql.DB) gin.HandlerFunc {
 // UpdateTenant updates a tenant
 func UpdateTenant(db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Check if user has permission
-		isSuperAdmin, exists := c.Get("isSuperAdmin")
-		if !exists || !isSuperAdmin.(bool) {
-			c.JSON(http.StatusForbidden, gin.H{"error": "Superadmin privileges required"})
-			return
-		}
-
 		// Get tenant ID from path
 		idStr := c.Param("id")
 		id, err := strconv.Atoi(idStr)
@@ -103,50 +104,51 @@ func UpdateTenant(db *sql.DB) gin.HandlerFunc {
 			return
 		}
 
-		// Parse request body
+		// Check if tenant exists
+		tenant, err := models.GetTenantByID(db, id)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get tenant: " + err.Error()})
+			return
+		}
+		if tenant == nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Tenant not found"})
+			return
+		}
+
+		// Parse request
 		var input models.UpdateTenantInput
 		if err := c.ShouldBindJSON(&input); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 
-		// Check if tenant exists
-		existingTenant, err := models.GetTenantByID(db, id)
-		if err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Tenant not found"})
-			return
-		}
-
-		// Check if tenant name already exists (if name is being changed)
-		if input.Name != nil && *input.Name != existingTenant.Name {
-			duplicateTenant, err := models.GetTenantByName(db, *input.Name)
-			if err == nil && duplicateTenant != nil && duplicateTenant.ID != id {
-				c.JSON(http.StatusBadRequest, gin.H{"error": "Tenant name already exists"})
+		// Check if tenant name is being changed and already exists
+		if input.Name != nil && *input.Name != tenant.Name {
+			existingTenant, err := models.GetTenantByName(db, *input.Name)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to check tenant name: " + err.Error()})
+				return
+			}
+			if existingTenant != nil {
+				c.JSON(http.StatusConflict, gin.H{"error": "Tenant name already exists"})
 				return
 			}
 		}
 
 		// Update tenant
-		tenant, err := models.UpdateTenant(db, id, input)
+		updatedTenant, err := models.UpdateTenant(db, id, input)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update tenant: " + err.Error()})
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"tenant": tenant})
+		c.JSON(http.StatusOK, gin.H{"tenant": updatedTenant})
 	}
 }
 
 // DeleteTenant deletes a tenant
 func DeleteTenant(db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Only superadmins can delete tenants
-		isSuperAdmin, exists := c.Get("isSuperAdmin")
-		if !exists || !isSuperAdmin.(bool) {
-			c.JSON(http.StatusForbidden, gin.H{"error": "Superadmin privileges required"})
-			return
-		}
-
 		// Get tenant ID from path
 		idStr := c.Param("id")
 		id, err := strconv.Atoi(idStr)
@@ -156,8 +158,12 @@ func DeleteTenant(db *sql.DB) gin.HandlerFunc {
 		}
 
 		// Check if tenant exists
-		_, err = models.GetTenantByID(db, id)
+		tenant, err := models.GetTenantByID(db, id)
 		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get tenant: " + err.Error()})
+			return
+		}
+		if tenant == nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Tenant not found"})
 			return
 		}
@@ -173,20 +179,13 @@ func DeleteTenant(db *sql.DB) gin.HandlerFunc {
 	}
 }
 
-// GetTenantUserCounts retrieves user counts for each tenant
+// GetTenantUserCounts gets the number of users for each tenant
 func GetTenantUserCounts(db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Check if user has permission
-		isSuperAdmin, exists := c.Get("isSuperAdmin")
-		if !exists || !isSuperAdmin.(bool) {
-			c.JSON(http.StatusForbidden, gin.H{"error": "Superadmin privileges required"})
-			return
-		}
-
-		// Get tenant user counts
-		counts, err := models.GetTenantUserCount(db)
+		// Get user counts
+		counts, err := models.GetTenantUserCounts(db)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get tenant user counts: " + err.Error()})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get user counts: " + err.Error()})
 			return
 		}
 

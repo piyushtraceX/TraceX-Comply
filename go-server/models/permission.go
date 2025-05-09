@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"fmt"
 	"time"
 )
 
@@ -28,82 +29,51 @@ type Action struct {
 
 // Permission represents a permission in the system
 type Permission struct {
-	ID          int       `json:"id"`
-	RoleID      int       `json:"roleId"`
-	ResourceID  int       `json:"resourceId"`
-	ActionID    int       `json:"actionId"`
-	TenantID    *int      `json:"tenantId"`
-	CreatedAt   time.Time `json:"createdAt"`
-	UpdatedAt   time.Time `json:"updatedAt"`
-	Resource    *Resource `json:"resource,omitempty"`
-	Action      *Action   `json:"action,omitempty"`
+	ID         int       `json:"id"`
+	RoleID     int       `json:"roleId"`
+	ResourceID int       `json:"resourceId"`
+	ActionID   int       `json:"actionId"`
+	TenantID   int       `json:"tenantId"`
+	CreatedAt  time.Time `json:"createdAt"`
+	Resource   *Resource `json:"resource,omitempty"`
+	Action     *Action   `json:"action,omitempty"`
 }
 
-// CreateResourceInput represents the input for creating a new resource
+// CreateResourceInput represents the input for creating a resource
 type CreateResourceInput struct {
 	Type        string `json:"type" binding:"required"`
 	Name        string `json:"name" binding:"required"`
 	DisplayName string `json:"displayName" binding:"required"`
-	Description string `json:"description"`
+	Description string `json:"description" binding:"required"`
 }
 
-// CreateActionInput represents the input for creating a new action
+// CreateActionInput represents the input for creating an action
 type CreateActionInput struct {
 	Name        string `json:"name" binding:"required"`
 	DisplayName string `json:"displayName" binding:"required"`
-	Description string `json:"description"`
+	Description string `json:"description" binding:"required"`
 }
 
-// CreatePermissionInput represents the input for creating a new permission
+// CreatePermissionInput represents the input for creating a permission
 type CreatePermissionInput struct {
-	RoleID     int  `json:"roleId" binding:"required"`
-	ResourceID int  `json:"resourceId" binding:"required"`
-	ActionID   int  `json:"actionId" binding:"required"`
-	TenantID   *int `json:"tenantId"`
-}
-
-// CreateResource creates a new resource
-func CreateResource(db *sql.DB, input CreateResourceInput) (*Resource, error) {
-	var resource Resource
-	query := `
-		INSERT INTO resources (type, name, display_name, description, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, NOW(), NOW())
-		RETURNING id, type, name, display_name, description, created_at, updated_at
-	`
-
-	err := db.QueryRow(
-		query,
-		input.Type,
-		input.Name,
-		input.DisplayName,
-		input.Description,
-	).Scan(
-		&resource.ID,
-		&resource.Type,
-		&resource.Name,
-		&resource.DisplayName,
-		&resource.Description,
-		&resource.CreatedAt,
-		&resource.UpdatedAt,
-	)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return &resource, nil
+	RoleID     int `json:"roleId" binding:"required"`
+	ResourceID int `json:"resourceId" binding:"required"`
+	ActionID   int `json:"actionId" binding:"required"`
+	TenantID   int `json:"tenantId" binding:"required"`
 }
 
 // GetResourceByID gets a resource by ID
 func GetResourceByID(db *sql.DB, id int) (*Resource, error) {
-	var resource Resource
-	query := `
+	// Query resource
+	row := db.QueryRow(`
 		SELECT id, type, name, display_name, description, created_at, updated_at
 		FROM resources
 		WHERE id = $1
-	`
+	`, id)
 
-	err := db.QueryRow(query, id).Scan(
+	// Scan row into resource
+	var resource Resource
+	err := row.Scan(
 		&resource.ID,
 		&resource.Type,
 		&resource.Name,
@@ -112,8 +82,10 @@ func GetResourceByID(db *sql.DB, id int) (*Resource, error) {
 		&resource.CreatedAt,
 		&resource.UpdatedAt,
 	)
-
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
 		return nil, err
 	}
 
@@ -122,14 +94,16 @@ func GetResourceByID(db *sql.DB, id int) (*Resource, error) {
 
 // GetResourceByName gets a resource by type and name
 func GetResourceByName(db *sql.DB, resourceType, name string) (*Resource, error) {
-	var resource Resource
-	query := `
+	// Query resource
+	row := db.QueryRow(`
 		SELECT id, type, name, display_name, description, created_at, updated_at
 		FROM resources
 		WHERE type = $1 AND name = $2
-	`
+	`, resourceType, name)
 
-	err := db.QueryRow(query, resourceType, name).Scan(
+	// Scan row into resource
+	var resource Resource
+	err := row.Scan(
 		&resource.ID,
 		&resource.Type,
 		&resource.Name,
@@ -138,8 +112,10 @@ func GetResourceByName(db *sql.DB, resourceType, name string) (*Resource, error)
 		&resource.CreatedAt,
 		&resource.UpdatedAt,
 	)
-
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
 		return nil, err
 	}
 
@@ -148,18 +124,19 @@ func GetResourceByName(db *sql.DB, resourceType, name string) (*Resource, error)
 
 // GetAllResources gets all resources
 func GetAllResources(db *sql.DB) ([]Resource, error) {
-	var resources []Resource
-	query := `
+	// Query resources
+	rows, err := db.Query(`
 		SELECT id, type, name, display_name, description, created_at, updated_at
 		FROM resources
-	`
-
-	rows, err := db.Query(query)
+		ORDER BY type, name
+	`)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
+	// Scan rows into resources
+	var resources []Resource
 	for rows.Next() {
 		var resource Resource
 		err := rows.Scan(
@@ -177,53 +154,54 @@ func GetAllResources(db *sql.DB) ([]Resource, error) {
 		resources = append(resources, resource)
 	}
 
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-
 	return resources, nil
 }
 
-// CreateAction creates a new action
-func CreateAction(db *sql.DB, input CreateActionInput) (*Action, error) {
-	var action Action
-	query := `
-		INSERT INTO actions (name, display_name, description, created_at, updated_at)
-		VALUES ($1, $2, $3, NOW(), NOW())
-		RETURNING id, name, display_name, description, created_at, updated_at
-	`
-
-	err := db.QueryRow(
-		query,
+// CreateResource creates a new resource
+func CreateResource(db *sql.DB, input CreateResourceInput) (*Resource, error) {
+	// Insert resource
+	var resource Resource
+	err := db.QueryRow(`
+		INSERT INTO resources (
+			type, name, display_name, description, created_at, updated_at
+		) VALUES (
+			$1, $2, $3, $4, $5, $6
+		) RETURNING id, type, name, display_name, description, created_at, updated_at
+	`,
+		input.Type,
 		input.Name,
 		input.DisplayName,
 		input.Description,
+		time.Now(),
+		time.Now(),
 	).Scan(
-		&action.ID,
-		&action.Name,
-		&action.DisplayName,
-		&action.Description,
-		&action.CreatedAt,
-		&action.UpdatedAt,
+		&resource.ID,
+		&resource.Type,
+		&resource.Name,
+		&resource.DisplayName,
+		&resource.Description,
+		&resource.CreatedAt,
+		&resource.UpdatedAt,
 	)
-
 	if err != nil {
 		return nil, err
 	}
 
-	return &action, nil
+	return &resource, nil
 }
 
 // GetActionByID gets an action by ID
 func GetActionByID(db *sql.DB, id int) (*Action, error) {
-	var action Action
-	query := `
+	// Query action
+	row := db.QueryRow(`
 		SELECT id, name, display_name, description, created_at, updated_at
 		FROM actions
 		WHERE id = $1
-	`
+	`, id)
 
-	err := db.QueryRow(query, id).Scan(
+	// Scan row into action
+	var action Action
+	err := row.Scan(
 		&action.ID,
 		&action.Name,
 		&action.DisplayName,
@@ -231,8 +209,10 @@ func GetActionByID(db *sql.DB, id int) (*Action, error) {
 		&action.CreatedAt,
 		&action.UpdatedAt,
 	)
-
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
 		return nil, err
 	}
 
@@ -241,14 +221,16 @@ func GetActionByID(db *sql.DB, id int) (*Action, error) {
 
 // GetActionByName gets an action by name
 func GetActionByName(db *sql.DB, name string) (*Action, error) {
-	var action Action
-	query := `
+	// Query action
+	row := db.QueryRow(`
 		SELECT id, name, display_name, description, created_at, updated_at
 		FROM actions
 		WHERE name = $1
-	`
+	`, name)
 
-	err := db.QueryRow(query, name).Scan(
+	// Scan row into action
+	var action Action
+	err := row.Scan(
 		&action.ID,
 		&action.Name,
 		&action.DisplayName,
@@ -256,8 +238,10 @@ func GetActionByName(db *sql.DB, name string) (*Action, error) {
 		&action.CreatedAt,
 		&action.UpdatedAt,
 	)
-
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
 		return nil, err
 	}
 
@@ -266,18 +250,19 @@ func GetActionByName(db *sql.DB, name string) (*Action, error) {
 
 // GetAllActions gets all actions
 func GetAllActions(db *sql.DB) ([]Action, error) {
-	var actions []Action
-	query := `
+	// Query actions
+	rows, err := db.Query(`
 		SELECT id, name, display_name, description, created_at, updated_at
 		FROM actions
-	`
-
-	rows, err := db.Query(query)
+		ORDER BY name
+	`)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
+	// Scan rows into actions
+	var actions []Action
 	for rows.Next() {
 		var action Action
 		err := rows.Scan(
@@ -294,28 +279,210 @@ func GetAllActions(db *sql.DB) ([]Action, error) {
 		actions = append(actions, action)
 	}
 
-	if err := rows.Err(); err != nil {
+	return actions, nil
+}
+
+// CreateAction creates a new action
+func CreateAction(db *sql.DB, input CreateActionInput) (*Action, error) {
+	// Insert action
+	var action Action
+	err := db.QueryRow(`
+		INSERT INTO actions (
+			name, display_name, description, created_at, updated_at
+		) VALUES (
+			$1, $2, $3, $4, $5
+		) RETURNING id, name, display_name, description, created_at, updated_at
+	`,
+		input.Name,
+		input.DisplayName,
+		input.Description,
+		time.Now(),
+		time.Now(),
+	).Scan(
+		&action.ID,
+		&action.Name,
+		&action.DisplayName,
+		&action.Description,
+		&action.CreatedAt,
+		&action.UpdatedAt,
+	)
+	if err != nil {
 		return nil, err
 	}
 
-	return actions, nil
+	return &action, nil
+}
+
+// GetPermissionByID gets a permission by ID
+func GetPermissionByID(db *sql.DB, id int) (*Permission, error) {
+	// Query permission
+	row := db.QueryRow(`
+		SELECT id, role_id, resource_id, action_id, tenant_id, created_at
+		FROM permissions
+		WHERE id = $1
+	`, id)
+
+	// Scan row into permission
+	var permission Permission
+	err := row.Scan(
+		&permission.ID,
+		&permission.RoleID,
+		&permission.ResourceID,
+		&permission.ActionID,
+		&permission.TenantID,
+		&permission.CreatedAt,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	// Get resource
+	resource, err := GetResourceByID(db, permission.ResourceID)
+	if err != nil {
+		return nil, err
+	}
+	permission.Resource = resource
+
+	// Get action
+	action, err := GetActionByID(db, permission.ActionID)
+	if err != nil {
+		return nil, err
+	}
+	permission.Action = action
+
+	return &permission, nil
+}
+
+// GetAllPermissions gets all permissions
+func GetAllPermissions(db *sql.DB, roleID, tenantID *int) ([]Permission, error) {
+	// Build query
+	query := `
+		SELECT p.id, p.role_id, p.resource_id, p.action_id, p.tenant_id, p.created_at,
+			r.id as r_id, r.type as r_type, r.name as r_name, r.display_name as r_display_name, r.description as r_description, r.created_at as r_created_at, r.updated_at as r_updated_at,
+			a.id as a_id, a.name as a_name, a.display_name as a_display_name, a.description as a_description, a.created_at as a_created_at, a.updated_at as a_updated_at
+		FROM permissions p
+		INNER JOIN resources r ON p.resource_id = r.id
+		INNER JOIN actions a ON p.action_id = a.id
+		WHERE 1=1
+	`
+	args := []interface{}{}
+	if roleID != nil {
+		query += fmt.Sprintf(" AND p.role_id = $%d", len(args)+1)
+		args = append(args, *roleID)
+	}
+	if tenantID != nil {
+		query += fmt.Sprintf(" AND p.tenant_id = $%d", len(args)+1)
+		args = append(args, *tenantID)
+	}
+	query += " ORDER BY p.id"
+
+	// Query permissions
+	rows, err := db.Query(query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	// Scan rows into permissions
+	var permissions []Permission
+	for rows.Next() {
+		var permission Permission
+		var resource Resource
+		var action Action
+
+		err := rows.Scan(
+			&permission.ID,
+			&permission.RoleID,
+			&permission.ResourceID,
+			&permission.ActionID,
+			&permission.TenantID,
+			&permission.CreatedAt,
+			&resource.ID,
+			&resource.Type,
+			&resource.Name,
+			&resource.DisplayName,
+			&resource.Description,
+			&resource.CreatedAt,
+			&resource.UpdatedAt,
+			&action.ID,
+			&action.Name,
+			&action.DisplayName,
+			&action.Description,
+			&action.CreatedAt,
+			&action.UpdatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		permission.Resource = &resource
+		permission.Action = &action
+		permissions = append(permissions, permission)
+	}
+
+	return permissions, nil
 }
 
 // CreatePermission creates a new permission
 func CreatePermission(db *sql.DB, input CreatePermissionInput) (*Permission, error) {
-	var permission Permission
-	query := `
-		INSERT INTO permissions (role_id, resource_id, action_id, tenant_id, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, NOW(), NOW())
-		RETURNING id, role_id, resource_id, action_id, tenant_id, created_at, updated_at
-	`
+	// Check if role exists
+	role, err := GetRoleByID(db, input.RoleID)
+	if err != nil {
+		return nil, err
+	}
+	if role == nil {
+		return nil, fmt.Errorf("role not found")
+	}
 
-	err := db.QueryRow(
-		query,
+	// Check if resource exists
+	resource, err := GetResourceByID(db, input.ResourceID)
+	if err != nil {
+		return nil, err
+	}
+	if resource == nil {
+		return nil, fmt.Errorf("resource not found")
+	}
+
+	// Check if action exists
+	action, err := GetActionByID(db, input.ActionID)
+	if err != nil {
+		return nil, err
+	}
+	if action == nil {
+		return nil, fmt.Errorf("action not found")
+	}
+
+	// Check if permission already exists
+	var count int
+	err = db.QueryRow(`
+		SELECT COUNT(*)
+		FROM permissions
+		WHERE role_id = $1 AND resource_id = $2 AND action_id = $3 AND tenant_id = $4
+	`, input.RoleID, input.ResourceID, input.ActionID, input.TenantID).Scan(&count)
+	if err != nil {
+		return nil, err
+	}
+	if count > 0 {
+		return nil, fmt.Errorf("permission already exists")
+	}
+
+	// Insert permission
+	var permission Permission
+	err = db.QueryRow(`
+		INSERT INTO permissions (
+			role_id, resource_id, action_id, tenant_id, created_at
+		) VALUES (
+			$1, $2, $3, $4, $5
+		) RETURNING id, role_id, resource_id, action_id, tenant_id, created_at
+	`,
 		input.RoleID,
 		input.ResourceID,
 		input.ActionID,
 		input.TenantID,
+		time.Now(),
 	).Scan(
 		&permission.ID,
 		&permission.RoleID,
@@ -323,195 +490,21 @@ func CreatePermission(db *sql.DB, input CreatePermissionInput) (*Permission, err
 		&permission.ActionID,
 		&permission.TenantID,
 		&permission.CreatedAt,
-		&permission.UpdatedAt,
 	)
-
 	if err != nil {
 		return nil, err
 	}
 
-	// Get the associated resource and action
-	resource, err := GetResourceByID(db, permission.ResourceID)
-	if err == nil {
-		permission.Resource = resource
-	}
-
-	action, err := GetActionByID(db, permission.ActionID)
-	if err == nil {
-		permission.Action = action
-	}
+	// Add resource and action to permission
+	permission.Resource = resource
+	permission.Action = action
 
 	return &permission, nil
-}
-
-// GetPermissionByID gets a permission by ID
-func GetPermissionByID(db *sql.DB, id int) (*Permission, error) {
-	var permission Permission
-	query := `
-		SELECT id, role_id, resource_id, action_id, tenant_id, created_at, updated_at
-		FROM permissions
-		WHERE id = $1
-	`
-
-	err := db.QueryRow(query, id).Scan(
-		&permission.ID,
-		&permission.RoleID,
-		&permission.ResourceID,
-		&permission.ActionID,
-		&permission.TenantID,
-		&permission.CreatedAt,
-		&permission.UpdatedAt,
-	)
-
-	if err != nil {
-		return nil, err
-	}
-
-	// Get the associated resource and action
-	resource, err := GetResourceByID(db, permission.ResourceID)
-	if err == nil {
-		permission.Resource = resource
-	}
-
-	action, err := GetActionByID(db, permission.ActionID)
-	if err == nil {
-		permission.Action = action
-	}
-
-	return &permission, nil
-}
-
-// GetPermissionsByRoleID gets all permissions for a role
-func GetPermissionsByRoleID(db *sql.DB, roleID int) ([]Permission, error) {
-	var permissions []Permission
-	query := `
-		SELECT p.id, p.role_id, p.resource_id, p.action_id, p.tenant_id, p.created_at, p.updated_at
-		FROM permissions p
-		WHERE p.role_id = $1
-	`
-
-	rows, err := db.Query(query, roleID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var permission Permission
-		err := rows.Scan(
-			&permission.ID,
-			&permission.RoleID,
-			&permission.ResourceID,
-			&permission.ActionID,
-			&permission.TenantID,
-			&permission.CreatedAt,
-			&permission.UpdatedAt,
-		)
-		if err != nil {
-			return nil, err
-		}
-
-		// Get the associated resource and action
-		resource, err := GetResourceByID(db, permission.ResourceID)
-		if err == nil {
-			permission.Resource = resource
-		}
-
-		action, err := GetActionByID(db, permission.ActionID)
-		if err == nil {
-			permission.Action = action
-		}
-
-		permissions = append(permissions, permission)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-
-	return permissions, nil
-}
-
-// GetAllPermissions gets all permissions, optionally filtered by roleID and tenantID
-func GetAllPermissions(db *sql.DB, roleID *int, tenantID *int) ([]Permission, error) {
-	var permissions []Permission
-	var query string
-	var rows *sql.Rows
-	var err error
-
-	if roleID != nil && tenantID != nil {
-		query = `
-			SELECT p.id, p.role_id, p.resource_id, p.action_id, p.tenant_id, p.created_at, p.updated_at
-			FROM permissions p
-			WHERE p.role_id = $1 AND (p.tenant_id = $2 OR p.tenant_id IS NULL)
-		`
-		rows, err = db.Query(query, roleID, tenantID)
-	} else if roleID != nil {
-		query = `
-			SELECT p.id, p.role_id, p.resource_id, p.action_id, p.tenant_id, p.created_at, p.updated_at
-			FROM permissions p
-			WHERE p.role_id = $1
-		`
-		rows, err = db.Query(query, roleID)
-	} else if tenantID != nil {
-		query = `
-			SELECT p.id, p.role_id, p.resource_id, p.action_id, p.tenant_id, p.created_at, p.updated_at
-			FROM permissions p
-			WHERE p.tenant_id = $1 OR p.tenant_id IS NULL
-		`
-		rows, err = db.Query(query, tenantID)
-	} else {
-		query = `
-			SELECT p.id, p.role_id, p.resource_id, p.action_id, p.tenant_id, p.created_at, p.updated_at
-			FROM permissions p
-		`
-		rows, err = db.Query(query)
-	}
-
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var permission Permission
-		err := rows.Scan(
-			&permission.ID,
-			&permission.RoleID,
-			&permission.ResourceID,
-			&permission.ActionID,
-			&permission.TenantID,
-			&permission.CreatedAt,
-			&permission.UpdatedAt,
-		)
-		if err != nil {
-			return nil, err
-		}
-
-		// Get the associated resource and action
-		resource, err := GetResourceByID(db, permission.ResourceID)
-		if err == nil {
-			permission.Resource = resource
-		}
-
-		action, err := GetActionByID(db, permission.ActionID)
-		if err == nil {
-			permission.Action = action
-		}
-
-		permissions = append(permissions, permission)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-
-	return permissions, nil
 }
 
 // DeletePermission deletes a permission
 func DeletePermission(db *sql.DB, id int) error {
-	query := `DELETE FROM permissions WHERE id = $1`
-	_, err := db.Exec(query, id)
+	// Delete permission
+	_, err := db.Exec("DELETE FROM permissions WHERE id = $1", id)
 	return err
 }
