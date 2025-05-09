@@ -78,11 +78,18 @@ export const TenantsList: React.FC = () => {
     }
   });
 
-  // Create tenant mutation
+  // Create tenant mutation - using direct API client
   const createMutation = useMutation({
     mutationFn: async (values: TenantFormValues) => {
-      const response = await apiRequest('POST', '/api/tenants', values);
-      return await response.json();
+      try {
+        // Import tenantsApi from go-api.ts for direct API access
+        const { tenantsApi } = await import('@/lib/go-api');
+        const response = await tenantsApi.createTenant(values);
+        return response.data;
+      } catch (error) {
+        console.error('Error creating tenant:', error);
+        throw error;
+      }
     },
     onSuccess: () => {
       toast({

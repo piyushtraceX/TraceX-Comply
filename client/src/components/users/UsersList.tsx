@@ -88,11 +88,18 @@ export const UsersList: React.FC = () => {
     }
   });
 
-  // Create user mutation
+  // Create user mutation - using direct API client
   const createMutation = useMutation({
     mutationFn: async (values: UserFormValues) => {
-      const response = await apiRequest('POST', '/api/users', values);
-      return await response.json();
+      try {
+        // Import usersApi from go-api.ts for direct API access
+        const { usersApi } = await import('@/lib/go-api');
+        const response = await usersApi.createUser(values);
+        return response.data;
+      } catch (error) {
+        console.error('Error creating user:', error);
+        throw error;
+      }
     },
     onSuccess: () => {
       toast({

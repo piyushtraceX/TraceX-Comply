@@ -112,11 +112,25 @@ export const PermissionsList: React.FC = () => {
     }
   });
 
-  // Create permission mutation
+  // Create permission mutation - using direct API client
   const createMutation = useMutation({
     mutationFn: async (values: PermissionFormValues) => {
-      const response = await apiRequest('POST', '/api/permissions', values);
-      return await response.json();
+      try {
+        // We'll implement this method in go-api.ts later
+        // For now, we'll stick with a direct axios call to /api/permissions
+        const apiClient = axios.create({
+          baseURL: window.location.origin,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          withCredentials: true,
+        });
+        const response = await apiClient.post('/api/permissions', values);
+        return response.data;
+      } catch (error) {
+        console.error('Error creating permission:', error);
+        throw error;
+      }
     },
     onSuccess: () => {
       toast({

@@ -80,11 +80,18 @@ export const RolesList: React.FC = () => {
     }
   });
 
-  // Create role mutation
+  // Create role mutation - using direct API client
   const createMutation = useMutation({
     mutationFn: async (values: RoleFormValues) => {
-      const response = await apiRequest('POST', '/api/roles', values);
-      return await response.json();
+      try {
+        // Import rolesApi from go-api.ts for direct API access
+        const { rolesApi } = await import('@/lib/go-api');
+        const response = await rolesApi.createRole(values);
+        return response.data;
+      } catch (error) {
+        console.error('Error creating role:', error);
+        throw error;
+      }
     },
     onSuccess: () => {
       toast({
