@@ -2,8 +2,8 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 import axios from "axios";
 import { API_BASE_URL, getApiUrl } from "./api-config";
 
-// Now use the Go server for all API requests
-const USE_EXPRESS_API = false;
+// Use the Express server for API requests
+const USE_EXPRESS_API = true;
 // Get the current hostname dynamically
 const host = window.location.hostname;
 const port = window.location.port ? `:${window.location.port}` : '';
