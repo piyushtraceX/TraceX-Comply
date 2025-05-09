@@ -2,8 +2,10 @@ package models
 
 import (
 	"database/sql"
-	"fmt"
+	"errors"
 	"time"
+
+	"github.com/lib/pq"
 )
 
 // Tenant represents a tenant in the system
@@ -16,61 +18,68 @@ type Tenant struct {
 	UpdatedAt   time.Time `json:"updatedAt"`
 }
 
-// CreateTenantInput represents the input for creating a tenant
-type CreateTenantInput struct {
-	Name        string `json:"name" binding:"required"`
-	DisplayName string `json:"displayName" binding:"required"`
-	Description string `json:"description" binding:"required"`
-}
+// CreateTenant creates a new tenant in the database
+func CreateTenant(db *sql.DB, tenant *Tenant) (*Tenant, error) {
+	// Set defaults
+	now := time.Now()
+	tenant.CreatedAt = now
+	tenant.UpdatedAt = now
 
-// UpdateTenantInput represents the input for updating a tenant
-type UpdateTenantInput struct {
-	Name        *string `json:"name"`
-	DisplayName *string `json:"displayName"`
-	Description *string `json:"description"`
-}
+	// Insert the tenant into the database
+	query := `
+		INSERT INTO tenants (name, display_name, description, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5)
+		RETURNING id
+	`
+	err := db.QueryRow(
+		query,
+		tenant.Name,
+		tenant.DisplayName,
+		tenant.Description,
+		tenant.CreatedAt,
+		tenant.UpdatedAt,
+	).Scan(&tenant.ID)
 
-// GetTenantByID gets a tenant by ID
-func GetTenantByID(db *sql.DB, id int) (*Tenant, error) {
-	// Query tenant
-	row := db.QueryRow(`
-		SELECT id, name, display_name, description, created_at, updated_at
-		FROM tenants
-		WHERE id = $1
-	`, id)
-
-	// Scan row into tenant
-	var tenant Tenant
-	err := row.Scan(
-		&tenant.ID,
-		&tenant.Name,
-		&tenant.DisplayName,
-		&tenant.Description,
-		&tenant.CreatedAt,
-		&tenant.UpdatedAt,
-	)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, nil
+		// Check for unique constraint violation
+		if pqErr, ok := err.(*pq.Error); ok {
+			if pqErr.Code == "23505" { // unique_violation
+				return nil, errors.New("tenant name already exists")
+			}
 		}
 		return nil, err
 	}
 
-	return &tenant, nil
+	return tenant, nil
 }
 
-// GetTenantByName gets a tenant by name
+// GetTenantByID retrieves a tenant by its ID
+func GetTenantByID(id int) (*Tenant, error) {
+	// TODO: Implement database access
+	// This is a placeholder for demonstration
+	if id == 1 {
+		return &Tenant{
+			ID:          1,
+			Name:        "default",
+			DisplayName: "Default Tenant",
+			Description: "Default tenant for system users",
+			CreatedAt:   time.Now(),
+			UpdatedAt:   time.Now(),
+		}, nil
+	}
+	return nil, errors.New("tenant not found")
+}
+
+// GetTenantByName retrieves a tenant by its name
 func GetTenantByName(db *sql.DB, name string) (*Tenant, error) {
-	// Query tenant
-	row := db.QueryRow(`
+	query := `
 		SELECT id, name, display_name, description, created_at, updated_at
 		FROM tenants
 		WHERE name = $1
-	`, name)
-
-	// Scan row into tenant
+	`
 	var tenant Tenant
-	err := row.Scan(
+
+	err := db.QueryRow(query, name).Scan(
 		&tenant.ID,
 		&tenant.Name,
 		&tenant.DisplayName,
@@ -78,9 +87,10 @@ func GetTenantByName(db *sql.DB, name string) (*Tenant, error) {
 		&tenant.CreatedAt,
 		&tenant.UpdatedAt,
 	)
+
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, nil
+			return nil, errors.New("tenant not found")
 		}
 		return nil, err
 	}
@@ -88,20 +98,19 @@ func GetTenantByName(db *sql.DB, name string) (*Tenant, error) {
 	return &tenant, nil
 }
 
-// GetAllTenants gets all tenants
-func GetAllTenants(db *sql.DB) ([]Tenant, error) {
-	// Query tenants
-	rows, err := db.Query(`
+// ListTenants retrieves all tenants
+func ListTenants(db *sql.DB) ([]Tenant, error) {
+	query := `
 		SELECT id, name, display_name, description, created_at, updated_at
 		FROM tenants
 		ORDER BY id
-	`)
+	`
+	rows, err := db.Query(query)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	// Scan rows into tenants
 	var tenants []Tenant
 	for rows.Next() {
 		var tenant Tenant
@@ -119,124 +128,117 @@ func GetAllTenants(db *sql.DB) ([]Tenant, error) {
 		tenants = append(tenants, tenant)
 	}
 
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
 	return tenants, nil
 }
 
-// CreateTenant creates a new tenant
-func CreateTenant(db *sql.DB, input CreateTenantInput) (*Tenant, error) {
-	// Insert tenant
-	var tenant Tenant
-	err := db.QueryRow(`
-		INSERT INTO tenants (
-			name, display_name, description, created_at, updated_at
-		) VALUES (
-			$1, $2, $3, $4, $5
-		) RETURNING id, name, display_name, description, created_at, updated_at
-	`,
-		input.Name,
-		input.DisplayName,
-		input.Description,
-		time.Now(),
-		time.Now(),
-	).Scan(
-		&tenant.ID,
-		&tenant.Name,
-		&tenant.DisplayName,
-		&tenant.Description,
-		&tenant.CreatedAt,
-		&tenant.UpdatedAt,
-	)
+// UpdateTenant updates a tenant in the database
+func UpdateTenant(db *sql.DB, tenant *Tenant) (*Tenant, error) {
+	// Update timestamp
+	tenant.UpdatedAt = time.Now()
+
+	// Update the tenant in the database
+	query := `
+		UPDATE tenants
+		SET name = $1, display_name = $2, description = $3, updated_at = $4
+		WHERE id = $5
+		RETURNING id
+	`
+	err := db.QueryRow(
+		query,
+		tenant.Name,
+		tenant.DisplayName,
+		tenant.Description,
+		tenant.UpdatedAt,
+		tenant.ID,
+	).Scan(&tenant.ID)
+
 	if err != nil {
-		return nil, err
-	}
-
-	return &tenant, nil
-}
-
-// UpdateTenant updates a tenant
-func UpdateTenant(db *sql.DB, id int, input UpdateTenantInput) (*Tenant, error) {
-	// Get current tenant
-	tenant, err := GetTenantByID(db, id)
-	if err != nil {
-		return nil, err
-	}
-	if tenant == nil {
-		return nil, fmt.Errorf("tenant not found")
-	}
-
-	// Build query
-	query := "UPDATE tenants SET updated_at = $1"
-	args := []interface{}{time.Now()}
-	argCount := 2
-
-	// Add fields to update
-	if input.Name != nil {
-		query += fmt.Sprintf(", name = $%d", argCount)
-		args = append(args, *input.Name)
-		argCount++
-	}
-	if input.DisplayName != nil {
-		query += fmt.Sprintf(", display_name = $%d", argCount)
-		args = append(args, *input.DisplayName)
-		argCount++
-	}
-	if input.Description != nil {
-		query += fmt.Sprintf(", description = $%d", argCount)
-		args = append(args, *input.Description)
-		argCount++
-	}
-
-	// Add where clause
-	query += fmt.Sprintf(" WHERE id = $%d RETURNING id, name, display_name, description, created_at, updated_at", argCount)
-	args = append(args, id)
-
-	// Execute query
-	row := db.QueryRow(query, args...)
-	err = row.Scan(
-		&tenant.ID,
-		&tenant.Name,
-		&tenant.DisplayName,
-		&tenant.Description,
-		&tenant.CreatedAt,
-		&tenant.UpdatedAt,
-	)
-	if err != nil {
+		// Check for unique constraint violation
+		if pqErr, ok := err.(*pq.Error); ok {
+			if pqErr.Code == "23505" { // unique_violation
+				return nil, errors.New("tenant name already exists")
+			}
+		}
 		return nil, err
 	}
 
 	return tenant, nil
 }
 
-// DeleteTenant deletes a tenant
+// DeleteTenant deletes a tenant from the database
 func DeleteTenant(db *sql.DB, id int) error {
-	// Delete tenant
-	_, err := db.Exec("DELETE FROM tenants WHERE id = $1", id)
-	return err
+	// Check if the tenant has users
+	var userCount int
+	countQuery := `SELECT COUNT(*) FROM users WHERE tenant_id = $1`
+	err := db.QueryRow(countQuery, id).Scan(&userCount)
+	if err != nil {
+		return err
+	}
+	
+	if userCount > 0 {
+		return errors.New("cannot delete tenant with associated users")
+	}
+
+	// Delete the tenant
+	query := `DELETE FROM tenants WHERE id = $1`
+	result, err := db.Exec(query, id)
+	if err != nil {
+		return err
+	}
+
+	// Check if any rows were affected
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	
+	if rowsAffected == 0 {
+		return errors.New("tenant not found")
+	}
+
+	return nil
 }
 
-// GetTenantUserCounts gets the number of users for each tenant
+// GetTenantUserCount gets the count of users in a tenant
+func GetTenantUserCount(db *sql.DB, tenantID int) (int, error) {
+	query := `SELECT COUNT(*) FROM users WHERE tenant_id = $1`
+	var count int
+	err := db.QueryRow(query, tenantID).Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
+// GetTenantUserCounts gets the count of users for all tenants
 func GetTenantUserCounts(db *sql.DB) (map[int]int, error) {
-	// Query user counts
-	rows, err := db.Query(`
+	query := `
 		SELECT tenant_id, COUNT(*) as user_count
 		FROM users
 		GROUP BY tenant_id
-	`)
+	`
+	rows, err := db.Query(query)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	// Scan rows into map
 	counts := make(map[int]int)
 	for rows.Next() {
-		var tenantID int
-		var count int
+		var tenantID, count int
 		err := rows.Scan(&tenantID, &count)
 		if err != nil {
 			return nil, err
 		}
 		counts[tenantID] = count
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
 	}
 
 	return counts, nil

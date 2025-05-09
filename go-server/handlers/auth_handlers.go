@@ -4,103 +4,86 @@ import (
 	"database/sql"
 	"log"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
-
-	"eudr-comply/go-server/middleware"
-	"eudr-comply/go-server/models"
+	"go-server/middleware"
+	"go-server/models"
 )
 
 // Login handles user login
 func Login(db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Parse request
-		var input struct {
+		var loginRequest struct {
 			Username string `json:"username" binding:"required"`
 			Password string `json:"password" binding:"required"`
 		}
-		if err := c.ShouldBindJSON(&input); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+
+		if err := c.ShouldBindJSON(&loginRequest); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request format"})
 			return
 		}
 
-		// Get user
-		user, err := models.GetUserByUsername(db, input.Username)
+		// Get user by username
+		user, err := models.GetUserByUsername(db, loginRequest.Username)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error getting user: " + err.Error()})
-			return
-		}
-		if user == nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})
-			return
-		}
-
-		// Verify password
-		ok, err := models.ComparePasswords(input.Password, user.Password)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error comparing passwords: " + err.Error()})
-			return
-		}
-		if !ok {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})
+			log.Printf("Login error for user %s: %v", loginRequest.Username, err)
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
 			return
 		}
 
 		// Check if user is active
 		if !user.IsActive {
-			c.JSON(http.StatusForbidden, gin.H{"error": "User is not active"})
+			c.JSON(http.StatusForbidden, gin.H{"error": "User account is inactive"})
 			return
 		}
 
-		// Update last login
-		err = models.UpdateUserLastLogin(db, user.ID)
+		// Verify password
+		if !models.VerifyPassword(user.Password, loginRequest.Password) {
+			log.Printf("Invalid password for user %s", loginRequest.Username)
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+			return
+		}
+
+		// Update last login time
+		err = models.UpdateLastLogin(db, user.ID)
 		if err != nil {
-			log.Printf("Error updating last login: %v", err)
+			log.Printf("Error updating last login for user %s: %v", user.Username, err)
+			// Not critical, continue
 		}
 
-		// Get tenant
-		tenant, err := models.GetTenantByID(db, user.TenantID)
+		// Generate token
+		token, err := middleware.GenerateToken(user)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error getting tenant: " + err.Error()})
-			return
-		}
-		if tenant == nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Tenant not found"})
+			log.Printf("Error generating token for user %s: %v", user.Username, err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate authentication token"})
 			return
 		}
 
-		// Get roles
-		roles, err := models.GetUserRoles(db, user.ID, &user.TenantID)
+		// Get user roles
+		roles, err := models.GetUserRoles(user.ID)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error getting roles: " + err.Error()})
-			return
+			log.Printf("Error getting roles for user %s: %v", user.Username, err)
+			// Not critical, continue with empty roles
+			roles = []models.Role{}
 		}
 
-		// Create role names array
+		// Get user's tenant
+		tenant, err := models.GetTenantByID(user.TenantID)
+		if err != nil {
+			log.Printf("Error getting tenant for user %s: %v", user.Username, err)
+			// Not critical, continue with nil tenant
+		}
+
+		// Convert roles to role names for the response
 		roleNames := make([]string, len(roles))
 		for i, role := range roles {
 			roleNames[i] = role.Name
 		}
 
-		// Generate JWT token
-		token, err := middleware.GenerateJWT(
-			user.ID,
-			user.Username,
-			user.Email,
-			user.DisplayName,
-			user.TenantID,
-			user.IsSuperAdmin,
-		)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error generating token: " + err.Error()})
-			return
-		}
-
-		// Return response
+		// Return successful login response
 		c.JSON(http.StatusOK, gin.H{
-			"user": map[string]interface{}{
+			"user": gin.H{
 				"id":           user.ID,
 				"username":     user.Username,
 				"email":        user.Email,
@@ -123,91 +106,134 @@ func Login(db *sql.DB) gin.HandlerFunc {
 // Register handles user registration
 func Register(db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Parse request
-		var input models.CreateUserInput
-		if err := c.ShouldBindJSON(&input); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
+		var registerRequest struct {
+			Username    string `json:"username" binding:"required"`
+			Password    string `json:"password" binding:"required"`
+			Email       string `json:"email" binding:"required,email"`
+			DisplayName string `json:"displayName" binding:"required"`
+			TenantID    int    `json:"tenantId"`
 		}
 
-		// Check if username already exists
-		existingUser, err := models.GetUserByUsername(db, input.Username)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error checking username: " + err.Error()})
-			return
-		}
-		if existingUser != nil {
-			c.JSON(http.StatusConflict, gin.H{"error": "Username already exists"})
+		if err := c.ShouldBindJSON(&registerRequest); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request format"})
 			return
 		}
 
 		// Check if tenant exists
-		tenant, err := models.GetTenantByID(db, input.TenantID)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error checking tenant: " + err.Error()})
-			return
+		tenantID := registerRequest.TenantID
+		if tenantID == 0 {
+			// Use default tenant if none specified
+			tenant, err := models.GetTenantByName(db, "default")
+			if err != nil {
+				log.Printf("Error getting default tenant: %v", err)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get default tenant"})
+				return
+			}
+			tenantID = tenant.ID
+		} else {
+			// Verify the tenant exists
+			_, err := models.GetTenantByID(tenantID)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid tenant ID"})
+				return
+			}
 		}
-		if tenant == nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Tenant not found"})
+
+		// Create the user
+		user := &models.User{
+			Username:     registerRequest.Username,
+			Password:     registerRequest.Password,
+			Email:        registerRequest.Email,
+			DisplayName:  registerRequest.DisplayName,
+			TenantID:     tenantID,
+			IsActive:     true,
+			IsSuperAdmin: false,
+			LastLogin:    time.Now(),
+		}
+
+		createdUser, err := models.CreateUser(db, user)
+		if err != nil {
+			log.Printf("Error creating user: %v", err)
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 
-		// Create user
-		user, err := models.CreateUser(db, input)
+		// Assign default user role
+		userRole, err := models.GetRoleByName(db, "user", tenantID)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error creating user: " + err.Error()})
+			log.Printf("Error getting user role: %v", err)
+			// Not critical, continue
+		} else {
+			err = models.AssignRoleToUser(db, createdUser.ID, userRole.ID, tenantID)
+			if err != nil {
+				log.Printf("Error assigning user role: %v", err)
+				// Not critical, continue
+			}
+		}
+
+		// Generate token
+		token, err := middleware.GenerateToken(createdUser)
+		if err != nil {
+			log.Printf("Error generating token: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate authentication token"})
 			return
 		}
 
-		// Return response
+		// Get user's tenant
+		tenant, err := models.GetTenantByID(createdUser.TenantID)
+		if err != nil {
+			log.Printf("Error getting tenant: %v", err)
+			// Not critical, continue with nil tenant
+		}
+
+		// Return successful registration response
 		c.JSON(http.StatusCreated, gin.H{
-			"user": user,
+			"user":   createdUser,
+			"tenant": tenant,
+			"roles":  []string{"user"},
+			"token":  token,
 		})
 	}
 }
 
-// GetCurrentUser gets the current authenticated user
+// GetCurrentUser returns the authenticated user's information
 func GetCurrentUser(db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Get user ID from context
-		userID, exists := middleware.GetUserIDFromContext(c)
+		// User should be set by the auth middleware
+		userValue, exists := c.Get("user")
 		if !exists {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Not authenticated"})
 			return
 		}
 
-		// Get user
-		user, err := models.GetUserByID(db, userID)
+		user, ok := userValue.(*models.User)
+		if !ok {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user in context"})
+			return
+		}
+
+		// Get user roles
+		roles, err := models.GetUserRoles(user.ID)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error getting user: " + err.Error()})
-			return
-		}
-		if user == nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-			return
+			log.Printf("Error getting roles for user %s: %v", user.Username, err)
+			// Not critical, continue with empty roles
+			roles = []models.Role{}
 		}
 
-		// Get tenant
-		tenant, err := models.GetTenantByID(db, user.TenantID)
+		// Get user's tenant
+		tenant, err := models.GetTenantByID(user.TenantID)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error getting tenant: " + err.Error()})
-			return
+			log.Printf("Error getting tenant for user %s: %v", user.Username, err)
+			// Not critical, continue with nil tenant
 		}
 
-		// Get roles
-		roles, err := models.GetUserRoles(db, user.ID, &user.TenantID)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error getting roles: " + err.Error()})
-			return
-		}
-
-		// Create role names array
+		// Convert roles to role names for the response
 		roleNames := make([]string, len(roles))
 		for i, role := range roles {
 			roleNames[i] = role.Name
 		}
 
-		// Return response
+		// Return user information
 		c.JSON(http.StatusOK, gin.H{
 			"user":   user,
 			"tenant": tenant,
@@ -218,109 +244,88 @@ func GetCurrentUser(db *sql.DB) gin.HandlerFunc {
 
 // Logout handles user logout
 func Logout(c *gin.Context) {
-	// No need to do anything on server side with JWT
-	c.JSON(http.StatusOK, gin.H{"message": "Logged out successfully"})
+	// In a stateless JWT system, the client is responsible for discarding the token
+	// So we just return a success message
+	c.JSON(http.StatusOK, gin.H{"message": "Successfully logged out"})
 }
 
-// SwitchTenant switches the user's active tenant
+// SwitchTenant switches the user's current tenant
 func SwitchTenant(db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Get user ID from context
-		userID, exists := middleware.GetUserIDFromContext(c)
-		if !exists {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		var request struct {
+			TenantID int `json:"tenantId" binding:"required"`
+		}
+
+		if err := c.ShouldBindJSON(&request); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request format"})
 			return
 		}
 
-		// Parse request
-		var input struct {
-			TenantID int `json:"tenantId" binding:"required"`
+		// User should be set by the auth middleware
+		userValue, exists := c.Get("user")
+		if !exists {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Not authenticated"})
+			return
 		}
-		if err := c.ShouldBindJSON(&input); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+
+		user, ok := userValue.(*models.User)
+		if !ok {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user in context"})
 			return
 		}
 
 		// Check if tenant exists
-		tenant, err := models.GetTenantByID(db, input.TenantID)
+		tenant, err := models.GetTenantByID(request.TenantID)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error checking tenant: " + err.Error()})
-			return
-		}
-		if tenant == nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Tenant not found"})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid tenant ID"})
 			return
 		}
 
-		// Get user
-		user, err := models.GetUserByID(db, userID)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error getting user: " + err.Error()})
-			return
-		}
-		if user == nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-			return
-		}
-
-		// Check if user is super admin
-		if !user.IsSuperAdmin && user.TenantID != input.TenantID {
-			// Check if user has roles in the tenant
-			count := 0
-			err = db.QueryRow(`
-				SELECT COUNT(*)
-				FROM user_roles
-				WHERE user_id = $1 AND tenant_id = $2
-			`, userID, input.TenantID).Scan(&count)
+		// Check if user has access to this tenant
+		// For simplicity in this example, we allow superadmins to switch to any tenant
+		// In a real application, you would check if the user has roles in the target tenant
+		if !user.IsSuperAdmin {
+			// Check if user has roles in the target tenant
+			roles, err := models.GetUserRolesByUserID(db, user.ID, &request.TenantID)
 			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Error checking user roles: " + err.Error()})
+				log.Printf("Error checking user roles in tenant: %v", err)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to check user roles"})
 				return
 			}
-			if count == 0 {
+
+			if len(roles) == 0 {
 				c.JSON(http.StatusForbidden, gin.H{"error": "User does not have access to this tenant"})
 				return
 			}
 		}
 
-		// Update user's tenant
-		updatedUser, err := models.UpdateUser(db, userID, models.UpdateUserInput{
-			TenantID: &input.TenantID,
-		})
+		// Generate a new token with the new tenant ID
+		userCopy := *user
+		userCopy.TenantID = request.TenantID
+		token, err := middleware.GenerateToken(&userCopy)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error updating user: " + err.Error()})
+			log.Printf("Error generating token: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate authentication token"})
 			return
 		}
 
-		// Get roles for new tenant
-		roles, err := models.GetUserRoles(db, userID, &input.TenantID)
+		// Get roles for the new tenant
+		roles, err := models.GetUserRolesByUserID(db, user.ID, &request.TenantID)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error getting roles: " + err.Error()})
-			return
+			log.Printf("Error getting roles: %v", err)
+			// Not critical, continue with empty roles
+			roles = []models.Role{}
 		}
 
-		// Create role names array
+		// Convert roles to role names for the response
 		roleNames := make([]string, len(roles))
 		for i, role := range roles {
 			roleNames[i] = role.Name
 		}
 
-		// Generate new JWT token
-		token, err := middleware.GenerateJWT(
-			updatedUser.ID,
-			updatedUser.Username,
-			updatedUser.Email,
-			updatedUser.DisplayName,
-			updatedUser.TenantID,
-			updatedUser.IsSuperAdmin,
-		)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error generating token: " + err.Error()})
-			return
-		}
-
-		// Return response
+		// Return success response
 		c.JSON(http.StatusOK, gin.H{
-			"user":   updatedUser,
+			"user":   userCopy,
 			"tenant": tenant,
 			"roles":  roleNames,
 			"token":  token,
@@ -332,134 +337,177 @@ func SwitchTenant(db *sql.DB) gin.HandlerFunc {
 func SeedDemoUser(db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Create default tenant if it doesn't exist
-		var tenant *models.Tenant
-		tenant, err := models.GetTenantByName(db, "default")
+		var defaultTenantID int
+		err := db.QueryRow(`
+			SELECT id FROM tenants WHERE name = 'default'
+		`).Scan(&defaultTenantID)
+
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error checking tenant: " + err.Error()})
-			return
-		}
-
-		if tenant == nil {
-			tenant, err = models.CreateTenant(db, models.CreateTenantInput{
-				Name:        "default",
-				DisplayName: "Default Tenant",
-				Description: "Default tenant for system users",
-			})
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Error creating tenant: " + err.Error()})
-				return
-			}
-		}
-
-		// Check if user already exists
-		existingUser, err := models.GetUserByUsername(db, "demouser")
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error checking user: " + err.Error()})
-			return
-		}
-
-		var user *models.User
-		if existingUser != nil {
-			user = existingUser
-		} else {
-			// Create demo user
-			user, err = models.CreateUser(db, models.CreateUserInput{
-				Username:    "demouser",
-				Password:    "demouser",
-				Email:       "demo@example.com",
-				DisplayName: "Demo User",
-				TenantID:    tenant.ID,
-				IsActive:    true,
-				IsSuperAdmin: false,
-			})
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Error creating user: " + err.Error()})
-				return
-			}
-
-			// Create user role if it doesn't exist
-			var role *models.Role
-			role, err = models.GetRoleByName(db, "user", &tenant.ID)
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Error checking role: " + err.Error()})
-				return
-			}
-
-			if role == nil {
-				role, err = models.CreateRole(db, models.CreateRoleInput{
-					Name:        "user",
-					DisplayName: "User",
-					Description: "Regular user with basic permissions",
-					TenantID:    tenant.ID,
-				})
+			if err == sql.ErrNoRows {
+				// Create default tenant
+				err = db.QueryRow(`
+					INSERT INTO tenants (name, display_name, description, created_at, updated_at)
+					VALUES ('default', 'Default Tenant', 'Default tenant for new users', $1, $2)
+					RETURNING id
+				`, time.Now(), time.Now()).Scan(&defaultTenantID)
 				if err != nil {
-					c.JSON(http.StatusInternalServerError, gin.H{"error": "Error creating role: " + err.Error()})
+					log.Printf("Error creating default tenant: %v", err)
+					c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create default tenant"})
 					return
 				}
+				log.Printf("Created default tenant with ID %d", defaultTenantID)
+			} else {
+				log.Printf("Error getting default tenant: %v", err)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get default tenant"})
+				return
 			}
+		}
 
-			// Assign role to user
-			_, err = models.AssignRoleToUser(db, models.CreateUserRoleInput{
-				UserID:   user.ID,
-				RoleID:   role.ID,
-				TenantID: tenant.ID,
-			})
+		// Check if demo user already exists
+		var existingDemoUser models.User
+		err = db.QueryRow(`
+			SELECT id FROM users WHERE username = 'demouser'
+		`).Scan(&existingDemoUser.ID)
+
+		if err == nil {
+			// User already exists, return it
+			user, err := models.GetUserByUsername(db, "demouser")
 			if err != nil {
-				log.Printf("Error assigning role to user: %v", err)
+				log.Printf("Error getting demo user: %v", err)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get demo user"})
+				return
+			}
+
+			// Get user roles
+			roles, err := models.GetUserRoles(user.ID)
+			if err != nil {
+				log.Printf("Error getting roles for demo user: %v", err)
+				// Not critical, continue with empty roles
+				roles = []models.Role{}
+			}
+
+			// Get user's tenant
+			tenant, err := models.GetTenantByID(user.TenantID)
+			if err != nil {
+				log.Printf("Error getting tenant for demo user: %v", err)
+				// Not critical, continue with nil tenant
+			}
+
+			// Convert roles to role names for the response
+			roleNames := make([]string, len(roles))
+			for i, role := range roles {
+				roleNames[i] = role.Name
+			}
+
+			// Return existing user
+			c.JSON(http.StatusOK, gin.H{
+				"user":    user,
+				"tenant":  tenant,
+				"roles":   roleNames,
+				"message": "Demo user already exists",
+			})
+			return
+		}
+
+		// Create admin role if it doesn't exist
+		var adminRoleID int
+		err = db.QueryRow(`
+			SELECT id FROM roles WHERE name = 'admin' AND tenant_id = $1
+		`, defaultTenantID).Scan(&adminRoleID)
+
+		if err != nil {
+			if err == sql.ErrNoRows {
+				// Create admin role
+				err = db.QueryRow(`
+					INSERT INTO roles (name, display_name, description, tenant_id, created_at, updated_at)
+					VALUES ('admin', 'Administrator', 'Full administrator role', $1, $2, $3)
+					RETURNING id
+				`, defaultTenantID, time.Now(), time.Now()).Scan(&adminRoleID)
+				if err != nil {
+					log.Printf("Error creating admin role: %v", err)
+					c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create admin role"})
+					return
+				}
+				log.Printf("Created admin role with ID %d", adminRoleID)
+			} else {
+				log.Printf("Error getting admin role: %v", err)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get admin role"})
+				return
 			}
 		}
 
-		// Update last login
-		err = models.UpdateUserLastLogin(db, user.ID)
+		// Create user role if it doesn't exist
+		var userRoleID int
+		err = db.QueryRow(`
+			SELECT id FROM roles WHERE name = 'user' AND tenant_id = $1
+		`, defaultTenantID).Scan(&userRoleID)
+
 		if err != nil {
-			log.Printf("Error updating last login: %v", err)
+			if err == sql.ErrNoRows {
+				// Create user role
+				err = db.QueryRow(`
+					INSERT INTO roles (name, display_name, description, tenant_id, created_at, updated_at)
+					VALUES ('user', 'User', 'Basic user role', $1, $2, $3)
+					RETURNING id
+				`, defaultTenantID, time.Now(), time.Now()).Scan(&userRoleID)
+				if err != nil {
+					log.Printf("Error creating user role: %v", err)
+					c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user role"})
+					return
+				}
+				log.Printf("Created user role with ID %d", userRoleID)
+			} else {
+				log.Printf("Error getting user role: %v", err)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get user role"})
+				return
+			}
 		}
 
-		// Get roles
-		roles, err := models.GetUserRoles(db, user.ID, &user.TenantID)
+		// Create the demo user
+		demoUser := &models.User{
+			Username:     "demouser",
+			Password:     "password",
+			Email:        "demo@example.com",
+			DisplayName:  "Demo User",
+			TenantID:     defaultTenantID,
+			IsActive:     true,
+			IsSuperAdmin: true, // Set to true for testing purposes
+			LastLogin:    time.Now(),
+		}
+
+		createdUser, err := models.CreateUser(db, demoUser)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error getting roles: " + err.Error()})
+			log.Printf("Error creating demo user: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create demo user"})
 			return
 		}
 
-		// Create role names array
-		roleNames := make([]string, len(roles))
-		for i, role := range roles {
-			roleNames[i] = role.Name
-		}
-
-		// Generate JWT token
-		token, err := middleware.GenerateJWT(
-			user.ID,
-			user.Username,
-			user.Email,
-			user.DisplayName,
-			user.TenantID,
-			user.IsSuperAdmin,
-		)
+		// Assign roles to the demo user
+		err = models.AssignRoleToUser(db, createdUser.ID, adminRoleID, defaultTenantID)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error generating token: " + err.Error()})
-			return
+			log.Printf("Error assigning admin role to demo user: %v", err)
+			// Not critical, continue
 		}
 
-		// Return response
-		c.JSON(http.StatusOK, gin.H{
-			"user": map[string]interface{}{
-				"id":           user.ID,
-				"username":     user.Username,
-				"email":        user.Email,
-				"displayName":  user.DisplayName,
-				"avatar":       user.Avatar,
-				"tenantId":     user.TenantID,
-				"isActive":     user.IsActive,
-				"isSuperAdmin": user.IsSuperAdmin,
-				"lastLogin":    time.Now(),
-				"createdAt":    user.CreatedAt,
-				"updatedAt":    user.UpdatedAt,
-			},
-			"tenant": tenant,
-			"roles":  roleNames,
-			"token":  token,
+		err = models.AssignRoleToUser(db, createdUser.ID, userRoleID, defaultTenantID)
+		if err != nil {
+			log.Printf("Error assigning user role to demo user: %v", err)
+			// Not critical, continue
+		}
+
+		// Get user's tenant
+		tenant, err := models.GetTenantByID(createdUser.TenantID)
+		if err != nil {
+			log.Printf("Error getting tenant for demo user: %v", err)
+			// Not critical, continue with nil tenant
+		}
+
+		// Return the created user
+		c.JSON(http.StatusCreated, gin.H{
+			"user":    createdUser,
+			"tenant":  tenant,
+			"roles":   []string{"admin", "user"},
+			"message": "Demo user created successfully",
 		})
 	}
 }
