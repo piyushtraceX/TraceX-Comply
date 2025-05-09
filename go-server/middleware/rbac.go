@@ -1,121 +1,118 @@
 package middleware
 
 import (
+	"database/sql"
+	"log"
 	"net/http"
 
 	"github.com/casbin/casbin/v2"
 	"github.com/gin-gonic/gin"
 )
 
-// Enforcer is the global casbin enforcer
-var Enforcer *casbin.Enforcer
+// EnforcerContext is a context key type
+type EnforcerContext string
 
-// SetupCasbin initializes the casbin enforcer
-func SetupCasbin(enforcer *casbin.Enforcer) {
-	Enforcer = enforcer
+// EnforcerKey is the key used to store the enforcer in the context
+const EnforcerKey EnforcerContext = "enforcer"
+
+// InitCasbinEnforcer initializes the casbin enforcer
+func InitCasbinEnforcer() (*casbin.Enforcer, error) {
+	enforcer, err := casbin.NewEnforcer("config/rbac_model.conf", "config/rbac_policy.csv")
+	if err != nil {
+		return nil, err
+	}
+	return enforcer, nil
 }
 
-// RBACMiddleware is a middleware for RBAC authorization
-func RBACMiddleware(resource, action string) gin.HandlerFunc {
+// Authorize checks if a user has the required permission
+func Authorize(sub, obj, act string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Skip if enforcer is not initialized
-		if Enforcer == nil {
-			c.Next()
-			return
-		}
-
-		// Get user roles from context
-		rolesList, exists := c.Get("roles")
-		if !exists || rolesList == nil {
-			c.JSON(http.StatusForbidden, gin.H{"error": "No roles defined for user"})
-			c.Abort()
-			return
-		}
-
-		// Check if user is super admin
-		isSuperAdmin, exists := c.Get("isSuperAdmin")
-		if exists && isSuperAdmin.(bool) {
-			// Super admins can do anything
-			c.Next()
-			return
-		}
-
-		// Convert to string slice
-		roles, ok := rolesList.([]string)
-		if !ok {
-			c.JSON(http.StatusForbidden, gin.H{"error": "Invalid roles format"})
-			c.Abort()
-			return
-		}
-
-		// Check if any role has the required permission
-		for _, role := range roles {
-			allowed, err := Enforcer.Enforce(role, resource, action)
+		// Get enforcer from context
+		e, exists := c.Get(string(EnforcerKey))
+		if !exists {
+			log.Println("Enforcer not found in context, creating new enforcer")
+			var err error
+			e, err = InitCasbinEnforcer()
 			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Authorization check failed"})
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to initialize enforcer"})
 				c.Abort()
 				return
 			}
+			c.Set(string(EnforcerKey), e)
+		}
+		enforcer := e.(*casbin.Enforcer)
 
-			if allowed {
-				// Permission granted
-				c.Next()
-				return
+		// Check permission
+		ok, err := enforcer.Enforce(sub, obj, act)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to enforce policy"})
+			c.Abort()
+			return
+		}
+		if !ok {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Unauthorized"})
+			c.Abort()
+			return
+		}
+
+		c.Next()
+	}
+}
+
+// CheckPermissionForRequest checks if a user has the required permission for the current request
+func CheckPermissionForRequest(c *gin.Context, userID int, resource, action string, db *sql.DB) bool {
+	// Get roles for user
+	rows, err := db.Query("SELECT r.name FROM roles r INNER JOIN user_roles ur ON r.id = ur.role_id WHERE ur.user_id = $1", userID)
+	if err != nil {
+		log.Printf("Error getting roles for user: %v", err)
+		return false
+	}
+	defer rows.Close()
+
+	// Get permissions for roles
+	var roles []string
+	for rows.Next() {
+		var role string
+		if err := rows.Scan(&role); err != nil {
+			log.Printf("Error scanning role: %v", err)
+			continue
+		}
+		roles = append(roles, role)
+	}
+
+	// Check if user has any permissions
+	if len(roles) == 0 {
+		return false
+	}
+
+	// Check if any role has the required permission
+	for _, role := range roles {
+		result, err := db.Query(`
+			SELECT COUNT(*) 
+			FROM permissions p 
+			INNER JOIN roles r ON p.role_id = r.id 
+			INNER JOIN resources res ON p.resource_id = res.id 
+			INNER JOIN actions a ON p.action_id = a.id 
+			WHERE r.name = $1 AND res.name = $2 AND a.name = $3
+		`, role, resource, action)
+		if err != nil {
+			log.Printf("Error checking permission: %v", err)
+			continue
+		}
+		defer result.Close()
+
+		var count int
+		if result.Next() {
+			if err := result.Scan(&count); err != nil {
+				log.Printf("Error scanning permission count: %v", err)
+				continue
 			}
 		}
 
-		// No role has the required permission
-		c.JSON(http.StatusForbidden, gin.H{"error": "Access denied: insufficient permissions"})
-		c.Abort()
+		if count > 0 {
+			return true
+		}
 	}
-}
 
-// RequireSuperAdmin middleware checks if the user is a super admin
-func RequireSuperAdmin() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		isSuperAdmin, exists := c.Get("isSuperAdmin")
-		if !exists || !isSuperAdmin.(bool) {
-			c.JSON(http.StatusForbidden, gin.H{"error": "Superadmin privileges required"})
-			c.Abort()
-			return
-		}
-		c.Next()
-	}
-}
-
-// RequireTenant middleware checks if the user belongs to the specified tenant
-func RequireTenant(tenantParamName string) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		// Super admins can access any tenant
-		isSuperAdmin, exists := c.Get("isSuperAdmin")
-		if exists && isSuperAdmin.(bool) {
-			c.Next()
-			return
-		}
-
-		// Get user's tenant ID from context
-		userTenantID, exists := c.Get("tenantID")
-		if !exists || userTenantID == nil {
-			c.JSON(http.StatusForbidden, gin.H{"error": "No tenant assigned to user"})
-			c.Abort()
-			return
-		}
-
-		// Get requested tenant ID from path parameter
-		requestedTenantID := c.Param(tenantParamName)
-		if requestedTenantID == "" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Tenant ID parameter required"})
-			c.Abort()
-			return
-		}
-
-		// Compare tenant IDs
-		if userTenantID.(int) != 0 && userTenantID.(int) != c.GetInt(requestedTenantID) {
-			c.JSON(http.StatusForbidden, gin.H{"error": "Access to this tenant denied"})
-			c.Abort()
-			return
-		}
-
-		c.Next()
-	}
+	return false
 }

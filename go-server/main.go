@@ -12,49 +12,55 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
-	"github.com/markbates/goth/gothic"
 
-	"eudr-comply/go-server/auth"
-	"eudr-comply/go-server/handlers"
 	"eudr-comply/go-server/middleware"
+	"eudr-comply/go-server/models"
 	"eudr-comply/go-server/routes"
 )
 
 func main() {
-	// Load environment variables from .env file
+	// Load .env file if it exists
 	err := godotenv.Load()
 	if err != nil {
-		log.Println("Warning: .env file not found, using environment variables")
+		log.Println("No .env file found, using environment variables")
 	}
 
 	// Set up database connection
 	dbURL := os.Getenv("DATABASE_URL")
 	if dbURL == "" {
-		log.Fatal("DATABASE_URL environment variable is required")
+		log.Fatal("DATABASE_URL is required")
 	}
 
-	// Connect to PostgreSQL
+	// Connect to database
 	db, err := sql.Open("postgres", dbURL)
 	if err != nil {
 		log.Fatalf("Error connecting to database: %v", err)
 	}
 	defer db.Close()
 
-	// Test the connection
+	// Test database connection
 	err = db.Ping()
 	if err != nil {
-		log.Fatalf("Error pinging database: %v", err)
+		log.Fatalf("Error connecting to database: %v", err)
 	}
-	log.Println("Connected to PostgreSQL database")
+	
+	// Make sure we have the schema
+	err = models.InitializeSchema(db)
+	if err != nil {
+		log.Fatalf("Error initializing schema: %v", err)
+	}
 
-	// Initialize auth providers
-	auth.InitAuth()
+	// Create default admin user if it doesn't exist
+	err = models.CreateDefaultAdminUserIfNotExists(db)
+	if err != nil {
+		log.Fatalf("Error creating default admin user: %v", err)
+	}
 
-	// Initialize Gin router
-	router := gin.Default()
+	// Set up Gin
+	r := gin.Default()
 
-	// Configure CORS
-	router.Use(cors.New(cors.Config{
+	// Set up CORS middleware
+	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"*"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
@@ -63,43 +69,49 @@ func main() {
 		MaxAge:           12 * time.Hour,
 	}))
 
-	// Setup Gothic session middleware
-	router.Use(func(c *gin.Context) {
-		gothic.GetProviderName = func(*http.Request) (string, error) {
-			return "casdoor", nil
-		}
-		c.Next()
-	})
+	// Set up middleware that doesn't require authentication
+	r.Use(middleware.Logger())
 
 	// Health check endpoint
-	router.GET("/api/health", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"status": "ok", "version": "1.0.0"})
+	r.GET("/health", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"status": "ok",
+			"time":   time.Now().Format(time.RFC3339),
+		})
 	})
 
-	// Register auth routes
-	auth.RegisterRoutes(router, db)
-
-	// Register API routes
-	apiGroup := router.Group("/api")
+	// API routes that require authentication
+	api := r.Group("/api")
 	{
-		// Apply JWT auth middleware to protected routes
-		apiGroup.Use(middleware.JWTAuthMiddleware())
-
-		// Register user routes
-		routes.RegisterUserRoutes(apiGroup, db)
-		routes.RegisterRoleRoutes(apiGroup, db)
-		routes.RegisterTenantRoutes(apiGroup, db)
-		routes.RegisterPermissionRoutes(apiGroup, db)
+		api.POST("/auth/login", handlers.Login(db))
+		api.POST("/auth/register", handlers.Register(db))
+		
+		// Setup routes that require authentication
+		authRequired := api.Group("/")
+		authRequired.Use(middleware.AuthRequired())
+		{
+			// User authenticated routes
+			authRequired.GET("/auth/me", handlers.GetCurrentUser(db))
+			authRequired.POST("/auth/logout", handlers.Logout)
+			authRequired.POST("/auth/switch-tenant", handlers.SwitchTenant(db))
+			
+			// Register other routes
+			routes.RegisterUserRoutes(authRequired, db)
+			routes.RegisterRoleRoutes(authRequired, db)
+			routes.RegisterTenantRoutes(authRequired, db)
+			routes.RegisterPermissionRoutes(authRequired, db)
+		}
 	}
 
-	// Define port
+	// Get port from environment
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
 
-	log.Printf("EUDR Comply Go server running on port %s", port)
-	if err := router.Run(":" + port); err != nil {
-		log.Fatalf("Failed to start server: %v", err)
+	// Start server
+	log.Printf("Starting server on port %s", port)
+	if err := r.Run(":" + port); err != nil {
+		log.Fatalf("Error starting server: %v", err)
 	}
 }
