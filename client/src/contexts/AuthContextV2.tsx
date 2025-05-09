@@ -65,7 +65,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     error,
     refetch 
   } = useQuery({
-    queryKey: ['auth', 'me'],
+    queryKey: ['/api/user'],
     queryFn: async () => {
       try {
         console.log('Fetching current user...');
@@ -173,7 +173,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     onSuccess: (response) => {
       // Update the user data in the query cache
       console.log('Updating auth cache with user data');
-      queryClient.setQueryData(['auth', 'me'], response.data);
+      queryClient.setQueryData(['/api/user'], response.data);
       
       toast({
         title: "Login successful",
@@ -196,7 +196,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         // Manually refetch the query to ensure we have the updated user
         console.log("Refetching auth state before redirecting...");
-        queryClient.invalidateQueries({queryKey: ['auth', 'me']});
+        queryClient.invalidateQueries({queryKey: ['/api/user']});
         
         // Redirect directly without setTimeout to avoid race conditions
         console.log("Login successful, redirecting to dashboard immediately");
@@ -242,7 +242,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     onSuccess: () => {
       // Clear user data from the query cache
       console.log('Clearing auth cache');
-      queryClient.setQueryData(['auth', 'me'], null);
+      queryClient.setQueryData(['/api/user'], null);
       
       toast({
         title: "Logged out",
@@ -268,7 +268,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       
       // Even if logout fails on the server, clear local state
-      queryClient.setQueryData(['auth', 'me'], null);
+      queryClient.setQueryData(['/api/user'], null);
     },
   });
 
@@ -281,7 +281,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Update the tenant data
       setTenant(response.data.tenant);
       // Refetch user data to get updated permissions
-      queryClient.invalidateQueries({ queryKey: ['auth', 'me'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/user'] });
       toast({
         title: "Tenant switched",
         description: `You're now using ${response.data.tenant.name}`,

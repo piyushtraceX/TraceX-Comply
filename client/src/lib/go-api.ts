@@ -1,26 +1,19 @@
 import axios, { AxiosInstance, AxiosResponse, AxiosRequestConfig } from 'axios';
 
-// Create axios instance for Go API
+// Create axios instance for API
 // Get the hostname from window.location to ensure we're using the correct host
 const getApiBaseUrl = () => {
   const host = window.location.hostname;
+  const port = window.location.port ? `:${window.location.port}` : '';
   const protocol = window.location.protocol;
   
   // Add debugging logs for API URL construction
-  console.log('Building API URL with:', { protocol, host });
+  console.log('Building API URL with:', { protocol, host, port });
   
-  // On Replit, use the same host for the API (handled by Go server)
-  if (host.includes('replit') || host.includes('repl.co')) {
-    const apiUrl = `${protocol}//${host}/api`;
-    console.log('Using Replit API URL:', apiUrl);
-    return apiUrl;
-  }
-  
-  // In local development, use port 5000
-  const port = '5000'; // Fixed port for Go API
-  const localApiUrl = `${protocol}//${host}:${port}/api`;
-  console.log('Using local API URL:', localApiUrl);
-  return localApiUrl;
+  // Use the same host for the API (for consistency between development and production)
+  const apiUrl = `${protocol}//${host}${port}`;
+  console.log('Using API URL:', apiUrl);
+  return apiUrl;
 };
 
 const apiClient: AxiosInstance = axios.create({
@@ -118,7 +111,7 @@ export const authApi = {
     
     console.log('Login attempt with username:', username);
     
-    return apiClient.post('/api/auth/login', { username, password })
+    return apiClient.post('/api/login', { username, password })
       .then(response => {
         console.log('Login response received:', response.data);
         
@@ -183,7 +176,7 @@ export const authApi = {
   },
   
   logout: (): Promise<AxiosResponse<any>> => {
-    return apiClient.post('/api/auth/logout')
+    return apiClient.post('/api/logout')
       .finally(() => {
         // Always clear all auth data on logout regardless of API success/failure
         console.log('Clearing all auth data from localStorage');
@@ -212,7 +205,7 @@ export const authApi = {
     }
     
     // Try to get user from API first
-    return apiClient.get('/api/auth/me', config)
+    return apiClient.get('/api/user', config)
       .catch(error => {
         console.error('[API] Error in getCurrentUser:', error);
         
@@ -240,7 +233,7 @@ export const authApi = {
   },
   
   switchTenant: (tenantId: number): Promise<AxiosResponse<any>> => {
-    return apiClient.post('/api/auth/switch-tenant', { tenantId });
+    return apiClient.post('/api/switch-tenant', { tenantId });
   },
 };
 
