@@ -138,19 +138,6 @@ function App() {
                           <UserManagement />
                         </SimpleProtectedRoute>
                       </Route>
-                      <Route path="/test-language">
-                        <SimpleProtectedRoute>
-                          <TestLanguage />
-                        </SimpleProtectedRoute>
-                      </Route>
-                      <Route path="/test-persona">
-                        <SimpleProtectedRoute>
-                          <TestPersona />
-                        </SimpleProtectedRoute>
-                      </Route>
-                      <Route path="/debug">
-                        <DebugPage />
-                      </Route>
                       <Route>
                         <NotFound />
                       </Route>
