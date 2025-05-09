@@ -2,25 +2,23 @@ package routes
 
 import (
 	"database/sql"
-
 	"github.com/gin-gonic/gin"
-
-	"eudr-comply/go-server/handlers"
-	"eudr-comply/go-server/middleware"
+	"go-server/handlers"
+	"go-server/middleware"
 )
 
-// RegisterPermissionRoutes registers permission-related routes
+// RegisterPermissionRoutes registers all permission related routes
 func RegisterPermissionRoutes(router *gin.RouterGroup, db *sql.DB) {
-	// Resource routes
-	router.GET("/resources", handlers.GetResources(db))
-	router.POST("/resources", middleware.RequireSuperAdmin(), handlers.CreateResource(db))
+	// Resources
+	router.GET("/resources", middleware.RequirePermission("resources", "read"), handlers.ListResources(db))
+	router.POST("/resources", middleware.RequirePermission("resources", "create"), handlers.CreateResource(db))
 	
-	// Action routes
-	router.GET("/actions", handlers.GetActions(db))
-	router.POST("/actions", middleware.RequireSuperAdmin(), handlers.CreateAction(db))
+	// Actions
+	router.GET("/actions", middleware.RequirePermission("actions", "read"), handlers.ListActions(db))
+	router.POST("/actions", middleware.RequirePermission("actions", "create"), handlers.CreateAction(db))
 	
-	// Permission routes
-	router.GET("/permissions", handlers.GetPermissions(db))
-	router.POST("/permissions", handlers.CreatePermission(db))
-	router.DELETE("/permissions/:id", middleware.RequireSuperAdmin(), handlers.DeletePermission(db))
+	// Permissions
+	router.GET("/permissions", middleware.RequirePermission("permissions", "read"), handlers.ListPermissions(db))
+	router.POST("/permissions", middleware.RequirePermission("permissions", "create"), handlers.CreatePermission(db))
+	router.DELETE("/permissions/:id", middleware.RequirePermission("permissions", "delete"), handlers.DeletePermission(db))
 }

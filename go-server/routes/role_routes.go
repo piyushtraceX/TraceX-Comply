@@ -2,22 +2,21 @@ package routes
 
 import (
 	"database/sql"
-
 	"github.com/gin-gonic/gin"
-
-	"eudr-comply/go-server/handlers"
-	"eudr-comply/go-server/middleware"
+	"go-server/handlers"
+	"go-server/middleware"
 )
 
-// RegisterRoleRoutes registers role-related routes
+// RegisterRoleRoutes registers all role related routes
 func RegisterRoleRoutes(router *gin.RouterGroup, db *sql.DB) {
-	// Role routes
-	roles := router.Group("/roles")
-	{
-		roles.GET("", handlers.GetRoles(db))
-		roles.POST("", handlers.CreateRole(db))
-		roles.GET("/:id", handlers.GetRole(db))
-		roles.PATCH("/:id", middleware.RequireSuperAdmin(), handlers.UpdateRole(db))
-		roles.DELETE("/:id", middleware.RequireSuperAdmin(), handlers.DeleteRole(db))
-	}
+	// Roles CRUD operations
+	router.GET("/roles", middleware.RequirePermission("roles", "read"), handlers.ListRoles(db))
+	router.GET("/roles/:id", middleware.RequirePermission("roles", "read"), handlers.GetRole(db))
+	router.POST("/roles", middleware.RequirePermission("roles", "create"), handlers.CreateRole(db))
+	router.PUT("/roles/:id", middleware.RequirePermission("roles", "update"), handlers.UpdateRole(db))
+	router.DELETE("/roles/:id", middleware.RequirePermission("roles", "delete"), handlers.DeleteRole(db))
+	
+	// Role assignments
+	router.POST("/user-roles", middleware.RequirePermission("roles", "assign"), handlers.AssignRoleToUser(db))
+	router.DELETE("/user-roles/:userId/:roleId", middleware.RequirePermission("roles", "assign"), handlers.RemoveRoleFromUser(db))
 }

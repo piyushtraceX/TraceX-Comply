@@ -4,22 +4,20 @@ import (
 	"database/sql"
 
 	"github.com/gin-gonic/gin"
-
-	"eudr-comply/go-server/handlers"
 )
 
-// RegisterAuthRoutes registers authentication-related routes
+// RegisterAuthRoutes registers all authentication related routes
 func RegisterAuthRoutes(router *gin.RouterGroup, db *sql.DB) {
-	// Authentication routes
-	auth := router.Group("/auth")
-	{
-		auth.POST("/login", handlers.Login(db))
-		auth.POST("/register", handlers.Register(db))
-		auth.POST("/seed-demo-user", handlers.SeedDemoUser(db))
-		
-		// The following routes require authentication
-		auth.GET("/me", handlers.GetCurrentUser(db))
-		auth.POST("/logout", handlers.Logout)
-		auth.POST("/switch-tenant", handlers.SwitchTenant(db))
-	}
+	// No need to add auth middlewares to these routes as they're for authentication
+	
+	// Keep the existing auth endpoints that are defined in main.go
+	// These are:
+	// POST /auth/login
+	// POST /auth/register
+	// GET /auth/me
+	// POST /auth/logout
+	// POST /auth/switch-tenant
+	// POST /auth/seed-demo-user
+	
+	// We'll implement additional auth endpoints here if needed
 }

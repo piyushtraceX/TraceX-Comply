@@ -56,6 +56,10 @@ func main() {
         if err != nil {
                 log.Fatalf("Error creating default admin user: %v", err)
         }
+        
+        // Initialize Casbin enforcer
+        middleware.InitEnforcer()
+        log.Println("Initialized Casbin enforcer")
 
         // Set up Gin
         r := gin.Default()

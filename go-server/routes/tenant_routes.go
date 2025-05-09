@@ -2,25 +2,20 @@ package routes
 
 import (
 	"database/sql"
-
 	"github.com/gin-gonic/gin"
-
-	"eudr-comply/go-server/handlers"
-	"eudr-comply/go-server/middleware"
+	"go-server/handlers"
+	"go-server/middleware"
 )
 
-// RegisterTenantRoutes registers tenant-related routes
+// RegisterTenantRoutes registers all tenant related routes
 func RegisterTenantRoutes(router *gin.RouterGroup, db *sql.DB) {
-	// Tenant routes
-	tenants := router.Group("/tenants")
-	{
-		tenants.GET("", handlers.GetTenants(db))
-		tenants.POST("", handlers.CreateTenant(db))
-		tenants.GET("/:id", handlers.GetTenant(db))
-		tenants.PATCH("/:id", middleware.RequireSuperAdmin(), handlers.UpdateTenant(db))
-		tenants.DELETE("/:id", middleware.RequireSuperAdmin(), handlers.DeleteTenant(db))
-		
-		// Tenant user counts
-		tenants.GET("/user-counts", middleware.RequireSuperAdmin(), handlers.GetTenantUserCounts(db))
-	}
+	// Tenants CRUD operations
+	router.GET("/tenants", middleware.RequirePermission("tenants", "read"), handlers.ListTenants(db))
+	router.GET("/tenants/:id", middleware.RequirePermission("tenants", "read"), handlers.GetTenant(db))
+	router.POST("/tenants", middleware.RequirePermission("tenants", "create"), handlers.CreateTenant(db))
+	router.PUT("/tenants/:id", middleware.RequirePermission("tenants", "update"), handlers.UpdateTenant(db))
+	router.DELETE("/tenants/:id", middleware.RequirePermission("tenants", "delete"), handlers.DeleteTenant(db))
+	
+	// Additional tenant routes
+	router.GET("/tenants/user-counts", middleware.RequirePermission("tenants", "read"), handlers.GetTenantUserCounts(db))
 }

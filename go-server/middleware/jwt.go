@@ -1,53 +1,56 @@
 package middleware
 
 import (
+	"errors"
 	"fmt"
+	"log"
+	"net/http"
 	"os"
+	"strings"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"go-server/models"
 )
 
+// JWTClaims represents the claims in the JWT
 type JWTClaims struct {
 	UserID    int    `json:"userId"`
 	Username  string `json:"username"`
-	Email     string `json:"email"`
-	Name      string `json:"name"`
 	TenantID  int    `json:"tenantId"`
-	IsSuperAdmin bool `json:"isSuperAdmin"`
+	SuperAdmin bool  `json:"isSuperAdmin"`
 	jwt.RegisteredClaims
 }
 
-// GenerateJWT creates a new JWT token for a user
-func GenerateJWT(userID int, username, email, name string, tenantID int, isSuperAdmin bool) (string, error) {
-	// Get token secret from environment
-	secret := os.Getenv("JWT_SECRET")
-	if secret == "" {
-		return "", fmt.Errorf("JWT_SECRET is required")
+// Generate a JWT token for a user
+func GenerateToken(user *models.User) (string, error) {
+	// Get JWT secret from environment
+	jwtSecret := os.Getenv("JWT_SECRET")
+	if jwtSecret == "" {
+		return "", errors.New("JWT_SECRET environment variable not set")
 	}
 
-	// Create claims
+	// Create the JWT claims
 	claims := JWTClaims{
-		UserID:    userID,
-		Username:  username,
-		Email:     email,
-		Name:      name,
-		TenantID:  tenantID,
-		IsSuperAdmin: isSuperAdmin,
+		UserID:    user.ID,
+		Username:  user.Username,
+		TenantID:  user.TenantID,
+		SuperAdmin: user.IsSuperAdmin,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			NotBefore: jwt.NewNumericDate(time.Now()),
-			Issuer:    "eudr-comply",
-			Subject:   fmt.Sprintf("%d", userID),
+			Issuer:    "eudr-comply-server",
+			Subject:   fmt.Sprintf("%d", user.ID),
 		},
 	}
 
-	// Create token with claims
+	// Create the token
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	// Generate encoded token
-	tokenString, err := token.SignedString([]byte(secret))
+	// Sign the token with the secret key
+	tokenString, err := token.SignedString([]byte(jwtSecret))
 	if err != nil {
 		return "", err
 	}
@@ -55,33 +58,88 @@ func GenerateJWT(userID int, username, email, name string, tenantID int, isSuper
 	return tokenString, nil
 }
 
-// ParseJWT parses and validates a JWT token
-func ParseJWT(tokenString string) (*JWTClaims, error) {
-	// Get token secret from environment
-	secret := os.Getenv("JWT_SECRET")
-	if secret == "" {
-		return nil, fmt.Errorf("JWT_SECRET is required")
-	}
-
-	// Parse token
-	claims := &JWTClaims{}
-	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-		// Validate signing method
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+// Authenticate a user based on the JWT token
+func AuthRequired() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// Get the Authorization header
+		authHeader := c.GetHeader("Authorization")
+		if authHeader == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header is required"})
+			c.Abort()
+			return
 		}
-		return []byte(secret), nil
-	})
 
-	// Check for parsing errors
-	if err != nil {
-		return nil, err
+		// Check if the header has the Bearer prefix
+		headerParts := strings.Split(authHeader, " ")
+		if len(headerParts) != 2 || headerParts[0] != "Bearer" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header format must be Bearer {token}"})
+			c.Abort()
+			return
+		}
+
+		// Get the token
+		tokenString := headerParts[1]
+
+		// Parse the token
+		token, err := jwt.ParseWithClaims(tokenString, &JWTClaims{}, func(token *jwt.Token) (interface{}, error) {
+			// Validate the alg is what we expect
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+			}
+
+			// Get the secret key
+			jwtSecret := os.Getenv("JWT_SECRET")
+			if jwtSecret == "" {
+				return nil, errors.New("JWT_SECRET environment variable not set")
+			}
+
+			return []byte(jwtSecret), nil
+		})
+
+		if err != nil {
+			log.Printf("Error parsing token: %v", err)
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
+			c.Abort()
+			return
+		}
+
+		// Validate the token
+		claims, ok := token.Claims.(*JWTClaims)
+		if !ok || !token.Valid {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})
+			c.Abort()
+			return
+		}
+
+		// Get the user from the database
+		user, err := models.GetUserByID(claims.UserID)
+		if err != nil {
+			log.Printf("Error getting user: %v", err)
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
+			c.Abort()
+			return
+		}
+
+		// Check if the user is active
+		if !user.IsActive {
+			c.JSON(http.StatusForbidden, gin.H{"error": "User account is inactive"})
+			c.Abort()
+			return
+		}
+
+		// Set the user in the context
+		c.Set("user", user)
+
+		// Set the tenant in the context
+		tenant, err := models.GetTenantByID(user.TenantID)
+		if err != nil {
+			log.Printf("Error getting tenant: %v", err)
+			// Not fatal, just log it and continue
+		} else {
+			c.Set("tenant", tenant)
+		}
+
+		// Continue processing the request
+		c.Next()
 	}
-
-	// Validate token
-	if !token.Valid {
-		return nil, fmt.Errorf("invalid token")
-	}
-
-	return claims, nil
 }

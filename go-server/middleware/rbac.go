@@ -1,118 +1,77 @@
 package middleware
 
 import (
-	"database/sql"
-	"log"
-	"net/http"
-
-	"github.com/casbin/casbin/v2"
 	"github.com/gin-gonic/gin"
+	"github.com/casbin/casbin/v2"
+	"go-server/models"
+	"net/http"
+	"fmt"
+	"log"
 )
 
-// EnforcerContext is a context key type
-type EnforcerContext string
+var enforcer *casbin.Enforcer
 
-// EnforcerKey is the key used to store the enforcer in the context
-const EnforcerKey EnforcerContext = "enforcer"
-
-// InitCasbinEnforcer initializes the casbin enforcer
-func InitCasbinEnforcer() (*casbin.Enforcer, error) {
-	enforcer, err := casbin.NewEnforcer("config/rbac_model.conf", "config/rbac_policy.csv")
+// InitEnforcer initializes the Casbin enforcer
+func InitEnforcer() {
+	var err error
+	enforcer, err = casbin.NewEnforcer("config/rbac_model.conf", "config/rbac_policy.csv")
 	if err != nil {
-		return nil, err
+		log.Fatalf("Failed to initialize Casbin enforcer: %v", err)
 	}
-	return enforcer, nil
 }
 
-// Authorize checks if a user has the required permission
-func Authorize(sub, obj, act string) gin.HandlerFunc {
+// RequirePermission checks if the user has the required permission
+func RequirePermission(resource string, action string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Get enforcer from context
-		e, exists := c.Get(string(EnforcerKey))
+		// Get the user from context (set by AuthRequired middleware)
+		userValue, exists := c.Get("user")
 		if !exists {
-			log.Println("Enforcer not found in context, creating new enforcer")
-			var err error
-			e, err = InitCasbinEnforcer()
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to initialize enforcer"})
-				c.Abort()
-				return
-			}
-			c.Set(string(EnforcerKey), e)
-		}
-		enforcer := e.(*casbin.Enforcer)
-
-		// Check permission
-		ok, err := enforcer.Enforce(sub, obj, act)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to enforce policy"})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
 			c.Abort()
 			return
 		}
+
+		user, ok := userValue.(*models.User)
 		if !ok {
-			c.JSON(http.StatusForbidden, gin.H{"error": "Unauthorized"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user in context"})
 			c.Abort()
 			return
 		}
 
-		c.Next()
-	}
-}
-
-// CheckPermissionForRequest checks if a user has the required permission for the current request
-func CheckPermissionForRequest(c *gin.Context, userID int, resource, action string, db *sql.DB) bool {
-	// Get roles for user
-	rows, err := db.Query("SELECT r.name FROM roles r INNER JOIN user_roles ur ON r.id = ur.role_id WHERE ur.user_id = $1", userID)
-	if err != nil {
-		log.Printf("Error getting roles for user: %v", err)
-		return false
-	}
-	defer rows.Close()
-
-	// Get permissions for roles
-	var roles []string
-	for rows.Next() {
-		var role string
-		if err := rows.Scan(&role); err != nil {
-			log.Printf("Error scanning role: %v", err)
-			continue
+		// Super admins bypass permission checks
+		if user.IsSuperAdmin {
+			c.Next()
+			return
 		}
-		roles = append(roles, role)
-	}
 
-	// Check if user has any permissions
-	if len(roles) == 0 {
-		return false
-	}
-
-	// Check if any role has the required permission
-	for _, role := range roles {
-		result, err := db.Query(`
-			SELECT COUNT(*) 
-			FROM permissions p 
-			INNER JOIN roles r ON p.role_id = r.id 
-			INNER JOIN resources res ON p.resource_id = res.id 
-			INNER JOIN actions a ON p.action_id = a.id 
-			WHERE r.name = $1 AND res.name = $2 AND a.name = $3
-		`, role, resource, action)
+		// Check if the user has the required permission through their roles
+		roles, err := models.GetUserRoles(user.ID)
 		if err != nil {
-			log.Printf("Error checking permission: %v", err)
-			continue
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get user roles"})
+			c.Abort()
+			return
 		}
-		defer result.Close()
 
-		var count int
-		if result.Next() {
-			if err := result.Scan(&count); err != nil {
-				log.Printf("Error scanning permission count: %v", err)
+		// Check if any of the user's roles have the required permission
+		for _, role := range roles {
+			// Check permission using Casbin
+			allowed, err := enforcer.Enforce(role.Name, resource, action)
+			if err != nil {
+				log.Printf("Casbin enforcement error: %v", err)
 				continue
 			}
+
+			if allowed {
+				// Permission granted, continue request
+				c.Next()
+				return
+			}
 		}
 
-		if count > 0 {
-			return true
-		}
+		// No role with the required permission was found
+		c.JSON(http.StatusForbidden, gin.H{
+			"error": fmt.Sprintf("User lacks permission to %s on %s", action, resource),
+		})
+		c.Abort()
 	}
-
-	return false
 }
