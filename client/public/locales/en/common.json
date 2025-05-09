@@ -42,7 +42,12 @@
     "customer": "Customer",
     "customerDescription": "Customer access to shared supply chain data",
     "euOperator": "EU Operator",
-    "euOperatorDescription": "EU operator with full EUDR obligations"
+    "euOperatorDescription": "EU operator with full EUDR obligations",
+    "visibleFeatures": "Visible Features",
+    "featureAccessHint": "Your current role determines which features you can access",
+    "switchOnly": "Switch Role",
+    "switchAndRedirect": "Switch and Go to Dashboard",
+    "roleDescription": "Role Description"
   },
   "languageSwitcher": {
     "language": "Language",
@@ -55,7 +60,71 @@
     "general": "An error occurred",
     "unauthorized": "Unauthorized access",
     "notFound": "Not found",
-    "serverError": "Server error"
+    "serverError": "Server error",
+    "forbidden": "You don't have permission to perform this action",
+    "userCreationFailed": "Failed to create user"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "lastUpdated": "Last Updated",
+    "exportBtn": "Export",
+    "newDeclarationBtn": "New Declaration",
+    "userRoles": "User Roles",
+    "currentRole": "Current Role"
+  },
+  "metrics": {
+    "overallCompliance": "Overall Compliance",
+    "lastUpdated": "Last Updated",
+    "riskLevel": "Risk Level",
+    "highRiskItems": "High Risk Items",
+    "documentStatus": "Document Status",
+    "missingItems": "Missing Items",
+    "supplierSummary": "Supplier Summary",
+    "activeSuppliers": "Active Suppliers"
+  },
+  "recentSuppliers": {
+    "title": "Recent Suppliers",
+    "viewAll": "View All"
+  },
+  "supplier": {
+    "status": {
+      "active": "Active",
+      "pending": "Pending",
+      "flagged": "Flagged"
+    }
+  },
+  "pages": {
+    "compliance": {
+      "title": "Compliance",
+      "description": "Manage regulatory compliance requirements"
+    },
+    "declarations": {
+      "title": "EUDR Declarations",
+      "description": "Manage declarations for EU Deforestation Regulation"
+    },
+    "customers": {
+      "title": "Customers",
+      "description": "Manage customer relationships"
+    },
+    "settings": {
+      "title": "Settings",
+      "description": "Configure system settings"
+    }
+  },
+  "search": {
+    "placeholder": "Search..."
+  },
+  "cta": {
+    "bookDemo": "Book a Demo"
+  },
+  "notifications": {
+    "label": "Notifications"
+  },
+  "test": {
+    "title": "Language Test"
+  },
+  "personaTest": {
+    "title": "Persona Test"
   },
   "userManagement": {
     "title": "User Management",
