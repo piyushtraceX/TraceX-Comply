@@ -142,6 +142,15 @@ func main() {
                                 callbackURL = fmt.Sprintf("%s/api/auth/callback", appURL)
                         }
                         
+                        // In Replit environment, if we detect a hostname ending with replit.dev or .app,
+                        // construct a full URL using the request host to ensure proper callbacks 
+                        host := c.Request.Host
+                        if strings.Contains(host, "replit.dev") || strings.Contains(host, ".app") {
+                                protocol := "https"
+                                callbackURL = fmt.Sprintf("%s://%s/api/auth/callback", protocol, host)
+                                log.Printf("Replit environment detected, using callback URL: %s", callbackURL)
+                        }
+                        
                         log.Printf("Using Casdoor callback URL: %s", callbackURL)
                         
                         // Generate the OAuth URL using Casdoor SDK

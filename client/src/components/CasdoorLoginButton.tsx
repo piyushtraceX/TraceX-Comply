@@ -11,27 +11,29 @@ const CasdoorLoginButton: React.FC<CasdoorLoginButtonProps> = ({ className }) =>
   const casdoorEndpoint = 'https://tracextech.casdoor.com';
   
   const handleCasdoorLogin = () => {
-    // Redirect to the Go backend's Casdoor OAuth route
-    // Use the full URL to avoid any path issues
+    // In development, we need to bypass the Express proxy and connect directly to Go server
+    // because the proxy is having issues with the redirect flow
+    const isDev = import.meta.env.DEV;
+    
+    // Get the current origin (hostname+port)
     const baseUrl = window.location.origin;
-    const redirectUrl = `${baseUrl}/api/auth/casdoor`;
+    // Get hostname without port
+    const hostname = window.location.hostname;
     
-    console.log('Attempting to redirect to Casdoor login at:', redirectUrl);
+    // Configure the redirect URL
+    let redirectUrl;
+    if (isDev) {
+      // In dev, connect directly to Go server on port 8081
+      redirectUrl = `http://${hostname}:8081/api/auth/casdoor`;
+      console.log('DEV MODE: Redirecting directly to Go server at:', redirectUrl);
+    } else {
+      // In production, use normal path
+      redirectUrl = `${baseUrl}/api/auth/casdoor`;
+      console.log('PROD MODE: Redirecting to Casdoor login at:', redirectUrl);
+    }
     
-    // Add fetch to verify the endpoint is reachable first
-    fetch(redirectUrl, { 
-      method: 'GET',
-      credentials: 'include' 
-    })
-    .then(response => {
-      console.log('Casdoor redirect response:', response);
-      // Let the redirect happen naturally
-      window.location.href = redirectUrl;
-    })
-    .catch(error => {
-      console.error('Error accessing Casdoor redirect endpoint:', error);
-      alert('Failed to connect to authentication service. See console for details.');
-    });
+    // Perform the redirect
+    window.location.href = redirectUrl;
   };
 
   return (

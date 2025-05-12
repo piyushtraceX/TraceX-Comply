@@ -70,15 +70,30 @@ const startProxy = async () => {
   const PORT = 5000;
   
   // Forward API requests to Go server
-  app.use('/api', (req, res, next) => {
-    console.log(`EXPRESS PROXY: ${req.method} ${req.url} -> http://localhost:8081${req.originalUrl}`);
-    
-    createProxyMiddleware({
-      target: 'http://localhost:8081',
-      changeOrigin: true,
-      secure: false
-    })(req, res, next);
-  });
+  app.use('/api', createProxyMiddleware({
+    target: 'http://localhost:8081',
+    changeOrigin: true,
+    secure: false,
+    pathRewrite: {
+      '^/api': '/api'  // keep the /api prefix
+    },
+    onProxyReq: (proxyReq, req: any, res: any) => {
+      console.log(`EXPRESS PROXY: ${req.method} ${req.originalUrl} -> ${proxyReq.protocol}//${proxyReq.host}${proxyReq.path}`);
+    }
+  }));
+  
+  // Additional route specifically for auth endpoints
+  app.use('/auth', createProxyMiddleware({
+    target: 'http://localhost:8081',
+    changeOrigin: true,
+    secure: false,
+    pathRewrite: {
+      '^/auth': '/api/auth'  // rewrite /auth to /api/auth
+    },
+    onProxyReq: (proxyReq, req: any, res: any) => {
+      console.log(`EXPRESS PROXY (AUTH): ${req.method} ${req.originalUrl} -> ${proxyReq.protocol}//${proxyReq.host}${proxyReq.path}`);
+    }
+  }));
   
   // Forward all other requests to Vite
   app.use('/', createProxyMiddleware({
