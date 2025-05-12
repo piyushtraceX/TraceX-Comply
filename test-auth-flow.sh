@@ -16,9 +16,14 @@ GO_OAUTH_REDIRECT=$(curl -s -I -X GET http://localhost:8081/api/auth/casdoor | g
 echo "Go OAuth redirect: $GO_OAUTH_REDIRECT"
 
 echo ""
-echo "3. Checking Callback URL Configuration"
+echo "3. Testing Authentication Callback Handling"
+echo "Simulating a callback from Casdoor (without code parameter):"
+curl -s -v -X GET http://localhost:5000/api/auth/callback 2>&1 | grep -E "^([<>]|HTTP/)"
+
+echo ""
+echo "4. Checking Callback URL Configuration"
 echo "Accessing Go server /api/health endpoint to see logs..."
 curl -s -X GET http://localhost:8081/api/health > /dev/null
 
 echo ""
-echo "4. Done! Check logs for any callback URL setup and redirection settings."
+echo "5. Done! Check logs for any callback URL setup and redirection settings."
