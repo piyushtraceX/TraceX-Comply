@@ -7,8 +7,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"eudr-comply/go-server/middleware"
-	"eudr-comply/go-server/models"
+	"go-server/middleware"
+	"go-server/models"
 )
 
 // GetTenants gets all tenants

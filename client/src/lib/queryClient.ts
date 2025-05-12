@@ -1,14 +1,9 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 import axios from "axios";
-import { API_BASE_URL, getApiUrl } from "./api-config";
+import { getApiBaseUrl } from "./go-api";
 
-// Use the Express server for API requests
-const USE_EXPRESS_API = true;
-// Get the current hostname dynamically
-const host = window.location.hostname;
-const port = window.location.port ? `:${window.location.port}` : '';
-const protocol = window.location.protocol;
-const API_URL = `${protocol}//${host}${port}/api`;
+// Use Go server API exclusively - get the correct URL based on environment
+const API_URL = `${getApiBaseUrl()}/api`;
 
 // Log the API URL being used
 console.log('Using API URL:', API_URL);

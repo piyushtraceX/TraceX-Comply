@@ -7,7 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"eudr-comply/go-server/models"
+	"go-server/models"
 )
 
 // GetResources retrieves all resources

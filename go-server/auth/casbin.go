@@ -11,8 +11,8 @@ import (
 	"github.com/casbin/casbin/v2/model"
 	"github.com/gin-gonic/gin"
 
-	"eudr-comply/go-server/middleware"
-	"eudr-comply/go-server/models"
+	"go-server/middleware"
+	"go-server/models"
 )
 
 // InitCasbin initializes the Casbin enforcer

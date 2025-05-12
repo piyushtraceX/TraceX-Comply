@@ -2,7 +2,7 @@ import axios, { AxiosInstance, AxiosResponse, AxiosRequestConfig } from 'axios';
 
 // Create axios instance for API
 // Use the configured Go server URL based on environment
-const getApiBaseUrl = () => {
+export const getApiBaseUrl = () => {
   const host = window.location.hostname;
   const protocol = window.location.protocol;
   
