@@ -86,7 +86,18 @@ const startProxy = async () => {
     res.redirect('http://localhost:8081/api/auth/casdoor');
   });
 
-  // Forward all API requests directly to Go server without any special handling
+  // Special case for /api/auth/* routes
+  app.get('/api/auth/:path', (req, res, next) => {
+    const targetPath = req.params.path;
+    console.log(`EXPRESS PROXY: Special handling for /api/auth/${targetPath}`);
+    
+    // Forward directly to Go server
+    const goServerUrl = `http://localhost:8081/api/auth/${targetPath}${req.url.includes('?') ? req.url.substring(req.url.indexOf('?')) : ''}`;
+    console.log(`EXPRESS PROXY: Redirecting to ${goServerUrl}`);
+    res.redirect(goServerUrl);
+  });
+
+  // Forward all other API requests directly to Go server
   app.use('/api', createProxyMiddleware({
     target: 'http://localhost:8081',
     changeOrigin: true,

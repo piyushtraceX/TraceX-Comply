@@ -7,8 +7,8 @@ OLD_ROUTE_REDIRECT=$(curl -s -I -X GET http://localhost:5000/auth/casdoor | grep
 echo "Old route redirect (/auth/casdoor): $OLD_ROUTE_REDIRECT"
 
 # Test the new direct /api/auth/casdoor route - this should redirect directly to Casdoor
-NEW_ROUTE_STATUS=$(curl -s -I -X GET http://localhost:5000/api/auth/casdoor | grep -E "HTTP/[0-9.]+ [0-9]+" || echo "No status found")
-echo "New route status (/api/auth/casdoor): $NEW_ROUTE_STATUS"
+echo "Checking /api/auth/casdoor route in detail:"
+curl -s -v -X GET http://localhost:5000/api/auth/casdoor 2>&1 | grep -E "^([<>]|HTTP/)"
 
 echo ""
 echo "2. Testing Go Server OAuth Handling"
