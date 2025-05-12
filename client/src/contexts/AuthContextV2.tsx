@@ -59,6 +59,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Query to fetch the current user
   const isAuthPage = window.location.pathname === '/auth';
   
+  // Check if we're in Replit environment
+  const isReplitEnvironment = 
+    window.location.hostname.includes('replit') || 
+    window.location.hostname.includes('.app');
+
   const { 
     data, 
     isLoading, 
@@ -69,6 +74,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     queryFn: async () => {
       try {
         console.log('Fetching current user...');
+        
+        // In Replit environment, fall back to localStorage data if available
+        if (isReplitEnvironment) {
+          console.log('Replit environment detected, checking localStorage for user data');
+          const userData = localStorage.getItem('user_data');
+          if (userData) {
+            console.log('Using stored user data from localStorage in Replit environment');
+            return { user: JSON.parse(userData) };
+          } else {
+            console.log('No stored user data available in Replit');
+          }
+        }
+        
+        // Try API call as usual
         const response = await authApi.getCurrentUser();
         console.log('Current user fetched:', response.data);
         return response.data;
@@ -84,6 +103,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (axios.isAxiosError(error)) {
           console.error('Response status:', error.response?.status);
           console.error('Response data:', error.response?.data);
+        }
+        
+        // In Replit, check localStorage as fallback even for non-401 errors
+        if (isReplitEnvironment) {
+          const userData = localStorage.getItem('user_data');
+          if (userData) {
+            console.log('Using stored user data from localStorage after API error');
+            return { user: JSON.parse(userData) };
+          }
         }
         
         throw error;

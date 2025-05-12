@@ -11,19 +11,23 @@ const CasdoorLoginButton: React.FC<CasdoorLoginButtonProps> = ({ className }) =>
   const casdoorEndpoint = 'https://tracextech.casdoor.com';
   
   const handleCasdoorLogin = () => {
-    // Get the current origin with protocol
-    const baseUrl = window.location.origin;
-    
-    // Special handling for Replit environment
+    // Special handling for Replit environment or any production environment
     const isReplit = 
       window.location.hostname.includes('replit') || 
       window.location.hostname.includes('.app');
     
-    // For Replit or production, use the current origin
-    // This ensures we're using the same domain that's publicly accessible
-    const redirectUrl = `${baseUrl}/api/auth/casdoor`;
+    // In Replit, go directly to Casdoor because of potential networking issues
+    if (isReplit) {
+      console.log('REPLIT ENVIRONMENT: Redirecting directly to Casdoor...');
+      window.location.href = 'https://tracextech.casdoor.com';
+      return;
+    }
     
-    console.log(`Redirecting to Casdoor login at: ${redirectUrl} (${isReplit ? 'Replit' : 'Standard'} environment)`);
+    // In local development, use the API endpoint
+    const baseUrl = window.location.origin;
+    const redirectUrl = `${baseUrl}/auth/casdoor`;
+    
+    console.log(`LOCAL DEVELOPMENT: Redirecting to Casdoor login via: ${redirectUrl}`);
     
     // Perform the redirect
     window.location.href = redirectUrl;

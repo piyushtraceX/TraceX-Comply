@@ -69,31 +69,39 @@ const startProxy = async () => {
   const app = express();
   const PORT = 5000;
   
-  // Forward API requests to Go server with specific logging
-  app.use('/api', (req, res, next) => {
-    console.log(`EXPRESS PROXY: ${req.method} ${req.originalUrl} -> http://localhost:8081${req.originalUrl}`);
-    return createProxyMiddleware({
-      target: 'http://localhost:8081',
-      changeOrigin: true,
-      secure: false,
-      ws: true,
-      xfwd: true
-    })(req, res, next);
+  // Add direct route for health checking
+  app.get('/health', (req, res) => {
+    res.json({
+      status: 'OK',
+      message: 'Express proxy is running',
+      timestamp: new Date().toISOString()
+    });
   });
-  
-  // Additional middleware for direct auth endpoint access
+
+  // Special case for direct Casdoor redirection
   app.get('/auth/casdoor', (req, res) => {
-    console.log('AUTH REDIRECT: Redirecting /auth/casdoor to /api/auth/casdoor');
-    res.redirect('/api/auth/casdoor');
+    console.log('AUTH REDIRECT: Redirecting /auth/casdoor to Casdoor...');
+    return res.redirect('https://tracextech.casdoor.com');
+  });
+
+  // Rewrite all /auth/* requests to /api/auth/*
+  app.use('/auth', (req, res, next) => {
+    const newPath = req.originalUrl.replace(/^\/auth/, '/api/auth');
+    console.log(`AUTH REWRITE: ${req.originalUrl} -> ${newPath}`);
+    req.url = req.url.replace(/^\/auth/, '/api/auth');
+    next();
   });
   
-  // Handle auth routes by redirecting them to proper API paths
-  app.use('/auth', (req, res, next) => {
-    // Start with proper path
-    const apiPath = req.path.replace(/^\//, '/api/auth/');
-    console.log(`AUTH PROXY: ${req.method} ${req.originalUrl} -> ${apiPath}`);
-    res.redirect(apiPath);
-  });
+  // Forward all /api/* requests to Go server
+  app.use('/api', createProxyMiddleware({
+    target: 'http://localhost:8081',
+    changeOrigin: true,
+    secure: false,
+    // Add logging
+    onProxyReq: function(proxyReq: any, req: any, res: any) {
+      console.log(`EXPRESS PROXY: ${req.method} ${req.originalUrl} -> http://localhost:8081${req.originalUrl}`);
+    } as any
+  }));
   
   // Forward all other requests to Vite
   app.use('/', createProxyMiddleware({
