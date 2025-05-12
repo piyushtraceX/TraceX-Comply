@@ -16,7 +16,7 @@ import AddDeclaration from "@/pages/AddDeclaration";
 import Customers from "@/pages/Customers";
 import AddCustomer from "@/pages/AddCustomer";
 import Settings from "@/pages/Settings";
-import AuthPage from "@/pages/AuthPage";
+import AuthPage from "@/pages/auth-page"; // Updated import path
 import UserManagement from "@/pages/UserManagement";
 import { ThemeProvider } from "next-themes";
 import { LanguageProvider } from "./contexts/LanguageContext";

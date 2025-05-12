@@ -36,29 +36,47 @@ type RegisterRequest struct {
 
 // InitAuth initializes the authentication providers
 func InitAuth() {
-        // Set up Casdoor provider if configured
+        // Set up Casdoor provider with enterprise hosted Casdoor
         casdoorEndpoint := os.Getenv("CASDOOR_ENDPOINT")
         casdoorClientID := os.Getenv("CASDOOR_CLIENT_ID")
         casdoorClientSecret := os.Getenv("CASDOOR_CLIENT_SECRET")
+        casdoorJwtSecret := os.Getenv("CASDOOR_JWT_SECRET")
 
-        if casdoorEndpoint != "" && casdoorClientID != "" && casdoorClientSecret != "" {
-                casdoorProvider := &Provider{
-                        ClientKey:    casdoorClientID,
-                        Secret:       casdoorClientSecret,
-                        CallbackURL:  fmt.Sprintf("%s/api/auth/callback", os.Getenv("APP_URL")),
-                        Name:         "casdoor",
-                        AuthURL:      fmt.Sprintf("%s/login/oauth/authorize", casdoorEndpoint),
-                        TokenURL:     fmt.Sprintf("%s/api/login/oauth/access_token", casdoorEndpoint),
-                        ProfileURL:   fmt.Sprintf("%s/api/userinfo", casdoorEndpoint),
-                        Scopes:       []string{"read"},
-                        AuthCodeURLOptions: nil,
-                }
-
-                goth.UseProviders(casdoorProvider)
-
-                // Initialize Casdoor SDK
-                casdoorsdk.InitConfig(casdoorEndpoint, casdoorClientID, casdoorClientSecret, "jwt-secret")
+        // Use default enterprise Casdoor endpoint if not set
+        if casdoorEndpoint == "" {
+                casdoorEndpoint = "https://tracextech.casdoor.com"
         }
+
+        // Check if required credentials are available
+        if casdoorClientID == "" || casdoorClientSecret == "" {
+                log.Println("Warning: Casdoor client ID or secret not set. OAuth login will not work properly.")
+                return
+        }
+
+        // Default JWT secret if not provided
+        if casdoorJwtSecret == "" {
+                casdoorJwtSecret = "jwt-secret-for-tracextech-casdoor"
+        }
+
+        // Set up Casdoor provider for OAuth login
+        casdoorProvider := &Provider{
+                ClientKey:    casdoorClientID,
+                Secret:       casdoorClientSecret,
+                CallbackURL:  fmt.Sprintf("%s/api/auth/callback", os.Getenv("APP_URL")),
+                Name:         "casdoor",
+                AuthURL:      fmt.Sprintf("%s/login/oauth/authorize", casdoorEndpoint),
+                TokenURL:     fmt.Sprintf("%s/api/login/oauth/access_token", casdoorEndpoint),
+                ProfileURL:   fmt.Sprintf("%s/api/userinfo", casdoorEndpoint),
+                Scopes:       []string{"read", "profile"},
+                AuthCodeURLOptions: nil,
+        }
+
+        goth.UseProviders(casdoorProvider)
+
+        // Initialize Casdoor SDK
+        casdoorsdk.InitConfig(casdoorEndpoint, casdoorClientID, casdoorClientSecret, casdoorJwtSecret)
+        
+        log.Printf("Casdoor OAuth configured with endpoint: %s", casdoorEndpoint)
 }
 
 // RegisterRoutes registers the authentication routes
