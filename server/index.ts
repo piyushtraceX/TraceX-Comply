@@ -70,11 +70,15 @@ const startProxy = async () => {
   const PORT = 5000;
   
   // Forward API requests to Go server
-  app.use('/api', createProxyMiddleware({
-    target: 'http://localhost:8081',
-    changeOrigin: true,
-    secure: false
-  }));
+  app.use('/api', (req, res, next) => {
+    console.log(`EXPRESS PROXY: ${req.method} ${req.url} -> http://localhost:8081${req.originalUrl}`);
+    
+    createProxyMiddleware({
+      target: 'http://localhost:8081',
+      changeOrigin: true,
+      secure: false
+    })(req, res, next);
+  });
   
   // Forward all other requests to Vite
   app.use('/', createProxyMiddleware({

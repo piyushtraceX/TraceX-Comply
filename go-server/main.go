@@ -136,10 +136,13 @@ func main() {
                         }
                         
                         // Set default callback URL for local development
-                        callbackURL := "http://localhost:5000/api/auth/callback"
+                        // Important: Use port 8081 for callback since that's where the Go server is listening directly
+                        callbackURL := "http://localhost:8081/api/auth/callback"
                         if appURL := os.Getenv("APP_URL"); appURL != "" {
                                 callbackURL = fmt.Sprintf("%s/api/auth/callback", appURL)
                         }
+                        
+                        log.Printf("Using Casdoor callback URL: %s", callbackURL)
                         
                         // Generate the OAuth URL using Casdoor SDK
                         // Note: The SDK function only takes callbackURL parameter in this version

@@ -14,8 +14,24 @@ const CasdoorLoginButton: React.FC<CasdoorLoginButtonProps> = ({ className }) =>
     // Redirect to the Go backend's Casdoor OAuth route
     // Use the full URL to avoid any path issues
     const baseUrl = window.location.origin;
-    window.location.href = `${baseUrl}/api/auth/casdoor`;
-    console.log('Redirecting to Casdoor login at:', `${baseUrl}/api/auth/casdoor`);
+    const redirectUrl = `${baseUrl}/api/auth/casdoor`;
+    
+    console.log('Attempting to redirect to Casdoor login at:', redirectUrl);
+    
+    // Add fetch to verify the endpoint is reachable first
+    fetch(redirectUrl, { 
+      method: 'GET',
+      credentials: 'include' 
+    })
+    .then(response => {
+      console.log('Casdoor redirect response:', response);
+      // Let the redirect happen naturally
+      window.location.href = redirectUrl;
+    })
+    .catch(error => {
+      console.error('Error accessing Casdoor redirect endpoint:', error);
+      alert('Failed to connect to authentication service. See console for details.');
+    });
   };
 
   return (
