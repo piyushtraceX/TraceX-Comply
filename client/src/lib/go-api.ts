@@ -1,18 +1,20 @@
 import axios, { AxiosInstance, AxiosResponse, AxiosRequestConfig } from 'axios';
 
 // Create axios instance for API
-// Get the hostname from window.location to ensure we're using the correct host
+// Use the explicitly configured Go server URL
 const getApiBaseUrl = () => {
   const host = window.location.hostname;
-  const port = window.location.port ? `:${window.location.port}` : '';
   const protocol = window.location.protocol;
   
-  // Add debugging logs for API URL construction
-  console.log('Building API URL with:', { protocol, host, port });
+  // Default Go server port is 8081
+  const goPort = "8081";
   
-  // Use the same host for the API (for consistency between development and production)
-  const apiUrl = `${protocol}//${host}${port}`;
-  console.log('Using API URL:', apiUrl);
+  // Add debugging logs for API URL construction
+  console.log('Building Go API URL with:', { protocol, host, goPort });
+  
+  // Use the same host but specific port for Go API
+  const apiUrl = `${protocol}//${host}:${goPort}`;
+  console.log('Using Go API URL:', apiUrl);
   return apiUrl;
 };
 

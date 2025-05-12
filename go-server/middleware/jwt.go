@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"errors"
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
@@ -14,43 +14,45 @@ import (
 	"go-server/models"
 )
 
-// JWTClaims represents the claims in the JWT
-type JWTClaims struct {
-	UserID    int    `json:"userId"`
-	Username  string `json:"username"`
-	TenantID  int    `json:"tenantId"`
-	SuperAdmin bool  `json:"isSuperAdmin"`
+var jwtKey = []byte(os.Getenv("JWT_SECRET"))
+
+// If JWT_SECRET is not set, use a default value for development
+func init() {
+	if len(jwtKey) == 0 {
+		jwtKey = []byte("development_jwt_secret_key")
+		log.Println("WARNING: Using default JWT secret key. Set JWT_SECRET environment variable in production.")
+	}
+}
+
+// Claims defines the structure for JWT claims
+type Claims struct {
+	UserID       int    `json:"userId"`
+	Username     string `json:"username"`
+	Email        string `json:"email"`
+	TenantID     int    `json:"tenantId"`
+	IsSuperAdmin bool   `json:"isSuperAdmin"`
 	jwt.RegisteredClaims
 }
 
-// Generate a JWT token for a user
+// GenerateToken creates a new JWT token for the user
 func GenerateToken(user *models.User) (string, error) {
-	// Get JWT secret from environment
-	jwtSecret := os.Getenv("JWT_SECRET")
-	if jwtSecret == "" {
-		return "", errors.New("JWT_SECRET environment variable not set")
-	}
+	expirationTime := time.Now().Add(24 * time.Hour)
 
-	// Create the JWT claims
-	claims := JWTClaims{
-		UserID:    user.ID,
-		Username:  user.Username,
-		TenantID:  user.TenantID,
-		SuperAdmin: user.IsSuperAdmin,
+	claims := &Claims{
+		UserID:       user.ID,
+		Username:     user.Username,
+		Email:        user.Email,
+		TenantID:     user.TenantID,
+		IsSuperAdmin: user.IsSuperAdmin,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+			ExpiresAt: jwt.NewNumericDate(expirationTime),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
-			NotBefore: jwt.NewNumericDate(time.Now()),
-			Issuer:    "eudr-comply-server",
 			Subject:   fmt.Sprintf("%d", user.ID),
 		},
 	}
 
-	// Create the token
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	// Sign the token with the secret key
-	tokenString, err := token.SignedString([]byte(jwtSecret))
+	tokenString, err := token.SignedString(jwtKey)
 	if err != nil {
 		return "", err
 	}
@@ -58,10 +60,30 @@ func GenerateToken(user *models.User) (string, error) {
 	return tokenString, nil
 }
 
-// Authenticate a user based on the JWT token
-func AuthRequired() gin.HandlerFunc {
+// ValidateToken validates a JWT token string
+func ValidateToken(tokenString string) (*Claims, error) {
+	claims := &Claims{}
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return jwtKey, nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	if !token.Valid {
+		return nil, fmt.Errorf("invalid token")
+	}
+
+	return claims, nil
+}
+
+// JWTAuth is a middleware that checks for a valid JWT token in the Authorization header
+func JWTAuth(db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Get the Authorization header
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header is required"})
@@ -69,77 +91,40 @@ func AuthRequired() gin.HandlerFunc {
 			return
 		}
 
-		// Check if the header has the Bearer prefix
-		headerParts := strings.Split(authHeader, " ")
-		if len(headerParts) != 2 || headerParts[0] != "Bearer" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header format must be Bearer {token}"})
+		// Extract the token from the Authorization header
+		// Expected format: "Bearer {token}"
+		parts := strings.Split(authHeader, " ")
+		if len(parts) != 2 || parts[0] != "Bearer" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid authorization format"})
 			c.Abort()
 			return
 		}
 
-		// Get the token
-		tokenString := headerParts[1]
-
-		// Parse the token
-		token, err := jwt.ParseWithClaims(tokenString, &JWTClaims{}, func(token *jwt.Token) (interface{}, error) {
-			// Validate the alg is what we expect
-			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-			}
-
-			// Get the secret key
-			jwtSecret := os.Getenv("JWT_SECRET")
-			if jwtSecret == "" {
-				return nil, errors.New("JWT_SECRET environment variable not set")
-			}
-
-			return []byte(jwtSecret), nil
-		})
-
+		tokenString := parts[1]
+		claims, err := ValidateToken(tokenString)
 		if err != nil {
-			log.Printf("Error parsing token: %v", err)
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
 			c.Abort()
 			return
 		}
 
-		// Validate the token
-		claims, ok := token.Claims.(*JWTClaims)
-		if !ok || !token.Valid {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})
-			c.Abort()
-			return
-		}
-
-		// Get the user from the database
-		user, err := models.GetUserByID(claims.UserID)
+		// Get user from database
+		user, err := models.GetUser(db, claims.UserID)
 		if err != nil {
-			log.Printf("Error getting user: %v", err)
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
 			c.Abort()
 			return
 		}
 
-		// Check if the user is active
+		// Check if user is active
 		if !user.IsActive {
 			c.JSON(http.StatusForbidden, gin.H{"error": "User account is inactive"})
 			c.Abort()
 			return
 		}
 
-		// Set the user in the context
+		// Set user in context for downstream handlers
 		c.Set("user", user)
-
-		// Set the tenant in the context
-		tenant, err := models.GetTenantByID(user.TenantID)
-		if err != nil {
-			log.Printf("Error getting tenant: %v", err)
-			// Not fatal, just log it and continue
-		} else {
-			c.Set("tenant", tenant)
-		}
-
-		// Continue processing the request
 		c.Next()
 	}
 }
