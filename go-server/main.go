@@ -150,29 +150,31 @@ func main() {
                                 casdoorEndpoint = "https://tracextech.casdoor.com"
                         }
                         
-                        // Set default callback URL for local development
-                        // Important: Use port 8081 for callback since that's where the Go server is listening directly
-                        callbackURL := "http://localhost:8081/api/auth/callback"
-                        if appURL := os.Getenv("APP_URL"); appURL != "" {
-                                callbackURL = fmt.Sprintf("%s/api/auth/callback", appURL)
+                        // Set base URL for callbacks, considering various environments
+                        baseURL := "http://localhost:5000" // Express server is our public-facing endpoint
+                        
+                        // Get requested Host (might be from Express or direct to Go)
+                        requestHost := c.Request.Host
+                        
+                        // Check for Replit or production environment
+                        if strings.Contains(requestHost, "replit.dev") || strings.Contains(requestHost, ".app") {
+                                // In Replit, our callback must go to the Express server which is publicly accessible
+                                protocol := "https"
+                                
+                                // Try to get X-Forwarded-Host which would be the public-facing hostname
+                                forwardedHost := c.Request.Header.Get("X-Forwarded-Host")
+                                if forwardedHost != "" {
+                                        requestHost = forwardedHost
+                                }
+                                
+                                baseURL = fmt.Sprintf("%s://%s", protocol, requestHost)
+                                log.Printf("Replit environment detected, using base URL: %s", baseURL)
                         }
                         
-                        // In Replit environment, if we detect a hostname ending with replit.dev or .app,
-                        // construct a full URL using the request host to ensure proper callbacks 
-                        host := c.Request.Host
-                        if strings.Contains(host, "replit.dev") || strings.Contains(host, ".app") {
-                                // Use https for production Replit environment
-                                protocol := "https"
-                                callbackURL = fmt.Sprintf("%s://%s/api/auth/callback", protocol, host)
-                                log.Printf("Replit environment detected, using callback URL: %s", callbackURL)
-                                
-                                // Also make sure our endpoint is configured correctly for Casdoor
-                                // This ensures we're sending the correct redirect_uri parameter to Casdoor
-                                casdoor_redirect_base := fmt.Sprintf("%s://%s", protocol, host)
-                                os.Setenv("CASDOOR_REDIRECT_URL", fmt.Sprintf("%s/api/auth/callback", casdoor_redirect_base))
-                                
-                                log.Printf("Setting CASDOOR_REDIRECT_URL to %s", os.Getenv("CASDOOR_REDIRECT_URL"))
-                        }
+                        // Construct final callback URL with the /api/auth/callback path
+                        // The Express server will proxy this to the Go server
+                        callbackURL := fmt.Sprintf("%s/api/auth/callback", baseURL)
+                        log.Printf("Using callback URL: %s (base: %s)", callbackURL, baseURL)
                         
                         log.Printf("Using Casdoor callback URL: %s", callbackURL)
                         
@@ -239,36 +241,24 @@ func main() {
                                 false, // Allow JavaScript access
                         )
                         
-                        // We want to redirect back to the TracexTech Comply dashboard specifically
-                        redirectTo := "/dashboard" // Default dashboard route
+                        // For the redirect back to the app after successful authentication,
+                        // we need to determine the base URL of our Express server (the frontend entry point)
+                        var baseURL string
+                        var dashboardPath = "/dashboard" // Specific route to redirect to
                         
-                        // If running in Replit, construct the full URL for the redirect
+                        // Determine if we're in Replit environment
                         host := c.Request.Host
                         if strings.Contains(host, "replit.dev") || strings.Contains(host, ".app") {
-                                // Use origin from request if available, otherwise construct a URL
-                                origin := c.GetHeader("Origin")
-                                if origin == "" {
-                                        // Check for X-Forwarded-Host and X-Forwarded-Proto headers
-                                        forwardedHost := c.GetHeader("X-Forwarded-Host")
-                                        forwardedProto := c.GetHeader("X-Forwarded-Proto")
-                                        
-                                        if forwardedHost != "" {
-                                                protocol := "https"
-                                                if forwardedProto != "" {
-                                                        protocol = forwardedProto
-                                                }
-                                                origin = fmt.Sprintf("%s://%s", protocol, forwardedHost)
-                                        } else {
-                                                origin = fmt.Sprintf("https://%s", host)
-                                        }
-                                }
-                                
-                                log.Printf("Redirecting authenticated user back to TracexTech Comply dashboard at %s", origin)
-                                redirectTo = origin + "/dashboard" // Explicit dashboard route
+                                // For Replit, construct full URL with https
+                                protocol := "https"
+                                baseURL = fmt.Sprintf("%s://%s", protocol, host)
                         } else {
-                                // For local development
-                                redirectTo = "http://localhost:5000/dashboard"
+                                // Local development - use the Express server
+                                baseURL = "http://localhost:5000"
                         }
+                        
+                        // Construct the dashboard redirect URL
+                        redirectTo := baseURL + dashboardPath
                         
                         log.Printf("Authentication successful, redirecting to dashboard: %s", redirectTo)
                         c.Redirect(http.StatusTemporaryRedirect, redirectTo)

@@ -79,10 +79,11 @@ const startProxy = async () => {
     });
   });
 
-  // Special case for /auth/casdoor - direct redirect to Casdoor
+  // Special case for /auth/casdoor - redirect to Go server's OAuth endpoint
   app.get('/auth/casdoor', (req, res) => {
-    console.log('EXPRESS: Direct redirect to Casdoor authentication endpoint');
-    res.redirect('https://tracextech.casdoor.com');
+    console.log('EXPRESS: Redirecting to Go server OAuth handler');
+    // Redirect to the Go server's endpoint which has all the proper OAuth parameters
+    res.redirect('http://localhost:8081/api/auth/casdoor');
   });
 
   // Forward all API requests directly to Go server without any special handling
