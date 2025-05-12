@@ -69,31 +69,31 @@ const startProxy = async () => {
   const app = express();
   const PORT = 5000;
   
-  // Forward API requests to Go server
-  app.use('/api', createProxyMiddleware({
-    target: 'http://localhost:8081',
-    changeOrigin: true,
-    secure: false,
-    pathRewrite: {
-      '^/api': '/api'  // keep the /api prefix
-    },
-    onProxyReq: (proxyReq, req: any, res: any) => {
-      console.log(`EXPRESS PROXY: ${req.method} ${req.originalUrl} -> ${proxyReq.protocol}//${proxyReq.host}${proxyReq.path}`);
-    }
-  }));
+  // Forward API requests to Go server with specific logging
+  app.use('/api', (req, res, next) => {
+    console.log(`EXPRESS PROXY: ${req.method} ${req.originalUrl} -> http://localhost:8081${req.originalUrl}`);
+    return createProxyMiddleware({
+      target: 'http://localhost:8081',
+      changeOrigin: true,
+      secure: false,
+      ws: true,
+      xfwd: true
+    })(req, res, next);
+  });
   
-  // Additional route specifically for auth endpoints
-  app.use('/auth', createProxyMiddleware({
-    target: 'http://localhost:8081',
-    changeOrigin: true,
-    secure: false,
-    pathRewrite: {
-      '^/auth': '/api/auth'  // rewrite /auth to /api/auth
-    },
-    onProxyReq: (proxyReq, req: any, res: any) => {
-      console.log(`EXPRESS PROXY (AUTH): ${req.method} ${req.originalUrl} -> ${proxyReq.protocol}//${proxyReq.host}${proxyReq.path}`);
-    }
-  }));
+  // Additional middleware for direct auth endpoint access
+  app.get('/auth/casdoor', (req, res) => {
+    console.log('AUTH REDIRECT: Redirecting /auth/casdoor to /api/auth/casdoor');
+    res.redirect('/api/auth/casdoor');
+  });
+  
+  // Handle auth routes by redirecting them to proper API paths
+  app.use('/auth', (req, res, next) => {
+    // Start with proper path
+    const apiPath = req.path.replace(/^\//, '/api/auth/');
+    console.log(`AUTH PROXY: ${req.method} ${req.originalUrl} -> ${apiPath}`);
+    res.redirect(apiPath);
+  });
   
   // Forward all other requests to Vite
   app.use('/', createProxyMiddleware({

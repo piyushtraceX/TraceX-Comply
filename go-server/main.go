@@ -77,6 +77,16 @@ func main() {
                 MaxAge:           12 * time.Hour,
         }))
 
+        // Add a root health check endpoint for direct server testing
+        router.GET("/health", func(c *gin.Context) {
+                c.JSON(http.StatusOK, gin.H{
+                        "status": "OK", 
+                        "message": "Go server root health check",
+                        "server": "Go",
+                        "timestamp": time.Now().Format(time.RFC3339),
+                })
+        })
+        
         // Set up API routes
         api := router.Group("/api")
         {
@@ -86,7 +96,12 @@ func main() {
                         c.Next()
                 })
                 api.GET("/health", func(c *gin.Context) {
-                        c.JSON(http.StatusOK, gin.H{"status": "OK", "message": "Go server is running"})
+                        c.JSON(http.StatusOK, gin.H{
+                                "status": "OK", 
+                                "message": "Go server is running",
+                                "server": "Go",
+                                "timestamp": time.Now().Format(time.RFC3339),
+                        })
                 })
 
                 // For now, let's implement simple mock auth endpoints
@@ -146,9 +161,17 @@ func main() {
                         // construct a full URL using the request host to ensure proper callbacks 
                         host := c.Request.Host
                         if strings.Contains(host, "replit.dev") || strings.Contains(host, ".app") {
+                                // Use https for production Replit environment
                                 protocol := "https"
                                 callbackURL = fmt.Sprintf("%s://%s/api/auth/callback", protocol, host)
                                 log.Printf("Replit environment detected, using callback URL: %s", callbackURL)
+                                
+                                // Also make sure our endpoint is configured correctly for Casdoor
+                                // This ensures we're sending the correct redirect_uri parameter to Casdoor
+                                casdoor_redirect_base := fmt.Sprintf("%s://%s", protocol, host)
+                                os.Setenv("CASDOOR_REDIRECT_URL", fmt.Sprintf("%s/api/auth/callback", casdoor_redirect_base))
+                                
+                                log.Printf("Setting CASDOOR_REDIRECT_URL to %s", os.Getenv("CASDOOR_REDIRECT_URL"))
                         }
                         
                         log.Printf("Using Casdoor callback URL: %s", callbackURL)

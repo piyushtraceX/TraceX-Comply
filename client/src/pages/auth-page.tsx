@@ -160,6 +160,17 @@ export default function AuthPage() {
                   </div>
                   
                   <CasdoorLoginButton className="mt-2" />
+                  
+                  {/* Direct link fallback for environments where redirect doesn't work properly */}
+                  <div className="mt-4 text-center text-sm text-gray-500">
+                    <p>Having trouble? <a 
+                      href="https://tracextech.casdoor.com" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline">
+                        Go directly to Casdoor login
+                    </a></p>
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>

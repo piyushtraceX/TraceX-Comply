@@ -11,26 +11,19 @@ const CasdoorLoginButton: React.FC<CasdoorLoginButtonProps> = ({ className }) =>
   const casdoorEndpoint = 'https://tracextech.casdoor.com';
   
   const handleCasdoorLogin = () => {
-    // In development, we need to bypass the Express proxy and connect directly to Go server
-    // because the proxy is having issues with the redirect flow
-    const isDev = import.meta.env.DEV;
-    
-    // Get the current origin (hostname+port)
+    // Get the current origin with protocol
     const baseUrl = window.location.origin;
-    // Get hostname without port
-    const hostname = window.location.hostname;
     
-    // Configure the redirect URL
-    let redirectUrl;
-    if (isDev) {
-      // In dev, connect directly to Go server on port 8081
-      redirectUrl = `http://${hostname}:8081/api/auth/casdoor`;
-      console.log('DEV MODE: Redirecting directly to Go server at:', redirectUrl);
-    } else {
-      // In production, use normal path
-      redirectUrl = `${baseUrl}/api/auth/casdoor`;
-      console.log('PROD MODE: Redirecting to Casdoor login at:', redirectUrl);
-    }
+    // Special handling for Replit environment
+    const isReplit = 
+      window.location.hostname.includes('replit') || 
+      window.location.hostname.includes('.app');
+    
+    // For Replit or production, use the current origin
+    // This ensures we're using the same domain that's publicly accessible
+    const redirectUrl = `${baseUrl}/api/auth/casdoor`;
+    
+    console.log(`Redirecting to Casdoor login at: ${redirectUrl} (${isReplit ? 'Replit' : 'Standard'} environment)`);
     
     // Perform the redirect
     window.location.href = redirectUrl;
