@@ -82,20 +82,14 @@ const startProxy = async () => {
   // Special case for /auth/casdoor - redirect to Go server's OAuth endpoint
   app.get('/auth/casdoor', (req, res) => {
     console.log('EXPRESS: Redirecting to Go server OAuth handler');
-    // Redirect to the Go server's endpoint which has all the proper OAuth parameters
-    res.redirect('http://localhost:8081/api/auth/casdoor');
+    
+    // Use the /api/auth/casdoor route directly, which will be proxied to Go
+    // This ensures it works both in local dev and Replit environments
+    res.redirect('/api/auth/casdoor');
   });
 
-  // Special case for /api/auth/* routes
-  app.get('/api/auth/:path', (req, res, next) => {
-    const targetPath = req.params.path;
-    console.log(`EXPRESS PROXY: Special handling for /api/auth/${targetPath}`);
-    
-    // Forward directly to Go server
-    const goServerUrl = `http://localhost:8081/api/auth/${targetPath}${req.url.includes('?') ? req.url.substring(req.url.indexOf('?')) : ''}`;
-    console.log(`EXPRESS PROXY: Redirecting to ${goServerUrl}`);
-    res.redirect(goServerUrl);
-  });
+  // All /api/* requests are proxied to Go server by the middleware below
+  // We don't need special handling for individual /api/auth/* routes
 
   // Forward all other API requests directly to Go server
   app.use('/api', createProxyMiddleware({

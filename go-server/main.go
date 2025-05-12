@@ -150,25 +150,32 @@ func main() {
                                 casdoorEndpoint = "https://tracextech.casdoor.com"
                         }
                         
-                        // Set base URL for callbacks, considering various environments
-                        baseURL := "http://localhost:5000" // Express server is our public-facing endpoint
+                        // Determine callback URL based on environment
+                        var baseURL string
                         
-                        // Get requested Host (might be from Express or direct to Go)
-                        requestHost := c.Request.Host
+                        // Get requested Host and headers
+                        host := c.Request.Host
+                        forwardedHost := c.GetHeader("X-Forwarded-Host")
+                        forwardedProto := c.GetHeader("X-Forwarded-Proto")
                         
-                        // Check for Replit or production environment
-                        if strings.Contains(requestHost, "replit.dev") || strings.Contains(requestHost, ".app") {
-                                // In Replit, our callback must go to the Express server which is publicly accessible
+                        // Check if we're in Replit/production environment
+                        if strings.Contains(host, "replit.dev") || strings.Contains(host, ".app") {
+                                // Default to https in Replit environment
                                 protocol := "https"
-                                
-                                // Try to get X-Forwarded-Host which would be the public-facing hostname
-                                forwardedHost := c.Request.Header.Get("X-Forwarded-Host")
-                                if forwardedHost != "" {
-                                        requestHost = forwardedHost
+                                if forwardedProto != "" {
+                                        protocol = forwardedProto
                                 }
                                 
-                                baseURL = fmt.Sprintf("%s://%s", protocol, requestHost)
+                                // Determine the hostname for callback
+                                if forwardedHost != "" {
+                                        host = forwardedHost
+                                }
+                                
+                                baseURL = fmt.Sprintf("%s://%s", protocol, host)
                                 log.Printf("Replit environment detected, using base URL: %s", baseURL)
+                        } else {
+                                // Local development - Express server is the entry point
+                                baseURL = "http://localhost:5000"
                         }
                         
                         // Construct final callback URL with the /api/auth/callback path
@@ -242,20 +249,35 @@ func main() {
                         )
                         
                         // For the redirect back to the app after successful authentication,
-                        // we need to determine the base URL of our Express server (the frontend entry point)
+                        // we need to determine the base URL of our frontend entry point
                         var baseURL string
                         var dashboardPath = "/dashboard" // Specific route to redirect to
                         
-                        // Determine if we're in Replit environment
+                        // Determine the proper base URL based on environment
                         host := c.Request.Host
+                        
+                        // Get the X-Forwarded-Host when available
+                        forwardedHost := c.GetHeader("X-Forwarded-Host")
+                        
+                        // Check if we're in Replit/production environment
                         if strings.Contains(host, "replit.dev") || strings.Contains(host, ".app") {
-                                // For Replit, construct full URL with https
                                 protocol := "https"
-                                baseURL = fmt.Sprintf("%s://%s", protocol, host)
+                                
+                                // Use forwarded host if available
+                                if forwardedHost != "" {
+                                        baseURL = fmt.Sprintf("%s://%s", protocol, forwardedHost)
+                                } else {
+                                        // Fallback to host header
+                                        baseURL = fmt.Sprintf("%s://%s", protocol, host)
+                                }
+                                
+                                log.Printf("Replit environment detected, using origin: %s", baseURL)
                         } else {
-                                // Local development - use the Express server
+                                // Local development
                                 baseURL = "http://localhost:5000"
                         }
+                        
+                        log.Printf("Using base URL for dashboard redirect: %s", baseURL)
                         
                         // Construct the dashboard redirect URL
                         redirectTo := baseURL + dashboardPath
