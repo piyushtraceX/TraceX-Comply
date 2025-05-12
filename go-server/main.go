@@ -40,10 +40,20 @@ func initCasdoor() {
                 casdoorJwtSecret = "jwt-secret-for-tracextech-casdoor"
         }
 
-        // Initialize Casdoor SDK
-        casdoorsdk.InitConfig(casdoorEndpoint, casdoorClientID, casdoorClientSecret, casdoorJwtSecret)
+        // Additional required parameters for SDK initialization
+        // Organization and Application names from Client ID (format: organization/application)
+        orgName := "tracextech"     // Default organization name
+        appName := "eudr-complimate" // Default application name
         
-        log.Printf("Casdoor OAuth configured with endpoint: %s", casdoorEndpoint)
+        if parts := strings.Split(casdoorClientID, "/"); len(parts) == 2 {
+                orgName = parts[0]
+                appName = parts[1]
+        }
+
+        // Initialize Casdoor SDK with all required parameters
+        casdoorsdk.InitConfig(casdoorEndpoint, casdoorClientID, casdoorClientSecret, casdoorJwtSecret, orgName, appName)
+        
+        log.Printf("Casdoor OAuth configured with endpoint: %s for organization: %s and application: %s", casdoorEndpoint, orgName, appName)
 }
 
 func main() {
@@ -118,9 +128,6 @@ func main() {
                                 casdoorEndpoint = "https://tracextech.casdoor.com"
                         }
                         
-                        // Get application ID from client ID
-                        clientID := os.Getenv("CASDOOR_CLIENT_ID")
-                        
                         // Set default callback URL for local development
                         callbackURL := "http://localhost:5000/api/auth/callback"
                         if appURL := os.Getenv("APP_URL"); appURL != "" {
@@ -128,9 +135,8 @@ func main() {
                         }
                         
                         // Generate the OAuth URL using Casdoor SDK
-                        state := "complimate-eudr" // Should be randomized in production
-                        scope := "read,profile"
-                        authURL := casdoorsdk.GetSigninUrl(callbackURL, state, scope)
+                        // Note: The SDK function only takes callbackURL parameter in this version
+                        authURL := casdoorsdk.GetSigninUrl(callbackURL)
                         
                         log.Printf("Redirecting to Casdoor URL: %s", authURL)
                         c.Redirect(http.StatusTemporaryRedirect, authURL)
@@ -167,10 +173,13 @@ func main() {
                         log.Printf("User authenticated: %s", claims.Name)
                         
                         // Create a cookie with the access token
+                        // token.ExpiresIn isn't available, use a fixed expiration time
+                        expiresInSeconds := 3600 // 1 hour
+                        
                         c.SetCookie(
                                 "casdoor_token",
                                 token.AccessToken,
-                                int(token.ExpiresIn), // Max age in seconds
+                                expiresInSeconds,
                                 "/",
                                 "",
                                 false, // Secure
