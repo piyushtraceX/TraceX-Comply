@@ -7,6 +7,7 @@ import (
         "os"
         "path/filepath"
         "strings"
+        "time"
 
         "github.com/gin-contrib/cors"
         "github.com/gin-contrib/static"
@@ -67,13 +68,14 @@ func main() {
         // Set up Gin router
         router := gin.Default()
 
-        // Configure CORS
-        config := cors.DefaultConfig()
-        config.AllowOrigins = []string{"*"}
-        config.AllowMethods = []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"}
-        config.AllowHeaders = []string{"Origin", "Content-Type", "Accept", "Authorization"}
-        config.AllowCredentials = true
-        router.Use(cors.New(config))
+        // Configure CORS - Allow all origins in development mode
+        router.Use(cors.New(cors.Config{
+                AllowOrigins:     []string{"*"},
+                AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"},
+                AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Accept", "Authorization", "X-Requested-With"},
+                AllowCredentials: true,
+                MaxAge:           12 * time.Hour,
+        }))
 
         // Set up API routes
         api := router.Group("/api")

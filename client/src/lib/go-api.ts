@@ -12,10 +12,10 @@ export const getApiBaseUrl = () => {
   
   let apiUrl;
   if (isDev) {
-    // In development, connect to Go server on port 8081
-    const goPort = "8081";
-    apiUrl = `${protocol}//${host}:${goPort}`;
-    console.log('Development mode: Using Go API URL:', apiUrl);
+    // In development, use the proxy set up in server/index.ts
+    // The Express proxy forwards /api requests to the Go server on port 8081
+    apiUrl = `${protocol}//${host}${window.location.port ? `:${window.location.port}` : ''}`;
+    console.log('Development mode: Using Go API URL through proxy:', apiUrl);
   } else {
     // In production, the Go server serves both the frontend and API
     // So we use the same URL
