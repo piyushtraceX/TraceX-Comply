@@ -11,18 +11,48 @@ import (
         "github.com/gin-contrib/cors"
         "github.com/gin-contrib/static"
         "github.com/gin-gonic/gin"
+        "github.com/casdoor/casdoor-go-sdk/casdoorsdk"
 
-        // Import local auth package for Casdoor integration
-        "go-server/auth"
+        // No need to import local auth package anymore
 )
+
+// initCasdoor initializes the Casdoor SDK
+func initCasdoor() {
+        // Set up Casdoor provider with enterprise hosted Casdoor
+        casdoorEndpoint := os.Getenv("CASDOOR_ENDPOINT")
+        casdoorClientID := os.Getenv("CASDOOR_CLIENT_ID")
+        casdoorClientSecret := os.Getenv("CASDOOR_CLIENT_SECRET")
+        casdoorJwtSecret := os.Getenv("CASDOOR_JWT_SECRET")
+
+        // Use default enterprise Casdoor endpoint if not set
+        if casdoorEndpoint == "" {
+                casdoorEndpoint = "https://tracextech.casdoor.com"
+        }
+
+        // Check if required credentials are available
+        if casdoorClientID == "" || casdoorClientSecret == "" {
+                log.Println("Warning: Casdoor client ID or secret not set. OAuth login will not work properly.")
+                return
+        }
+
+        // Default JWT secret if not provided
+        if casdoorJwtSecret == "" {
+                casdoorJwtSecret = "jwt-secret-for-tracextech-casdoor"
+        }
+
+        // Initialize Casdoor SDK
+        casdoorsdk.InitConfig(casdoorEndpoint, casdoorClientID, casdoorClientSecret, casdoorJwtSecret)
+        
+        log.Printf("Casdoor OAuth configured with endpoint: %s", casdoorEndpoint)
+}
 
 func main() {
         // Set up logging
         log.SetFlags(log.LstdFlags | log.Lshortfile)
         log.Println("Starting Go server...")
 
-        // Initialize auth with Casdoor
-        auth.InitAuth()
+        // Initialize Casdoor for authentication
+        initCasdoor()
         
         // Set up Gin router
         router := gin.Default()
@@ -88,28 +118,66 @@ func main() {
                                 casdoorEndpoint = "https://tracextech.casdoor.com"
                         }
                         
+                        // Get application ID from client ID
                         clientID := os.Getenv("CASDOOR_CLIENT_ID")
-                        redirectURI := fmt.Sprintf("%s/api/auth/callback", os.Getenv("APP_URL"))
-                        if redirectURI == "/api/auth/callback" {
-                                redirectURI = "http://localhost:5000/api/auth/callback"
+                        
+                        // Set default callback URL for local development
+                        callbackURL := "http://localhost:5000/api/auth/callback"
+                        if appURL := os.Getenv("APP_URL"); appURL != "" {
+                                callbackURL = fmt.Sprintf("%s/api/auth/callback", appURL)
                         }
                         
-                        authURL := fmt.Sprintf("%s/login/oauth/authorize?client_id=%s&response_type=code&redirect_uri=%s&scope=read,profile", 
-                                casdoorEndpoint, clientID, redirectURI)
+                        // Generate the OAuth URL using Casdoor SDK
+                        state := "complimate-eudr" // Should be randomized in production
+                        scope := "read,profile"
+                        authURL := casdoorsdk.GetSigninUrl(callbackURL, state, scope)
                         
+                        log.Printf("Redirecting to Casdoor URL: %s", authURL)
                         c.Redirect(http.StatusTemporaryRedirect, authURL)
                 })
 
                 // Casdoor callback handler
                 api.GET("/auth/callback", func(c *gin.Context) {
                         code := c.Query("code")
+                        state := c.Query("state")
+                        
                         if code == "" {
                                 c.JSON(http.StatusBadRequest, gin.H{"error": "No authorization code provided"})
                                 return
                         }
                         
-                        // In a production implementation, we would exchange the code for a token
-                        // and fetch user info. For now, we'll just redirect to the frontend.
+                        log.Printf("Received callback with code: %s and state: %s", code, state)
+                        
+                        // Exchange authorization code for token
+                        token, err := casdoorsdk.GetOAuthToken(code, state)
+                        if err != nil {
+                                log.Printf("Error getting token: %v", err)
+                                c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get access token"})
+                                return
+                        }
+                        
+                        // Get user info from Casdoor
+                        claims, err := casdoorsdk.ParseJwtToken(token.AccessToken)
+                        if err != nil {
+                                log.Printf("Error parsing JWT: %v", err)
+                                c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse user token"})
+                                return
+                        }
+                        
+                        log.Printf("User authenticated: %s", claims.Name)
+                        
+                        // Create a cookie with the access token
+                        c.SetCookie(
+                                "casdoor_token",
+                                token.AccessToken,
+                                int(token.ExpiresIn), // Max age in seconds
+                                "/",
+                                "",
+                                false, // Secure
+                                true, // HTTP only
+                        )
+                        
+                        // Redirect back to frontend
                         c.Redirect(http.StatusTemporaryRedirect, "/")
                 })
         }
