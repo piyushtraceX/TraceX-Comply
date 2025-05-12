@@ -239,23 +239,38 @@ func main() {
                                 false, // Allow JavaScript access
                         )
                         
-                        // Redirect back to frontend - specifically to the TracexTech Comply dashboard
-                        redirectTo := "/"
+                        // We want to redirect back to the TracexTech Comply dashboard specifically
+                        redirectTo := "/dashboard" // Default dashboard route
                         
-                        // If running in Replit, check whether we should redirect to a specific dashboard URL
+                        // If running in Replit, construct the full URL for the redirect
                         host := c.Request.Host
                         if strings.Contains(host, "replit.dev") || strings.Contains(host, ".app") {
                                 // Use origin from request if available, otherwise construct a URL
                                 origin := c.GetHeader("Origin")
                                 if origin == "" {
-                                        origin = fmt.Sprintf("https://%s", host)
+                                        // Check for X-Forwarded-Host and X-Forwarded-Proto headers
+                                        forwardedHost := c.GetHeader("X-Forwarded-Host")
+                                        forwardedProto := c.GetHeader("X-Forwarded-Proto")
+                                        
+                                        if forwardedHost != "" {
+                                                protocol := "https"
+                                                if forwardedProto != "" {
+                                                        protocol = forwardedProto
+                                                }
+                                                origin = fmt.Sprintf("%s://%s", protocol, forwardedHost)
+                                        } else {
+                                                origin = fmt.Sprintf("https://%s", host)
+                                        }
                                 }
                                 
-                                log.Printf("Redirecting authenticated user back to dashboard at %s", origin)
-                                redirectTo = origin + "/"
+                                log.Printf("Redirecting authenticated user back to TracexTech Comply dashboard at %s", origin)
+                                redirectTo = origin + "/dashboard" // Explicit dashboard route
+                        } else {
+                                // For local development
+                                redirectTo = "http://localhost:5000/dashboard"
                         }
                         
-                        log.Printf("Authentication successful, redirecting to: %s", redirectTo)
+                        log.Printf("Authentication successful, redirecting to dashboard: %s", redirectTo)
                         c.Redirect(http.StatusTemporaryRedirect, redirectTo)
                 })
         }
