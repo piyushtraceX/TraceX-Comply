@@ -80,6 +80,11 @@ func main() {
         // Set up API routes
         api := router.Group("/api")
         {
+                // Debug middleware to log all API requests
+                api.Use(func(c *gin.Context) {
+                        log.Printf("API Request: %s %s from %s", c.Request.Method, c.Request.URL.Path, c.ClientIP())
+                        c.Next()
+                })
                 api.GET("/health", func(c *gin.Context) {
                         c.JSON(http.StatusOK, gin.H{"status": "OK", "message": "Go server is running"})
                 })
@@ -183,9 +188,20 @@ func main() {
                                 token.AccessToken,
                                 expiresInSeconds,
                                 "/",
-                                "",
-                                false, // Secure
+                                c.Request.Host, // Set the domain to the request host
+                                false, // Secure should be true in production
                                 true, // HTTP only
+                        )
+                        
+                        // Also create a session cookie
+                        c.SetCookie(
+                                "session",
+                                token.AccessToken,
+                                expiresInSeconds,
+                                "/",
+                                c.Request.Host, // Set the domain to the request host
+                                false, // Secure should be true in production
+                                false, // Allow JavaScript access
                         )
                         
                         // Redirect back to frontend

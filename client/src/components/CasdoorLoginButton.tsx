@@ -12,7 +12,10 @@ const CasdoorLoginButton: React.FC<CasdoorLoginButtonProps> = ({ className }) =>
   
   const handleCasdoorLogin = () => {
     // Redirect to the Go backend's Casdoor OAuth route
-    window.location.href = '/api/auth/casdoor';
+    // Use the full URL to avoid any path issues
+    const baseUrl = window.location.origin;
+    window.location.href = `${baseUrl}/api/auth/casdoor`;
+    console.log('Redirecting to Casdoor login at:', `${baseUrl}/api/auth/casdoor`);
   };
 
   return (
