@@ -1,114 +1,184 @@
 package main
 
 import (
-        "database/sql"
-        "fmt"
-        "log"
-        "net/http"
-        "os"
-        "time"
+	"database/sql"
+	"fmt"
+	"log"
+	"os"
+	"time"
 
-        "github.com/gin-contrib/cors"
-        "github.com/gin-gonic/gin"
-        "github.com/joho/godotenv"
-        _ "github.com/lib/pq"
-
-        "eudr-comply/go-server/handlers"
-        "eudr-comply/go-server/middleware"
-        "eudr-comply/go-server/models"
-        "eudr-comply/go-server/routes"
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
+	_ "github.com/lib/pq"
+	"go-server/handlers"
+	"go-server/middleware"
+	"go-server/models"
 )
 
 func main() {
-        // Load .env file if it exists
-        err := godotenv.Load()
-        if err != nil {
-                log.Println("No .env file found, using environment variables")
-        }
+	// Set up logging
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+	log.Println("Starting Go server...")
 
-        // Set up database connection
-        dbURL := os.Getenv("DATABASE_URL")
-        if dbURL == "" {
-                log.Fatal("DATABASE_URL is required")
-        }
+	// Get database connection string
+	dbURL := os.Getenv("DATABASE_URL")
+	if dbURL == "" {
+		log.Fatal("DATABASE_URL environment variable is not set")
+	}
 
-        // Connect to database
-        db, err := sql.Open("postgres", dbURL)
-        if err != nil {
-                log.Fatalf("Error connecting to database: %v", err)
-        }
-        defer db.Close()
+	// Connect to database
+	db, err := sql.Open("postgres", dbURL)
+	if err != nil {
+		log.Fatalf("Failed to connect to database: %v", err)
+	}
+	defer db.Close()
 
-        // Test database connection
-        err = db.Ping()
-        if err != nil {
-                log.Fatalf("Error connecting to database: %v", err)
-        }
-        
-        // Make sure we have the schema
-        err = models.InitializeSchema(db)
-        if err != nil {
-                log.Fatalf("Error initializing schema: %v", err)
-        }
+	// Set connection pool parameters
+	db.SetMaxOpenConns(25)
+	db.SetMaxIdleConns(5)
+	db.SetConnMaxLifetime(5 * time.Minute)
 
-        // Create default admin user if it doesn't exist
-        err = models.CreateDefaultAdminUserIfNotExists(db)
-        if err != nil {
-                log.Fatalf("Error creating default admin user: %v", err)
-        }
-        
-        // Initialize Casbin enforcer
-        middleware.InitEnforcer()
-        log.Println("Initialized Casbin enforcer")
+	// Verify database connection
+	if err := db.Ping(); err != nil {
+		log.Fatalf("Failed to ping database: %v", err)
+	}
+	log.Println("Successfully connected to database")
 
-        // Set up Gin
-        r := gin.Default()
+	// Initialize database schema
+	err = models.InitializeSchema(db)
+	if err != nil {
+		log.Fatalf("Failed to initialize database schema: %v", err)
+	}
+	log.Println("Database schema initialized")
 
-        // Set up CORS middleware
-        r.Use(cors.New(cors.Config{
-                AllowOrigins:     []string{"*"},
-                AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
-                AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
-                ExposeHeaders:    []string{"Content-Length"},
-                AllowCredentials: true,
-                MaxAge:           12 * time.Hour,
-        }))
+	// Create default admin user if no users exist
+	err = models.CreateDefaultAdminUserIfNotExists(db)
+	if err != nil {
+		log.Fatalf("Failed to create default admin user: %v", err)
+	}
 
-        // Set up middleware that doesn't require authentication
-        r.Use(middleware.Logger())
+	// Set up Gin router
+	router := gin.Default()
 
-        // Health check endpoint
-        r.GET("/health", func(c *gin.Context) {
-                c.JSON(http.StatusOK, gin.H{
-                        "status": "ok",
-                        "time":   time.Now().Format(time.RFC3339),
-                })
-        })
+	// Configure CORS
+	config := cors.DefaultConfig()
+	config.AllowAllOrigins = true
+	config.AllowMethods = []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"}
+	config.AllowHeaders = []string{"Origin", "Content-Type", "Accept", "Authorization"}
+	config.ExposeHeaders = []string{"Content-Length"}
+	config.AllowCredentials = true
+	router.Use(cors.New(config))
 
-        // API routes that don't require authentication
-        api := r.Group("/api")
-        {
-                api.POST("/auth/login", handlers.Login(db))
-                api.POST("/auth/register", handlers.Register(db))
-                api.POST("/auth/seed-demo-user", handlers.SeedDemoUser(db))
-                
-                // Routes that require authentication
-                authRequired := api.Group("/")
-                authRequired.Use(middleware.AuthRequired())
-                
-                // Register all routes
-                routes.RegisterAllRoutes(authRequired, db)
-        }
+	// Add database to context
+	router.Use(func(c *gin.Context) {
+		c.Set("db", db)
+		c.Next()
+	})
 
-        // Get port from environment
-        port := os.Getenv("PORT")
-        if port == "" {
-                port = "8080"
-        }
+	// Health check endpoint
+	router.GET("/health", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"status":    "ok",
+			"timestamp": time.Now().Format(time.RFC3339),
+		})
+	})
 
-        // Start server
-        log.Printf("Starting server on port %s", port)
-        if err := r.Run(":" + port); err != nil {
-                log.Fatalf("Error starting server: %v", err)
-        }
+	// API routes
+	api := router.Group("/api")
+	{
+		// Public routes (no authentication required)
+		api.POST("/auth/login", handlers.Login(db))
+		api.POST("/auth/register", handlers.Register(db))
+		api.POST("/seed-demo-user", handlers.SeedDemoUser(db))
+
+		// Protected routes (authentication required)
+		protected := api.Group("")
+		protected.Use(middleware.JWTAuth(db))
+		{
+			// Auth routes
+			protected.GET("/auth/me", handlers.GetCurrentUser(db))
+			protected.POST("/auth/logout", handlers.Logout)
+			protected.POST("/auth/switch-tenant", handlers.SwitchTenant(db))
+
+			// User routes
+			protected.GET("/users", func(c *gin.Context) {
+				// Get users based on query parameters
+				c.JSON(200, gin.H{
+					"message": "This endpoint will list users",
+				})
+			})
+
+			protected.POST("/users", func(c *gin.Context) {
+				// Create a new user
+				c.JSON(200, gin.H{
+					"message": "This endpoint will create a user",
+				})
+			})
+
+			protected.GET("/users/:id", func(c *gin.Context) {
+				// Get user by ID
+				c.JSON(200, gin.H{
+					"message": "This endpoint will get a user by ID",
+				})
+			})
+
+			protected.PUT("/users/:id", func(c *gin.Context) {
+				// Update user by ID
+				c.JSON(200, gin.H{
+					"message": "This endpoint will update a user by ID",
+				})
+			})
+
+			protected.DELETE("/users/:id", func(c *gin.Context) {
+				// Delete user by ID
+				c.JSON(200, gin.H{
+					"message": "This endpoint will delete a user by ID",
+				})
+			})
+
+			// Role routes
+			protected.GET("/roles", func(c *gin.Context) {
+				// Get roles based on query parameters
+				c.JSON(200, gin.H{
+					"message": "This endpoint will list roles",
+				})
+			})
+
+			// Tenant routes
+			protected.GET("/tenants", func(c *gin.Context) {
+				// Get tenants based on query parameters
+				c.JSON(200, gin.H{
+					"message": "This endpoint will list tenants",
+				})
+			})
+
+			// Permission routes
+			protected.GET("/permissions", func(c *gin.Context) {
+				// Get permissions based on query parameters
+				c.JSON(200, gin.H{
+					"message": "This endpoint will list permissions",
+				})
+			})
+		}
+	}
+
+	// Get port from environment or use default
+	port := os.Getenv("GO_PORT")
+	if port == "" {
+		port = "8081"
+	}
+
+	// Start server
+	serverAddr := fmt.Sprintf("0.0.0.0:%s", port)
+	log.Printf("Go server starting on %s", serverAddr)
+	
+	// Use a non-blocking way to start the server
+	go func() {
+		if err := router.Run(serverAddr); err != nil {
+			log.Fatalf("Failed to start server: %v", err)
+		}
+	}()
+
+	// Block forever
+	select {}
 }
