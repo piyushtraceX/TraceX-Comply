@@ -79,32 +79,19 @@ const startProxy = async () => {
     });
   });
 
-  // Forward all API requests directly to Go server 
+  // Special case for /auth/casdoor - direct redirect to Casdoor
+  app.get('/auth/casdoor', (req, res) => {
+    console.log('EXPRESS: Direct redirect to Casdoor authentication endpoint');
+    res.redirect('https://tracextech.casdoor.com');
+  });
+
+  // Forward all API requests directly to Go server without any special handling
   app.use('/api', createProxyMiddleware({
     target: 'http://localhost:8081',
     changeOrigin: true,
     secure: false,
-    xfwd: true,
-    // @ts-ignore - onProxyReq exists but TypeScript definitions are incomplete
-    onProxyReq: (proxyReq: any, req: any, res: any) => {
-      console.log(`Proxying API request: ${req.method} ${req.url} to Go server`);
-    }
-  } as any));
-  
-  // Forward auth endpoints to Go server's /api/auth endpoints
-  app.use('/auth', createProxyMiddleware({
-    target: 'http://localhost:8081',
-    changeOrigin: true,
-    secure: false,
-    xfwd: true,
-    pathRewrite: {
-      '^/auth': '/api/auth'  // Rewrite /auth to /api/auth
-    },
-    // @ts-ignore - onProxyReq exists but TypeScript definitions are incomplete
-    onProxyReq: (proxyReq: any, req: any, res: any) => {
-      console.log(`Proxying Auth request: ${req.method} ${req.url} to Go server as /api/auth${req.url}`);
-    }
-  } as any));
+    xfwd: true
+  }));
   
   // Forward all other requests to Vite
   app.use('/', createProxyMiddleware({

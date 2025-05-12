@@ -41,14 +41,14 @@ const CasdoorLoginButton: React.FC<CasdoorLoginButtonProps> = ({ className }) =>
     
     console.log('Cleared all authentication data');
     
-    // Redirect directly to the Go server's OAuth endpoint
+    // Redirect to the Casdoor authentication flow
     console.log('Initiating Casdoor authentication flow...');
     
-    // Go directly to the API endpoint for Casdoor login
-    const authUrl = '/api/auth/casdoor';
+    // Use the auth/casdoor endpoint directly handled by Express
+    const authUrl = '/auth/casdoor';
     console.log(`Redirecting to: ${authUrl}`);
     
-    // This will redirect to Casdoor with the proper OAuth parameters
+    // This will be redirected to Casdoor by Express
     window.location.href = authUrl;
   };
 
