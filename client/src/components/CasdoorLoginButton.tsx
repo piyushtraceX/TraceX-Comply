@@ -1,6 +1,14 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { FaKey } from 'react-icons/fa'; // Using a key icon instead of SiCasdoor
+import axios from 'axios';
+
+// Extend window interface for TypeScript
+declare global {
+  interface Window {
+    axios?: typeof axios;
+  }
+}
 
 interface CasdoorLoginButtonProps {
   className?: string;
@@ -11,26 +19,31 @@ const CasdoorLoginButton: React.FC<CasdoorLoginButtonProps> = ({ className }) =>
   const casdoorEndpoint = 'https://tracextech.casdoor.com';
   
   const handleCasdoorLogin = () => {
-    // Special handling for Replit environment or any production environment
-    const isReplit = 
-      window.location.hostname.includes('replit') || 
-      window.location.hostname.includes('.app');
+    // Clear any existing authentication data
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('user_data');
+    localStorage.removeItem('just_logged_in');
+    sessionStorage.clear();
     
-    // In Replit, go directly to Casdoor because of potential networking issues
-    if (isReplit) {
-      console.log('REPLIT ENVIRONMENT: Redirecting directly to Casdoor...');
-      window.location.href = 'https://tracextech.casdoor.com';
-      return;
+    // Remove any authorization headers from axios
+    try {
+      if (axios.defaults?.headers?.common) {
+        delete axios.defaults.headers.common['Authorization'];
+      }
+    } catch (e) {
+      console.error('Error clearing axios headers:', e);
     }
     
-    // In local development, use the API endpoint
-    const baseUrl = window.location.origin;
-    const redirectUrl = `${baseUrl}/auth/casdoor`;
+    // Delete all cookies related to authentication
+    document.cookie.split(';').forEach(c => {
+      document.cookie = c.replace(/^ +/, '').replace(/=.*/, '=;expires=' + new Date().toUTCString() + ';path=/');
+    });
     
-    console.log(`LOCAL DEVELOPMENT: Redirecting to Casdoor login via: ${redirectUrl}`);
+    console.log('Cleared all authentication data');
     
-    // Perform the redirect
-    window.location.href = redirectUrl;
+    // Redirect directly to Casdoor for a fresh login
+    console.log('Redirecting to Casdoor for authentication...');
+    window.location.href = 'https://tracextech.casdoor.com';
   };
 
   return (

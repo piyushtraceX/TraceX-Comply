@@ -78,29 +78,24 @@ const startProxy = async () => {
     });
   });
 
-  // Special case for direct Casdoor redirection
-  app.get('/auth/casdoor', (req, res) => {
-    console.log('AUTH REDIRECT: Redirecting /auth/casdoor to Casdoor...');
-    return res.redirect('https://tracextech.casdoor.com');
-  });
-
-  // Rewrite all /auth/* requests to /api/auth/*
-  app.use('/auth', (req, res, next) => {
-    const newPath = req.originalUrl.replace(/^\/auth/, '/api/auth');
-    console.log(`AUTH REWRITE: ${req.originalUrl} -> ${newPath}`);
-    req.url = req.url.replace(/^\/auth/, '/api/auth');
-    next();
-  });
-  
-  // Forward all /api/* requests to Go server
+  // Forward all API requests directly to Go server
+  // No preprocessing or redirects to ensure everything works natively
   app.use('/api', createProxyMiddleware({
     target: 'http://localhost:8081',
     changeOrigin: true,
     secure: false,
-    // Add logging
-    onProxyReq: function(proxyReq: any, req: any, res: any) {
-      console.log(`EXPRESS PROXY: ${req.method} ${req.originalUrl} -> http://localhost:8081${req.originalUrl}`);
-    } as any
+    xfwd: true
+  }));
+  
+  // Also forward /auth to the Go server without any rewriting
+  app.use('/auth', createProxyMiddleware({
+    target: 'http://localhost:8081/api/auth',
+    changeOrigin: true,
+    secure: false,
+    xfwd: true,
+    pathRewrite: {
+      '^/auth': ''  // Remove /auth prefix
+    }
   }));
   
   // Forward all other requests to Vite

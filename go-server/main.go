@@ -239,8 +239,24 @@ func main() {
                                 false, // Allow JavaScript access
                         )
                         
-                        // Redirect back to frontend
-                        c.Redirect(http.StatusTemporaryRedirect, "/")
+                        // Redirect back to frontend - specifically to the TracexTech Comply dashboard
+                        redirectTo := "/"
+                        
+                        // If running in Replit, check whether we should redirect to a specific dashboard URL
+                        host := c.Request.Host
+                        if strings.Contains(host, "replit.dev") || strings.Contains(host, ".app") {
+                                // Use origin from request if available, otherwise construct a URL
+                                origin := c.GetHeader("Origin")
+                                if origin == "" {
+                                        origin = fmt.Sprintf("https://%s", host)
+                                }
+                                
+                                log.Printf("Redirecting authenticated user back to dashboard at %s", origin)
+                                redirectTo = origin + "/"
+                        }
+                        
+                        log.Printf("Authentication successful, redirecting to: %s", redirectTo)
+                        c.Redirect(http.StatusTemporaryRedirect, redirectTo)
                 })
         }
 
