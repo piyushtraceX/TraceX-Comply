@@ -12,6 +12,7 @@ import (
         "github.com/gin-gonic/gin"
         "github.com/markbates/goth"
         "github.com/markbates/goth/gothic"
+        _ "github.com/lib/pq" // PostgreSQL driver
         "golang.org/x/crypto/bcrypt"
 
         "go-server/middleware"
@@ -32,6 +33,30 @@ type RegisterRequest struct {
         DisplayName  string  `json:"name" binding:"required"`
         TenantID     *int    `json:"tenantId"`
         IsSuperAdmin bool    `json:"isSuperAdmin"`
+}
+
+// SetupDatabase initializes a database connection
+func SetupDatabase() (*sql.DB, error) {
+        // Get database connection string from environment variable
+        dbURL := os.Getenv("DATABASE_URL")
+        if dbURL == "" {
+                log.Println("DATABASE_URL environment variable not set. Using default connection string.")
+                dbURL = "postgres://postgres:postgres@localhost:5432/eudr_complimate?sslmode=disable"
+        }
+
+        // Open database connection
+        db, err := sql.Open("postgres", dbURL)
+        if err != nil {
+                return nil, fmt.Errorf("failed to connect to database: %v", err)
+        }
+
+        // Test database connection
+        if err := db.Ping(); err != nil {
+                return nil, fmt.Errorf("failed to ping database: %v", err)
+        }
+
+        log.Println("Database connection established successfully")
+        return db, nil
 }
 
 // InitAuth initializes the authentication providers

@@ -8,10 +8,10 @@ require (
 	github.com/gin-contrib/cors v1.3.1
 	github.com/gin-contrib/static v0.0.1
 	github.com/gin-gonic/gin v1.7.7
-	github.com/golang-jwt/jwt/v5 v5.0.0
+	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/lib/pq v1.10.7
-	github.com/markbates/goth v1.78.0
-	golang.org/x/crypto v0.0.0-20220525230936-793ad666bf5e
+	github.com/markbates/goth v1.81.0
+	golang.org/x/crypto v0.21.0
 )
 
 require (

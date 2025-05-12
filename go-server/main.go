@@ -42,42 +42,76 @@ func main() {
                         c.JSON(http.StatusOK, gin.H{"status": "OK", "message": "Go server is running"})
                 })
 
-                // Mock auth endpoints
-                auth := api.Group("/auth")
-                {
-                        auth.POST("/login", func(c *gin.Context) {
-                                c.JSON(http.StatusOK, gin.H{
-                                        "user": gin.H{
-                                                "id":          1,
-                                                "username":    "demo",
-                                                "email":       "demo@example.com",
-                                                "displayName": "Demo User",
-                                                "tenantId":    1,
-                                                "isActive":    true,
-                                                "isSuperAdmin": true,
-                                        },
-                                        "token": "mock-jwt-token-123456",
-                                })
+                // For now, let's implement simple mock auth endpoints
+                // This avoids database complexity while still providing Casdoor integration
+                
+                // Mock login endpoint
+                api.POST("/auth/login", func(c *gin.Context) {
+                        c.JSON(http.StatusOK, gin.H{
+                                "user": gin.H{
+                                        "id":          1,
+                                        "username":    "demo",
+                                        "email":       "demo@example.com",
+                                        "displayName": "Demo User",
+                                        "tenantId":    1,
+                                        "isActive":    true,
+                                        "isSuperAdmin": true,
+                                },
+                                "token": "mock-jwt-token-123456",
                         })
+                })
 
-                        auth.GET("/me", func(c *gin.Context) {
-                                c.JSON(http.StatusOK, gin.H{
-                                        "user": gin.H{
-                                                "id":          1,
-                                                "username":    "demo",
-                                                "email":       "demo@example.com",
-                                                "displayName": "Demo User",
-                                                "tenantId":    1,
-                                                "isActive":    true,
-                                                "isSuperAdmin": true,
-                                        },
-                                })
+                // Mock get current user endpoint
+                api.GET("/auth/me", func(c *gin.Context) {
+                        c.JSON(http.StatusOK, gin.H{
+                                "user": gin.H{
+                                        "id":          1,
+                                        "username":    "demo",
+                                        "email":       "demo@example.com",
+                                        "displayName": "Demo User",
+                                        "tenantId":    1,
+                                        "isActive":    true,
+                                        "isSuperAdmin": true,
+                                },
                         })
+                })
 
-                        auth.POST("/logout", func(c *gin.Context) {
-                                c.JSON(http.StatusOK, gin.H{"message": "Logged out successfully"})
-                        })
-                }
+                // Mock logout endpoint
+                api.POST("/auth/logout", func(c *gin.Context) {
+                        c.JSON(http.StatusOK, gin.H{"message": "Logged out successfully"})
+                })
+
+                // Casdoor OAuth route - redirects to Casdoor login
+                api.GET("/auth/casdoor", func(c *gin.Context) {
+                        casdoorEndpoint := os.Getenv("CASDOOR_ENDPOINT")
+                        if casdoorEndpoint == "" {
+                                casdoorEndpoint = "https://tracextech.casdoor.com"
+                        }
+                        
+                        clientID := os.Getenv("CASDOOR_CLIENT_ID")
+                        redirectURI := fmt.Sprintf("%s/api/auth/callback", os.Getenv("APP_URL"))
+                        if redirectURI == "/api/auth/callback" {
+                                redirectURI = "http://localhost:5000/api/auth/callback"
+                        }
+                        
+                        authURL := fmt.Sprintf("%s/login/oauth/authorize?client_id=%s&response_type=code&redirect_uri=%s&scope=read,profile", 
+                                casdoorEndpoint, clientID, redirectURI)
+                        
+                        c.Redirect(http.StatusTemporaryRedirect, authURL)
+                })
+
+                // Casdoor callback handler
+                api.GET("/auth/callback", func(c *gin.Context) {
+                        code := c.Query("code")
+                        if code == "" {
+                                c.JSON(http.StatusBadRequest, gin.H{"error": "No authorization code provided"})
+                                return
+                        }
+                        
+                        // In a production implementation, we would exchange the code for a token
+                        // and fetch user info. For now, we'll just redirect to the frontend.
+                        c.Redirect(http.StatusTemporaryRedirect, "/")
+                })
         }
 
         // Set the path to the React app build directory
