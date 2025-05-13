@@ -107,8 +107,8 @@ func main() {
                 // For now, let's implement simple mock auth endpoints
                 // This avoids database complexity while still providing Casdoor integration
                 
-                // Mock login endpoint
-                api.POST("/auth/login", func(c *gin.Context) {
+                // Login endpoint
+                api.POST("auth/login", func(c *gin.Context) {
                         c.JSON(http.StatusOK, gin.H{
                                 "user": gin.H{
                                         "id":          1,
