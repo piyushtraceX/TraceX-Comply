@@ -16,7 +16,8 @@ import AddDeclaration from "@/pages/AddDeclaration";
 import Customers from "@/pages/Customers";
 import AddCustomer from "@/pages/AddCustomer";
 import Settings from "@/pages/Settings";
-import AuthPage from "@/pages/auth-page"; // Updated import path
+import AuthPage from "@/pages/auth-page";
+import AuthCallback from "@/pages/auth-callback"; // Add the callback page
 import UserManagement from "@/pages/UserManagement";
 import { ThemeProvider } from "next-themes";
 import { LanguageProvider } from "./contexts/LanguageContext";
@@ -60,6 +61,9 @@ function App() {
                     <Switch>
                       <Route path="/auth">
                         <AuthPage />
+                      </Route>
+                      <Route path="/auth/callback">
+                        <AuthCallback />
                       </Route>
                       <Route path="/">
                         <SimpleProtectedRoute>
