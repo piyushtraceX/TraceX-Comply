@@ -68,6 +68,10 @@ func main() {
         log.Printf("REPL_ID = '%s'", os.Getenv("REPL_ID"))
         log.Printf("REPL_SLUG = '%s'", os.Getenv("REPL_SLUG"))
         log.Printf("REPL_OWNER = '%s'", os.Getenv("REPL_OWNER"))
+        log.Printf("GO_PORT = '%s'", os.Getenv("GO_PORT"))
+        log.Println("====== BUILD VERSION 02 ======")
+        log.Println("Changes: Manual URL construction with URL escape fix")
+        log.Println("===============================")
         log.Println("===============================")
 
         // Initialize Casdoor for authentication
@@ -311,9 +315,13 @@ func main() {
                         
                         // Manually construct and print the URL for comparison
                         // Using net/url to properly encode the callback URL
+                        escapedCallback := url.QueryEscape(callbackURL)
+                        log.Printf("ESCAPED CALLBACK URL: %s", escapedCallback)
+                        
+                        // Hardcode the Casdoor URL with our application parameters
                         manual_auth_url := fmt.Sprintf(
                             "https://tracextech.casdoor.com/login/oauth/authorize?client_id=d85be9c2468eae1dbf58&response_type=code&redirect_uri=%s&scope=read&state=eudr-complimate", 
-                            url.QueryEscape(callbackURL))
+                            escapedCallback)
                         
                         log.Printf("SDK URL: %s", sdk_function_url)
                         log.Printf("MANUAL URL: %s", manual_auth_url)
