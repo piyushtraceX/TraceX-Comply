@@ -14,7 +14,6 @@ import (
         "github.com/gin-contrib/static"
         "github.com/gin-gonic/gin"
         "github.com/casdoor/casdoor-go-sdk/casdoorsdk"
-        jwt "github.com/golang-jwt/jwt/v4"
 )
 
 // initCasdoor initializes the Casdoor SDK
@@ -538,47 +537,36 @@ func main() {
                         
                         // Get user info from Casdoor token
                         
-                        // Try our custom RSA verification first
-                        log.Printf("Attempting to verify JWT using RSA private key")
-                        claims, err := ParseJWTWithRSA(token.AccessToken)
+                        // Attempt to verify JWT using Casdoor SDK
+                        log.Printf("Attempting to verify JWT using Casdoor SDK")
+                        sdkClaims, sdkErr := casdoorsdk.ParseJwtToken(token.AccessToken)
                         
-                        if err != nil {
-                                // If our custom parsing fails, try with Casdoor SDK
-                                log.Printf("RSA verification failed: %v, trying Casdoor SDK...", err)
-                                sdkClaims, sdkErr := casdoorsdk.ParseJwtToken(token.AccessToken)
+                        if sdkErr != nil {
+                                // Verification failed
+                                log.Printf("Error verifying JWT with SDK: %v", sdkErr)
                                 
-                                if sdkErr != nil {
-                                        // Both methods failed
-                                        log.Printf("Error verifying JWT with SDK: %v", sdkErr)
-                                        
-                                        // DEVELOPMENT MODE: Create a mock user for testing
-                                        log.Printf("⚠️ DEVELOPMENT MODE: Creating session with mock user")
-                                        
-                                        // Set cookies even if verification fails
-                                        c.SetCookie(
-                                                "auth_status", 
-                                                "success_mock", 
-                                                3600,
-                                                "/", 
-                                                c.Request.Host,
-                                                false,
-                                                false,
-                                        )
-                                        
-                                        // Redirect to dashboard
-                                        c.Redirect(http.StatusFound, "/")
-                                        return
-                                }
+                                // DEVELOPMENT MODE: Create a mock user for testing
+                                log.Printf("⚠️ DEVELOPMENT MODE: Creating session with mock user")
                                 
-                                // SDK verification succeeded
-                                log.Printf("JWT verification successful using Casdoor SDK")
-                                log.Printf("User authenticated: %s", sdkClaims.Name)
-                        } else {
-                                // Our RSA verification succeeded
-                                log.Printf("JWT verification successful using RSA")
-                                log.Printf("User authenticated: %s", claims.Name)
-                                log.Printf("Token details: %s", FormatClaims(claims))
+                                // Set cookies even if verification fails in development
+                                c.SetCookie(
+                                        "auth_status", 
+                                        "success_mock", 
+                                        3600,
+                                        "/", 
+                                        c.Request.Host,
+                                        false,
+                                        false,
+                                )
+                                
+                                // Redirect to dashboard
+                                c.Redirect(http.StatusFound, "/")
+                                return
                         }
+                        
+                        // SDK verification succeeded
+                        log.Printf("JWT verification successful using Casdoor SDK")
+                        log.Printf("User authenticated: %s", sdkClaims.Name)
                         
                         // Create a cookie with the access token
                         // token.ExpiresIn isn't available, use a fixed expiration time
