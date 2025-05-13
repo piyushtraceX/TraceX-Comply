@@ -170,6 +170,13 @@ const startProxy = async () => {
       proxyReq.setHeader('X-Forwarded-Host', req.get('host'));
       
       // Add our custom header for domain detection
+      const replitDomains = process.env.REPLIT_DOMAINS;
+      if (replitDomains) {
+        // If REPLIT_DOMAINS env var is available, use it (most reliable)
+        console.log(`EXPRESS PROXY: Adding X-Replit-Domains-Env header: ${replitDomains}`);
+        proxyReq.setHeader('X-Replit-Domains-Env', replitDomains);
+      }
+      
       if (req.hostname.includes('replit') || req.hostname.includes('.app')) {
         const protocol = req.protocol || 'https';
         const replitDomain = `${protocol}://${req.hostname}`;

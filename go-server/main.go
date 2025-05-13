@@ -155,6 +155,8 @@ func main() {
                         
                         // First, check for environment variables (most reliable)
                         replitDomainsEnv := os.Getenv("REPLIT_DOMAINS")
+                        log.Printf("DEBUG: REPLIT_DOMAINS env var = '%s'", replitDomainsEnv)
+                        
                         if replitDomainsEnv != "" {
                             baseURL = fmt.Sprintf("https://%s", replitDomainsEnv)
                             log.Printf("Using Replit Domains from environment variable: %s", baseURL)
@@ -209,6 +211,9 @@ func main() {
                         
                         // Double-check if we're in a Replit environment by looking at environment variables
                         // Use the replitDomainsEnv variable we already declared above
+                        log.Printf("DEBUG: Before override, callbackURL = '%s'", callbackURL)
+                        log.Printf("DEBUG: Before override, replitDomainsEnv = '%s'", replitDomainsEnv)
+                        
                         if replitDomainsEnv != "" {
                             // We're in a Replit environment, make sure to use the proper domain
                             callbackURL = fmt.Sprintf("https://%s/api/auth/callback", replitDomainsEnv)
