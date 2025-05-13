@@ -136,7 +136,11 @@ const startProxy = async () => {
     
     // Pass special headers to Go server to help it construct correct callback URLs
     req.headers['x-replit-domain'] = `${protocol}://${host}`;
+    req.headers['x-replit-domains-env'] = process.env.REPLIT_DOMAINS;
     req.headers['x-environment'] = isReplit ? 'replit' : 'local';
+    
+    console.log('EXPRESS: Added REPLIT_DOMAINS header:', process.env.REPLIT_DOMAINS);
+    console.log('EXPRESS: Added x-replit-domain header:', `${protocol}://${host}`);
     
     // Let the proxy middleware handle the actual forwarding
     next();

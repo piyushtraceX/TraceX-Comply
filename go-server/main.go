@@ -257,17 +257,24 @@ func main() {
                                    
                         var callbackURL string
                         
-                        // If in Replit environment, use a more reliable domain detection for the callback URL
-                        if isReplit {
-                            log.Printf("REPLIT ENVIRONMENT DETECTED")
+                        // IMPORTANT: Fixed callback URL construction
+                        // Force Replit domain in Replit environment, regardless of other settings
+                        replitDomainsEnv = os.Getenv("REPLIT_DOMAINS")
+                        if replitDomainsEnv != "" && replitDomainsEnv != "undefined" {
+                            // We're 100% in a Replit environment - use REPLIT_DOMAINS env var
+                            log.Printf("REPLIT ENVIRONMENT CONFIRMED via REPLIT_DOMAINS env var")
+                            callbackURL = fmt.Sprintf("https://%s/api/auth/callback", replitDomainsEnv)
+                            log.Printf("Using REPLIT_DOMAINS env var for callback URL: %s", callbackURL)
+                        } else if isReplit {
+                            log.Printf("REPLIT ENVIRONMENT DETECTED but missing REPLIT_DOMAINS")
                             
                             // Try different sources for the domain name, in order of reliability
                             var domain string
                             
-                            if replitDomainsEnv != "" {
-                                // First choice: env var or header equivalent
-                                domain = replitDomainsEnv
-                                log.Printf("Using domain from REPLIT_DOMAINS: %s", domain)
+                            if replitDomainsFromHeader != "" {
+                                // First choice: header from Express
+                                domain = replitDomainsFromHeader
+                                log.Printf("Using domain from X-Replit-Domains-Env header: %s", domain)
                             } else if currentReplitDomain != "" {
                                 // Second choice: header from Express
                                 domain = strings.TrimPrefix(currentReplitDomain, "https://")
@@ -294,17 +301,29 @@ func main() {
                         
                         log.Printf("Final callback URL: %s (base: %s)", callbackURL, baseURL)
                         
-                        // IMPORTANT: Force a check for Replit domains again (to be absolutely sure)
-                        // This should catch cases where the replitDomainsEnv variable wasn't properly set 
+                        // IMPORTANT: Force a final emergency check (all previous steps didn't work)
+                        // This is our last line of defense for the callback URL
                         replit_domains_env := os.Getenv("REPLIT_DOMAINS")
                         log.Printf("FINAL CHECK: REPLIT_DOMAINS = '%s'", replit_domains_env)
                         
-                        if replit_domains_env != "" && !strings.Contains(callbackURL, replit_domains_env) {
+                        if replit_domains_env != "" && replit_domains_env != "undefined" && 
+                           !strings.Contains(callbackURL, replit_domains_env) {
                             // Emergency override - the callbackURL is wrong, fix it!
                             originalCallbackURL := callbackURL
                             callbackURL = fmt.Sprintf("https://%s/api/auth/callback", replit_domains_env)
                             log.Printf("EMERGENCY OVERRIDE: Changing callback URL from '%s' to '%s'", 
                                 originalCallbackURL, callbackURL)
+                        }
+                        
+                        // If we're in Replit, ensure we are NEVER using localhost in the callback URL
+                        if isReplit && strings.Contains(callbackURL, "localhost") {
+                            log.Printf("FATAL ERROR: Still using localhost in Replit environment!")
+                            if replit_domains_env != "" && replit_domains_env != "undefined" {
+                                originalCallbackURL := callbackURL
+                                callbackURL = fmt.Sprintf("https://%s/api/auth/callback", replit_domains_env)
+                                log.Printf("LAST RESORT FIX: Changing localhost URL '%s' to '%s'", 
+                                    originalCallbackURL, callbackURL)
+                            }
                         }
                         
                         // Last chance logging
