@@ -117,40 +117,52 @@ const startProxy = async () => {
   // All /api/* requests are proxied to Go server by the middleware below
   // We don't need special handling for individual /api/auth/* routes
 
-  // Add specific route for /api/auth/casdoor with detailed logging
-  app.get('/api/auth/casdoor', (req, res, next) => {
-    console.log('EXPRESS: Direct handling of /api/auth/casdoor');
+  // EMERGENCY DIRECT HANDLER: Express handles the OAuth redirect directly
+  app.get('/api/auth/casdoor', (req, res) => {
+    console.log('⚠️ EXPRESS: EMERGENCY DIRECT HANDLING of /api/auth/casdoor');
+    console.log('⚠️ EXPRESS: Bypassing Go server completely for OAuth redirect');
     
-    // Check if we're in Replit environment
-    const isReplit = req.headers.host?.includes('replit') || req.headers.host?.includes('repl.co');
+    // Hard-coded Casdoor parameters
+    const casdoorEndpoint = "https://tracextech.casdoor.com";
+    const clientID = "d85be9c2468eae1dbf58";
     
-    // Get the full host for the Replit environment
+    // Determine the callback URL for Replit environment
+    let callbackUrl: string;
+    const replitDomains = process.env.REPLIT_DOMAINS;
     const protocol = req.headers['x-forwarded-proto'] || 'https';
-    const host = req.headers['x-forwarded-host'] || req.headers.host;
+    const host = req.headers.host || '';
     
-    console.log(`EXPRESS: Auth request in ${isReplit ? 'Replit' : 'local'} environment`);
-    console.log(`EXPRESS: Host headers - protocol: ${protocol}, host: ${host}`);
+    console.log(`⚠️ EXPRESS OAUTH: Host information - protocol: ${protocol}, host: ${host}`);
+    console.log(`⚠️ EXPRESS OAUTH: REPLIT_DOMAINS env var: ${replitDomains}`);
     
-    // Add query parameters
-    const queryParams = req.url.includes('?') ? req.url.substring(req.url.indexOf('?')) : '';
-    
-    // Pass special headers to Go server to help it construct correct callback URLs
-    req.headers['x-replit-domain'] = `${protocol}://${host}`;
-    req.headers['x-replit-domains-env'] = process.env.REPLIT_DOMAINS;
-    req.headers['x-environment'] = isReplit ? 'replit' : 'local';
-    
-    // Add a direct callback URL to make it absolutely clear
-    if (process.env.REPLIT_DOMAINS) {
-      const callbackUrl = `https://${process.env.REPLIT_DOMAINS}/api/auth/callback`;
-      req.headers['x-replit-callback-url'] = callbackUrl;
-      console.log('EXPRESS: Added x-replit-callback-url header:', callbackUrl);
+    if (replitDomains) {
+      // First priority: Use REPLIT_DOMAINS environment variable
+      callbackUrl = `https://${replitDomains}/api/auth/callback`;
+      console.log(`⚠️ EXPRESS OAUTH: Using callback URL from REPLIT_DOMAINS: ${callbackUrl}`);
+    } else if (host && (host.includes('replit') || host.includes('.repl.co'))) {
+      // Second priority: Use hostname if it's a Replit domain
+      callbackUrl = `${protocol}://${host}/api/auth/callback`;
+      console.log(`⚠️ EXPRESS OAUTH: Using callback URL from hostname: ${callbackUrl}`);
+    } else {
+      // Fallback for local development
+      callbackUrl = "http://localhost:5000/api/auth/callback";
+      console.log(`⚠️ EXPRESS OAUTH: Using localhost callback URL: ${callbackUrl}`);
     }
     
-    console.log('EXPRESS: Added REPLIT_DOMAINS header:', process.env.REPLIT_DOMAINS);
-    console.log('EXPRESS: Added x-replit-domain header:', `${protocol}://${host}`);
+    // Construct the OAuth URL manually
+    const state = "eudr-complimate";
+    const scope = "read";
+    const authUrl = `${casdoorEndpoint}/login/oauth/authorize?` +
+      `client_id=${clientID}&` +
+      `response_type=code&` +
+      `redirect_uri=${encodeURIComponent(callbackUrl)}&` +
+      `scope=${scope}&` +
+      `state=${state}`;
     
-    // Let the proxy middleware handle the actual forwarding
-    next();
+    console.log(`⚠️ EXPRESS OAUTH: Redirecting to Casdoor with URL: ${authUrl}`);
+    
+    // Redirect directly to Casdoor
+    res.redirect(307, authUrl);
   });
 
   // Add an explicit route handler for the root auth endpoint for error debugging
