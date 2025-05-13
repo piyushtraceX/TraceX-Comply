@@ -211,23 +211,63 @@ func main() {
                             }
                         }
                         
-                        // Construct final callback URL with the /api/auth/callback path
-                        // The Express server will proxy this to the Go server
-                        callbackURL := fmt.Sprintf("%s/api/auth/callback", baseURL)
-                        log.Printf("Using callback URL: %s (base: %s)", callbackURL, baseURL)
+                        // Get current host from request for better domain detection
+                        currentHost := c.Request.Host
+                        forwardedHostHeader := c.GetHeader("X-Forwarded-Host")
+                        currentReplitDomain := c.GetHeader("X-Replit-Domain")
                         
-                        log.Printf("Using Casdoor callback URL: %s", callbackURL)
+                        // Determine if we're in a Replit environment for better callback URL handling
+                        isReplit := strings.Contains(currentHost, "replit") || 
+                                   strings.Contains(currentHost, ".app") || 
+                                   strings.Contains(currentHost, ".repl.co")
                         
-                        // Double-check if we're in a Replit environment by looking at environment variables
-                        // Use the replitDomainsEnv variable we already declared above
-                        log.Printf("DEBUG: Before override, callbackURL = '%s'", callbackURL)
-                        log.Printf("DEBUG: Before override, replitDomainsEnv = '%s'", replitDomainsEnv)
-                        
-                        if replitDomainsEnv != "" {
-                            // We're in a Replit environment, make sure to use the proper domain
-                            callbackURL = fmt.Sprintf("https://%s/api/auth/callback", replitDomainsEnv)
-                            log.Printf("OVERRIDE: Using Replit callback URL from env vars: %s", callbackURL)
+                        // Check custom headers as well
+                        replitDomainsFromHeader := c.GetHeader("X-Replit-Domains-Env")
+                        if replitDomainsFromHeader != "" {
+                            isReplit = true
+                            // If Express passed the env var via header, use it
+                            replitDomainsEnv = replitDomainsFromHeader
+                            log.Printf("IMPORTANT: Got REPLIT_DOMAINS from Express header: %s", replitDomainsFromHeader)
                         }
+                                   
+                        var callbackURL string
+                        
+                        // If in Replit environment, use a more reliable domain detection for the callback URL
+                        if isReplit {
+                            log.Printf("REPLIT ENVIRONMENT DETECTED")
+                            
+                            // Try different sources for the domain name, in order of reliability
+                            var domain string
+                            
+                            if replitDomainsEnv != "" {
+                                // First choice: env var or header equivalent
+                                domain = replitDomainsEnv
+                                log.Printf("Using domain from REPLIT_DOMAINS: %s", domain)
+                            } else if currentReplitDomain != "" {
+                                // Second choice: header from Express
+                                domain = strings.TrimPrefix(currentReplitDomain, "https://")
+                                domain = strings.TrimPrefix(domain, "http://")
+                                log.Printf("Using domain from X-Replit-Domain header: %s", domain)
+                            } else if forwardedHostHeader != "" {
+                                // Third choice: X-Forwarded-Host header
+                                domain = forwardedHostHeader
+                                log.Printf("Using domain from X-Forwarded-Host: %s", domain)
+                            } else {
+                                // Last resort: the host header
+                                domain = currentHost
+                                log.Printf("Using domain from Host header: %s", domain)
+                            }
+                            
+                            // Construct the callback URL with the Replit domain
+                            callbackURL = fmt.Sprintf("https://%s/api/auth/callback", domain)
+                            log.Printf("REPLIT environment: Using callback URL: %s", callbackURL)
+                        } else {
+                            // Local development - just use the baseURL
+                            callbackURL = fmt.Sprintf("%s/api/auth/callback", baseURL)
+                            log.Printf("LOCAL environment: Using callback URL: %s", callbackURL)
+                        }
+                        
+                        log.Printf("Final callback URL: %s (base: %s)", callbackURL, baseURL)
                         
                         // Generate the OAuth URL using Casdoor SDK
                         // Note: The SDK function only takes callbackURL parameter in this version
