@@ -136,12 +136,71 @@ func main() {
 
                 // User info endpoint
                 api.GET("auth/me", func(c *gin.Context) {
+                        // Check for Casdoor token cookie first
+                        casdoorToken, err := c.Cookie("casdoor_token")
+                        if err == nil && casdoorToken != "" {
+                                // We have a Casdoor token, try to extract user info
+                                log.Printf("Found Casdoor token cookie, length: %d", len(casdoorToken))
+                                
+                                // Try to parse the token
+                                claims, parseErr := casdoorsdk.ParseJwtToken(casdoorToken)
+                                if parseErr == nil && claims != nil {
+                                        log.Printf("Successfully parsed Casdoor token, user: %s", claims.Name)
+                                        
+                                        // Return user info from the token
+                                        c.JSON(http.StatusOK, gin.H{
+                                                "user": gin.H{
+                                                        "id":          1, // Use a fixed ID for simplicity
+                                                        "username":    claims.Name,
+                                                        "email":       claims.Email,
+                                                        "name":        claims.Name,
+                                                        "tenantId":    1,
+                                                        "isActive":    true,
+                                                        "isSuperAdmin": true,
+                                                },
+                                                "auth": gin.H{
+                                                        "provider": "casdoor",
+                                                        "token_type": "Bearer",
+                                                },
+                                        })
+                                        return
+                                } else {
+                                        log.Printf("Error parsing Casdoor token: %v", parseErr)
+                                }
+                        }
+                        
+                        // Check for auth_status cookie as fallback
+                        authStatus, _ := c.Cookie("auth_status")
+                        if authStatus == "success" || authStatus == "success_mock" {
+                                log.Printf("Found auth_status cookie: %s", authStatus)
+                                
+                                // Return a mock user for development
+                                c.JSON(http.StatusOK, gin.H{
+                                        "user": gin.H{
+                                                "id":          1,
+                                                "username":    "casdoor_user",
+                                                "email":       "user@example.com",
+                                                "name":        "Casdoor User",
+                                                "tenantId":    1,
+                                                "isActive":    true,
+                                                "isSuperAdmin": true,
+                                        },
+                                        "auth": gin.H{
+                                                "provider": "casdoor",
+                                                "method": "cookie",
+                                        },
+                                })
+                                return
+                        }
+                        
+                        // Fallback to demo user for development
+                        log.Printf("No authentication found, returning demo user")
                         c.JSON(http.StatusOK, gin.H{
                                 "user": gin.H{
                                         "id":          1,
                                         "username":    "demo",
                                         "email":       "demo@example.com",
-                                        "displayName": "Demo User",
+                                        "name":        "Demo User",
                                         "tenantId":    1,
                                         "isActive":    true,
                                         "isSuperAdmin": true,
@@ -151,6 +210,29 @@ func main() {
 
                 // Logout endpoint
                 api.POST("auth/logout", func(c *gin.Context) {
+                        // Clear Casdoor token cookie
+                        c.SetCookie(
+                                "casdoor_token",
+                                "",
+                                -1, // Expire immediately
+                                "/",
+                                c.Request.Host,
+                                false,
+                                true,
+                        )
+                        
+                        // Clear auth status cookie
+                        c.SetCookie(
+                                "auth_status",
+                                "",
+                                -1, // Expire immediately
+                                "/",
+                                c.Request.Host,
+                                false,
+                                false,
+                        )
+                        
+                        log.Printf("Cleared authentication cookies for user")
                         c.JSON(http.StatusOK, gin.H{"message": "Logged out successfully"})
                 })
 
@@ -158,11 +240,22 @@ func main() {
                 // Direct handler that doesn't rely on Casdoor SDK
                 api.GET("auth/casdoor", func(c *gin.Context) {
                     // ====== REPLIT DOMAIN DETECTION ======
+                    // Priority 0: Check for client-provided redirect_uri
+                    clientRedirectURI := c.Query("redirect_uri")
+                    
                     // First priority: Use direct header from Express
                     callbackURL := c.GetHeader("X-Replit-Callback-URL")
+                    
                     // Log all headers (for debugging)
                     log.Println("==== ALL HEADERS ====")
                     for key, values := range c.Request.Header {
+                        log.Printf("  %s: %v", key, values)
+                    }
+                    log.Println("====================")
+
+                    // Log all query parameters
+                    log.Println("==== QUERY PARAMS ====")
+                    for key, values := range c.Request.URL.Query() {
                         log.Printf("  %s: %v", key, values)
                     }
                     log.Println("====================")
@@ -171,6 +264,7 @@ func main() {
                     replitDomains := os.Getenv("REPLIT_DOMAINS")
                     
                     // Log all important variables first
+                    log.Printf("[AUTH] Client redirect_uri: '%s'", clientRedirectURI)
                     log.Printf("[AUTH] X-Replit-Callback-URL header: '%s'", callbackURL)
                     log.Printf("[AUTH] REPLIT_DOMAINS env var: '%s'", replitDomains)
                     
@@ -178,24 +272,43 @@ func main() {
                     isReplit := replitDomains != "" || strings.Contains(c.Request.Host, "replit") || 
                                strings.Contains(c.Request.Host, ".repl.co")
                     
-                    // Determine the callback URL
+                    var apiCallbackURL string
+                    
+                    // Determine the API callback URL
                     if callbackURL == "" {
                         // Header not available - construct URL ourselves
                         if replitDomains != "" {
                             // Use environment variable
-                            callbackURL = fmt.Sprintf("https://%s/api/auth/callback", replitDomains)
-                            log.Printf("[AUTH] Using REPLIT_DOMAINS env var for callback: %s", callbackURL)
+                            apiCallbackURL = fmt.Sprintf("https://%s/api/auth/callback", replitDomains)
+                            log.Printf("[AUTH] Using REPLIT_DOMAINS env var for API callback: %s", apiCallbackURL)
                         } else if isReplit {
                             // Use the host header
-                            callbackURL = fmt.Sprintf("https://%s/api/auth/callback", c.Request.Host)
-                            log.Printf("[AUTH] Using Host header for callback: %s", callbackURL)
+                            apiCallbackURL = fmt.Sprintf("https://%s/api/auth/callback", c.Request.Host)
+                            log.Printf("[AUTH] Using Host header for API callback: %s", apiCallbackURL)
                         } else {
                             // Local development
-                            callbackURL = "http://localhost:5000/api/auth/callback"
-                            log.Printf("[AUTH] Using localhost for callback: %s", callbackURL)
+                            apiCallbackURL = "http://localhost:5000/api/auth/callback"
+                            log.Printf("[AUTH] Using localhost for API callback: %s", apiCallbackURL)
                         }
                     } else {
-                        log.Printf("[AUTH] Using explicit callback URL from header: %s", callbackURL)
+                        apiCallbackURL = callbackURL
+                        log.Printf("[AUTH] Using explicit API callback URL from header: %s", apiCallbackURL)
+                    }
+                    
+                    // If client provided a redirect_uri, we'll use that for the final user redirect
+                    // But for Casdoor, we still need to use our API callback URL
+                    if clientRedirectURI != "" {
+                        // Store the client's redirect URI in the session or cookie for later use
+                        c.SetCookie(
+                            "client_redirect_uri",
+                            clientRedirectURI,
+                            3600, // 1 hour
+                            "/",
+                            c.Request.Host,
+                            false,
+                            false,
+                        )
+                        log.Printf("[AUTH] Stored client redirect URI in cookie: %s", clientRedirectURI)
                     }
                     
                     // Hard-coded Casdoor parameters

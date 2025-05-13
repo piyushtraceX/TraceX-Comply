@@ -42,12 +42,16 @@ const CasdoorLoginButton: React.FC<CasdoorLoginButtonProps> = ({ className }) =>
     console.log('Cleared all authentication data');
     console.log('Initiating Casdoor authentication flow...');
     
-    // Use the Go server's OAuth endpoint with a timestamp parameter to avoid caching
+    // Create callback URL for our custom handler
+    const callbackUrl = `${window.location.origin}/auth/callback`;
+    
+    // Use the Go server's OAuth endpoint with timestamp and callback parameters
     const timestamp = new Date().getTime();
-    const authUrl = `/api/auth/casdoor?ts=${timestamp}`;
+    const authUrl = `/api/auth/casdoor?ts=${timestamp}&redirect_uri=${encodeURIComponent(callbackUrl)}`;
     
     // Log more details about the request
     console.log(`Current location: ${window.location.href}`);
+    console.log(`Callback URL: ${callbackUrl}`);
     console.log(`Full auth URL: ${window.location.origin}${authUrl}`);
     console.log(`Redirecting to Go server OAuth endpoint: ${authUrl}`);
     
