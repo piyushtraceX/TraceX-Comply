@@ -123,9 +123,8 @@ func main() {
                         })
                 })
 
-                // Mock get current user endpoint
                 // User info endpoint
-                api.GET("/auth/me", func(c *gin.Context) {
+                api.GET("auth/me", func(c *gin.Context) {
                         c.JSON(http.StatusOK, gin.H{
                                 "user": gin.H{
                                         "id":          1,
@@ -139,14 +138,13 @@ func main() {
                         })
                 })
 
-                // Mock logout endpoint
-                api.POST("/auth/logout", func(c *gin.Context) {
+                // Logout endpoint
+                api.POST("auth/logout", func(c *gin.Context) {
                         c.JSON(http.StatusOK, gin.H{"message": "Logged out successfully"})
                 })
 
                 // Casdoor OAuth route - redirects to Casdoor login
-                // OAuth redirect to Casdoor
-                api.GET("/auth/casdoor", func(c *gin.Context) {
+                api.GET("auth/casdoor", func(c *gin.Context) {
                         casdoorEndpoint := os.Getenv("CASDOOR_ENDPOINT")
                         if casdoorEndpoint == "" {
                                 casdoorEndpoint = "https://tracextech.casdoor.com"
@@ -210,7 +208,7 @@ func main() {
                 })
 
                 // Casdoor callback handler
-                api.GET("/auth/callback", func(c *gin.Context) {
+                api.GET("auth/callback", func(c *gin.Context) {
                         code := c.Query("code")
                         state := c.Query("state")
                         
