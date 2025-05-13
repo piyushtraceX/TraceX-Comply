@@ -152,11 +152,13 @@ const startProxy = async () => {
 
   // Forward all API requests directly to Go server
   app.use('/api', createProxyMiddleware({
-    target: 'http://localhost:8081',
+    target: 'http://localhost:8081/api',
     changeOrigin: true,
     secure: false,
     xfwd: true,
-    pathRewrite: undefined, // Do not modify paths
+    pathRewrite: {
+      '^/api': '' // Replace /api with nothing since it's already in the target
+    },
     // Add logging but fix TypeScript errors
     onProxyReq: function(proxyReq: any, req: any, res: any) {
       const originalPath = req.originalUrl;
