@@ -81,11 +81,28 @@ const startProxy = async () => {
 
   // Special case for /auth/casdoor - redirect to Go server's OAuth endpoint
   app.get('/auth/casdoor', (req, res) => {
-    console.log('EXPRESS: Redirecting to Go server OAuth handler');
+    console.log('EXPRESS: Redirecting /auth/casdoor to Go server OAuth handler at /api/auth/casdoor');
+    
+    // Add timestamp parameter to avoid caching issues
+    const timestamp = new Date().getTime();
+    const redirectUrl = `/api/auth/casdoor?ts=${timestamp}`;
     
     // Use the /api/auth/casdoor route directly, which will be proxied to Go
     // This ensures it works both in local dev and Replit environments
-    res.redirect('/api/auth/casdoor');
+    res.redirect(redirectUrl);
+  });
+  
+  // Handle /auth/me redirections as well
+  app.get('/auth/me', (req, res) => {
+    console.log('EXPRESS: Redirecting /auth/me to /api/auth/me');
+    res.redirect('/api/auth/me');
+  });
+  
+  // Handle any other auth routes that might be missing the /api prefix
+  app.get('/auth/*', (req, res) => {
+    const path = req.path.replace('/auth/', '/api/auth/');
+    console.log(`EXPRESS: Redirecting ${req.path} to ${path}`);
+    res.redirect(path + (req.url.includes('?') ? req.url.substring(req.url.indexOf('?')) : ''));
   });
 
   // All /api/* requests are proxied to Go server by the middleware below
@@ -95,14 +112,24 @@ const startProxy = async () => {
   app.get('/api/auth/casdoor', (req, res, next) => {
     console.log('EXPRESS: Direct handling of /api/auth/casdoor');
     
-    // Forward to the Go server with full URL parameters
-    const targetUrl = 'http://localhost:8081/api/auth/casdoor' + 
-      (req.url.includes('?') ? req.url.substring(req.url.indexOf('?')) : '');
+    // Check if we're in Replit environment
+    const isReplit = req.headers.host?.includes('replit') || req.headers.host?.includes('repl.co');
     
-    console.log(`EXPRESS: Forwarding to Go server at ${targetUrl}`);
+    // Get the full host for the Replit environment
+    const protocol = req.headers['x-forwarded-proto'] || 'https';
+    const host = req.headers['x-forwarded-host'] || req.headers.host;
     
-    // Use next() to let the proxy middleware handle the actual forwarding
-    req.url = '/api/auth/casdoor';
+    console.log(`EXPRESS: Auth request in ${isReplit ? 'Replit' : 'local'} environment`);
+    console.log(`EXPRESS: Host headers - protocol: ${protocol}, host: ${host}`);
+    
+    // Add query parameters
+    const queryParams = req.url.includes('?') ? req.url.substring(req.url.indexOf('?')) : '';
+    
+    // Pass special headers to Go server to help it construct correct callback URLs
+    req.headers['x-replit-domain'] = `${protocol}://${host}`;
+    req.headers['x-environment'] = isReplit ? 'replit' : 'local';
+    
+    // Let the proxy middleware handle the actual forwarding
     next();
   });
 
