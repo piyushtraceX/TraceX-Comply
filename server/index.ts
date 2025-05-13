@@ -106,6 +106,18 @@ const startProxy = async () => {
     next();
   });
 
+  // Add an explicit route handler for the root auth endpoint for error debugging
+  app.get('/auth', (req, res) => {
+    console.log('EXPRESS: Caught request to /auth root');
+    res.redirect('/auth/casdoor');
+  });
+
+  // Add a catch-all route for missing API routes with helpful debugging info
+  app.all('/api/*', (req, res, next) => {
+    console.log(`EXPRESS: Processing API request for ${req.method} ${req.url}`);
+    next();
+  });
+
   // Forward all API requests directly to Go server
   app.use('/api', createProxyMiddleware({
     target: 'http://localhost:8081',
@@ -113,18 +125,19 @@ const startProxy = async () => {
     secure: false,
     xfwd: true,
     pathRewrite: undefined, // Do not rewrite paths
-    onProxyReq: (proxyReq, req, res) => {
+    // Add logging but fix TypeScript errors
+    onProxyReq: function(proxyReq: any, req: any, res: any) {
       console.log(`EXPRESS PROXY: Forwarding ${req.method} ${req.url} to Go server`);
     },
-    onProxyRes: (proxyRes, req, res) => {
+    onProxyRes: function(proxyRes: any, req: any, res: any) {
       console.log(`EXPRESS PROXY: Received ${proxyRes.statusCode} ${proxyRes.statusMessage} from Go server for ${req.method} ${req.url}`);
     },
-    onError: (err, req, res) => {
+    onError: function(err: Error, req: any, res: any) {
       console.error(`EXPRESS PROXY ERROR: ${err.message} for ${req.method} ${req.url}`);
       res.writeHead(502, { 'Content-Type': 'text/plain' });
       res.end(`Proxy Error: ${err.message}`);
     }
-  }));
+  } as any));
   
   // Forward all other requests to Vite
   app.use('/', createProxyMiddleware({

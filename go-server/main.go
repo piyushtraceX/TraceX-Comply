@@ -4,6 +4,7 @@ import (
         "fmt"
         "log"
         "net/http"
+        "net/url"
         "os"
         "path/filepath"
         "strings"
@@ -13,8 +14,7 @@ import (
         "github.com/gin-contrib/static"
         "github.com/gin-gonic/gin"
         "github.com/casdoor/casdoor-go-sdk/casdoorsdk"
-
-        // No need to import local auth package anymore
+        jwt "github.com/golang-jwt/jwt/v4"
 )
 
 // initCasdoor initializes the Casdoor SDK
