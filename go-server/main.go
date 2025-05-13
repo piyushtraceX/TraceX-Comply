@@ -310,14 +310,22 @@ func main() {
                         sdk_function_url := casdoorsdk.GetSigninUrl(callbackURL)
                         
                         // Manually construct and print the URL for comparison
-                        manual_auth_url := fmt.Sprintf("https://tracextech.casdoor.com/login/oauth/authorize?client_id=d85be9c2468eae1dbf58&response_type=code&redirect_uri=%s&scope=read&state=eudr-complimate", url.QueryEscape(callbackURL))
+                        // Using net/url to properly encode the callback URL
+                        manual_auth_url := fmt.Sprintf(
+                            "https://tracextech.casdoor.com/login/oauth/authorize?client_id=d85be9c2468eae1dbf58&response_type=code&redirect_uri=%s&scope=read&state=eudr-complimate", 
+                            url.QueryEscape(callbackURL))
                         
                         log.Printf("SDK URL: %s", sdk_function_url)
                         log.Printf("MANUAL URL: %s", manual_auth_url)
                         
-                        // The SDK might be ignoring our callback URL!
-                        // In this case, directly use our manually constructed URL
-                        authURL := manual_auth_url
+                        // Check if SDK URL contains the proper callback URL
+                        var authURL string
+                        if !strings.Contains(sdk_function_url, url.QueryEscape(callbackURL)) {
+                            log.Printf("WARNING: SDK URL does not contain the proper callback URL! Using manual URL instead.")
+                            authURL = manual_auth_url
+                        } else {
+                            authURL = sdk_function_url
+                        }
                         
                         log.Printf("Redirecting to Casdoor URL: %s", authURL)
                         c.Redirect(http.StatusTemporaryRedirect, authURL)

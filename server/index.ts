@@ -26,7 +26,7 @@ const killProcessesOnPorts = async (ports: number[]) => {
 const startGoServer = async () => {
   console.log('Building and starting Go server...');
   
-  // Build the Go server
+  // Rebuild the Go server every time to ensure we have the latest code
   const buildProcess = spawn('cd go-server && go build -o server main.go', {
     shell: true,
     stdio: 'inherit'
@@ -38,8 +38,8 @@ const startGoServer = async () => {
   const replitDomains = process.env.REPLIT_DOMAINS;
   console.log(`EXPRESS: REPLIT_DOMAINS environment variable = '${replitDomains}'`);
   
-  // Start the Go server with environment variables
-  const goServer = spawn('./go-server/server', {
+  // Double-check that we're using our freshly built binary
+  const goServer = spawn('cd go-server && ./server', {
     env: { 
       ...process.env, 
       GO_PORT: '8081',
