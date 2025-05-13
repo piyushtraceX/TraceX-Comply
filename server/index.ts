@@ -34,9 +34,18 @@ const startGoServer = async () => {
   
   await new Promise((resolve) => buildProcess.on('close', resolve));
   
-  // Start the Go server
+  // Copy important environment variables
+  const replitDomains = process.env.REPLIT_DOMAINS;
+  console.log(`EXPRESS: REPLIT_DOMAINS environment variable = '${replitDomains}'`);
+  
+  // Start the Go server with environment variables
   const goServer = spawn('./go-server/server', {
-    env: { ...process.env, GO_PORT: '8081' },
+    env: { 
+      ...process.env, 
+      GO_PORT: '8081',
+      // Make sure REPLIT_DOMAINS is explicitly passed to child process
+      ...(replitDomains ? { REPLIT_DOMAINS: replitDomains } : {})
+    },
     shell: true,
     stdio: 'inherit'
   });

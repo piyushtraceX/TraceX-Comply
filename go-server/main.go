@@ -61,6 +61,14 @@ func main() {
         // Set up logging
         log.SetFlags(log.LstdFlags | log.Lshortfile)
         log.Println("Starting Go server...")
+        
+        // Dump important environment variables for debugging
+        log.Println("==== ENVIRONMENT VARIABLES ====")
+        log.Printf("REPLIT_DOMAINS = '%s'", os.Getenv("REPLIT_DOMAINS"))
+        log.Printf("REPL_ID = '%s'", os.Getenv("REPL_ID"))
+        log.Printf("REPL_SLUG = '%s'", os.Getenv("REPL_SLUG"))
+        log.Printf("REPL_OWNER = '%s'", os.Getenv("REPL_OWNER"))
+        log.Println("===============================")
 
         // Initialize Casdoor for authentication
         initCasdoor()
@@ -145,6 +153,19 @@ func main() {
 
                 // Casdoor OAuth route - redirects to Casdoor login
                 api.GET("auth/casdoor", func(c *gin.Context) {
+                        // Debug: Dump all headers to help with debugging
+                        log.Printf("==== CASDOOR REQUEST HEADERS ====")
+                        for name, values := range c.Request.Header {
+                            for _, value := range values {
+                                log.Printf("  %s: %s", name, value)
+                            }
+                        }
+                        log.Printf("=================================")
+                        
+                        // Debug REPLIT_DOMAINS environment variable again
+                        replitDomains := os.Getenv("REPLIT_DOMAINS") 
+                        log.Printf("CASDOOR HANDLER: REPLIT_DOMAINS env = '%s'", replitDomains)
+                        
                         casdoorEndpoint := os.Getenv("CASDOOR_ENDPOINT")
                         if casdoorEndpoint == "" {
                                 casdoorEndpoint = "https://tracextech.casdoor.com"
@@ -269,9 +290,34 @@ func main() {
                         
                         log.Printf("Final callback URL: %s (base: %s)", callbackURL, baseURL)
                         
-                        // Generate the OAuth URL using Casdoor SDK
-                        // Note: The SDK function only takes callbackURL parameter in this version
-                        authURL := casdoorsdk.GetSigninUrl(callbackURL)
+                        // IMPORTANT: Force a check for Replit domains again (to be absolutely sure)
+                        // This should catch cases where the replitDomainsEnv variable wasn't properly set 
+                        replit_domains_env := os.Getenv("REPLIT_DOMAINS")
+                        log.Printf("FINAL CHECK: REPLIT_DOMAINS = '%s'", replit_domains_env)
+                        
+                        if replit_domains_env != "" && !strings.Contains(callbackURL, replit_domains_env) {
+                            // Emergency override - the callbackURL is wrong, fix it!
+                            originalCallbackURL := callbackURL
+                            callbackURL = fmt.Sprintf("https://%s/api/auth/callback", replit_domains_env)
+                            log.Printf("EMERGENCY OVERRIDE: Changing callback URL from '%s' to '%s'", 
+                                originalCallbackURL, callbackURL)
+                        }
+                        
+                        // Last chance logging
+                        log.Printf("FINAL CALLBACK URL: %s", callbackURL)
+
+                        // DEBUGGING: Print full authURL construction process
+                        sdk_function_url := casdoorsdk.GetSigninUrl(callbackURL)
+                        
+                        // Manually construct and print the URL for comparison
+                        manual_auth_url := fmt.Sprintf("https://tracextech.casdoor.com/login/oauth/authorize?client_id=d85be9c2468eae1dbf58&response_type=code&redirect_uri=%s&scope=read&state=eudr-complimate", url.QueryEscape(callbackURL))
+                        
+                        log.Printf("SDK URL: %s", sdk_function_url)
+                        log.Printf("MANUAL URL: %s", manual_auth_url)
+                        
+                        // The SDK might be ignoring our callback URL!
+                        // In this case, directly use our manually constructed URL
+                        authURL := manual_auth_url
                         
                         log.Printf("Redirecting to Casdoor URL: %s", authURL)
                         c.Redirect(http.StatusTemporaryRedirect, authURL)
