@@ -357,24 +357,40 @@ func main() {
                         
                         log.Printf("COMPLETE MANUAL OAUTH URL: %s", authURL)
                         
-                        // FORCE FIX V2: Hardcoded absolute override for Replit environment
-                        // Ignore all previous URL construction and use Replit domain directly
+                        // FORCE FIX V3: Try to read callback URL directly from header first, then env var
+                        // This should be most reliable since Express is sending this header explicitly
+                        directCallbackUrl := c.GetHeader("X-Replit-Callback-URL")
                         replitDomainenv := os.Getenv("REPLIT_DOMAINS")
-                        log.Printf("### TESTING OVERRIDE: REPLIT_DOMAINS = '%s'", replitDomainenv)
                         
-                        // Always override in test environment
-                        if replitDomainenv != "" {
-                            log.Printf("### FORCE OVERRIDING AUTH URL - REPLIT DOMAIN FOUND")
+                        log.Printf("### TESTING OVERRIDE: X-Replit-Callback-URL = '%s', REPLIT_DOMAINS = '%s'", 
+                            directCallbackUrl, replitDomainenv)
+                        
+                        // PRIORITY 1: Use the direct callback URL from Express (most reliable)
+                        if directCallbackUrl != "" {
+                            log.Printf("### USING EXPRESS-PROVIDED CALLBACK URL")
+                            escapedDirectCallback := url.QueryEscape(directCallbackUrl)
+                            newAuthURL := fmt.Sprintf(
+                                "https://tracextech.casdoor.com/login/oauth/authorize?client_id=d85be9c2468eae1dbf58&response_type=code&redirect_uri=%s&scope=read&state=eudr-complimate", 
+                                escapedDirectCallback)
+                            
+                            log.Printf("### EXPRESS HEADER OVERRIDE ###\nFrom: %s\nTo: %s", authURL, newAuthURL)
+                            authURL = newAuthURL
+                        
+                        // PRIORITY 2: Use env var if available (fallback)
+                        } else if replitDomainenv != "" {
+                            log.Printf("### USING ENVIRONMENT VARIABLE - REPLIT_DOMAINS")
                             // Force Replit domain for ALL auth URLs regardless of other logic
                             escapedReplit := url.QueryEscape(fmt.Sprintf("https://%s/api/auth/callback", replitDomainenv))
                             newAuthURL := fmt.Sprintf(
                                 "https://tracextech.casdoor.com/login/oauth/authorize?client_id=d85be9c2468eae1dbf58&response_type=code&redirect_uri=%s&scope=read&state=eudr-complimate", 
                                 escapedReplit)
                             
-                            log.Printf("### EMERGENCY OVERRIDE ###\nFrom: %s\nTo: %s", authURL, newAuthURL)
+                            log.Printf("### ENV VAR OVERRIDE ###\nFrom: %s\nTo: %s", authURL, newAuthURL)
                             authURL = newAuthURL
+                        
+                        // No reliable source found - keeping original URL
                         } else {
-                            log.Printf("### NO OVERRIDE - REPLIT_DOMAINS NOT FOUND")
+                            log.Printf("### NO OVERRIDE SOURCE FOUND - USING ORIGINAL URL")
                         }
                         
                         log.Printf("Redirecting to Casdoor URL: %s", authURL)

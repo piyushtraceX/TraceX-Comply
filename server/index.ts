@@ -139,6 +139,13 @@ const startProxy = async () => {
     req.headers['x-replit-domains-env'] = process.env.REPLIT_DOMAINS;
     req.headers['x-environment'] = isReplit ? 'replit' : 'local';
     
+    // Add a direct callback URL to make it absolutely clear
+    if (process.env.REPLIT_DOMAINS) {
+      const callbackUrl = `https://${process.env.REPLIT_DOMAINS}/api/auth/callback`;
+      req.headers['x-replit-callback-url'] = callbackUrl;
+      console.log('EXPRESS: Added x-replit-callback-url header:', callbackUrl);
+    }
+    
     console.log('EXPRESS: Added REPLIT_DOMAINS header:', process.env.REPLIT_DOMAINS);
     console.log('EXPRESS: Added x-replit-domain header:', `${protocol}://${host}`);
     
@@ -188,6 +195,11 @@ const startProxy = async () => {
         // If REPLIT_DOMAINS env var is available, use it (most reliable)
         console.log(`EXPRESS PROXY: Adding X-Replit-Domains-Env header: ${replitDomains}`);
         proxyReq.setHeader('X-Replit-Domains-Env', replitDomains);
+        
+        // Add the direct callback URL in a header
+        const callbackUrl = `https://${replitDomains}/api/auth/callback`;
+        proxyReq.setHeader('X-Replit-Callback-URL', callbackUrl);
+        console.log(`EXPRESS PROXY: Adding X-Replit-Callback-URL header: ${callbackUrl}`);
         
         // Also add environment dump (for debugging)
         console.log("EXPRESS PROXY: Environment variables:");
