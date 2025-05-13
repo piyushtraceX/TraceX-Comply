@@ -154,9 +154,9 @@ func main() {
                         var baseURL string
                         
                         // First, check for environment variables (most reliable)
-                        replitDomains := os.Getenv("REPLIT_DOMAINS")
-                        if replitDomains != "" {
-                            baseURL = fmt.Sprintf("https://%s", replitDomains)
+                        replitDomainsEnv := os.Getenv("REPLIT_DOMAINS")
+                        if replitDomainsEnv != "" {
+                            baseURL = fmt.Sprintf("https://%s", replitDomainsEnv)
                             log.Printf("Using Replit Domains from environment variable: %s", baseURL)
                         } else {
                             // Fall back to headers if environment variables aren't available
@@ -208,10 +208,10 @@ func main() {
                         log.Printf("Using Casdoor callback URL: %s", callbackURL)
                         
                         // Double-check if we're in a Replit environment by looking at environment variables
-                        replitDomains := os.Getenv("REPLIT_DOMAINS")
-                        if replitDomains != "" {
+                        // Use the replitDomainsEnv variable we already declared above
+                        if replitDomainsEnv != "" {
                             // We're in a Replit environment, make sure to use the proper domain
-                            callbackURL = fmt.Sprintf("https://%s/api/auth/callback", replitDomains)
+                            callbackURL = fmt.Sprintf("https://%s/api/auth/callback", replitDomainsEnv)
                             log.Printf("OVERRIDE: Using Replit callback URL from env vars: %s", callbackURL)
                         }
                         
@@ -285,9 +285,9 @@ func main() {
                         
                         // Determine the proper base URL based on environment
                         // First check for REPLIT_DOMAINS environment variable (most reliable)
-                        replitDomains := os.Getenv("REPLIT_DOMAINS")
-                        if replitDomains != "" {
-                            baseURL = fmt.Sprintf("https://%s", replitDomains)
+                        replitDomainsEnv := os.Getenv("REPLIT_DOMAINS")
+                        if replitDomainsEnv != "" {
+                            baseURL = fmt.Sprintf("https://%s", replitDomainsEnv)
                             log.Printf("Using Replit Domains from environment variable for redirect: %s", baseURL)
                         } else {
                             // Fall back to headers
