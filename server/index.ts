@@ -91,12 +91,39 @@ const startProxy = async () => {
   // All /api/* requests are proxied to Go server by the middleware below
   // We don't need special handling for individual /api/auth/* routes
 
-  // Forward all other API requests directly to Go server
+  // Add specific route for /api/auth/casdoor with detailed logging
+  app.get('/api/auth/casdoor', (req, res, next) => {
+    console.log('EXPRESS: Direct handling of /api/auth/casdoor');
+    
+    // Forward to the Go server with full URL parameters
+    const targetUrl = 'http://localhost:8081/api/auth/casdoor' + 
+      (req.url.includes('?') ? req.url.substring(req.url.indexOf('?')) : '');
+    
+    console.log(`EXPRESS: Forwarding to Go server at ${targetUrl}`);
+    
+    // Use next() to let the proxy middleware handle the actual forwarding
+    req.url = '/api/auth/casdoor';
+    next();
+  });
+
+  // Forward all API requests directly to Go server
   app.use('/api', createProxyMiddleware({
     target: 'http://localhost:8081',
     changeOrigin: true,
     secure: false,
-    xfwd: true
+    xfwd: true,
+    pathRewrite: undefined, // Do not rewrite paths
+    onProxyReq: (proxyReq, req, res) => {
+      console.log(`EXPRESS PROXY: Forwarding ${req.method} ${req.url} to Go server`);
+    },
+    onProxyRes: (proxyRes, req, res) => {
+      console.log(`EXPRESS PROXY: Received ${proxyRes.statusCode} ${proxyRes.statusMessage} from Go server for ${req.method} ${req.url}`);
+    },
+    onError: (err, req, res) => {
+      console.error(`EXPRESS PROXY ERROR: ${err.message} for ${req.method} ${req.url}`);
+      res.writeHead(502, { 'Content-Type': 'text/plain' });
+      res.end(`Proxy Error: ${err.message}`);
+    }
   }));
   
   // Forward all other requests to Vite

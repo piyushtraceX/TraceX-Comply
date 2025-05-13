@@ -1,29 +1,37 @@
 #!/bin/bash
 
+# Get the Replit domain from environment variable or use localhost for local testing
+REPLIT_DOMAIN="${REPLIT_DOMAIN:-https://8d9e1fd6-0f97-43eb-adcd-2f98ad7d8288-00-3o9u7z9m8zzsa.worf.replit.dev}"
+LOCAL_DOMAIN="http://localhost:5000"
+
+# Determine which domain to use based on environment
+if [[ "$REPLIT_DOMAIN" == *"replit"* ]]; then
+  DOMAIN="$REPLIT_DOMAIN"
+  echo "Testing in Replit environment: $DOMAIN"
+else
+  DOMAIN="$LOCAL_DOMAIN"
+  echo "Testing in local environment: $DOMAIN"
+fi
+
 echo "==== Testing EUDR Complimate Authentication Flow ===="
-echo "1. Testing Authentication Redirects"
-# Test the old /auth/casdoor route (handled by Express)
-OLD_ROUTE_REDIRECT=$(curl -s -I -X GET http://localhost:5000/auth/casdoor | grep Location)
-echo "Old route redirect (/auth/casdoor): $OLD_ROUTE_REDIRECT"
+echo "1. Testing API Routes"
 
-# Test the new direct /api/auth/casdoor route - this should redirect directly to Casdoor
-echo "Checking /api/auth/casdoor route in detail:"
-curl -s -v -X GET http://localhost:5000/api/auth/casdoor 2>&1 | grep -E "^([<>]|HTTP/)"
-
+echo "Testing /api/health endpoint:"
+curl -s -I -X GET "$DOMAIN/api/health" | head -1
 echo ""
-echo "2. Testing Go Server OAuth Handling"
-GO_OAUTH_REDIRECT=$(curl -s -I -X GET http://localhost:8081/api/auth/casdoor | grep Location)
-echo "Go OAuth redirect: $GO_OAUTH_REDIRECT"
 
+echo "Testing /api/auth/casdoor endpoint (direct):"
+curl -s -v -X GET "$DOMAIN/api/auth/casdoor" 2>&1 | grep -E "^([<>]|HTTP/)" | head -10
 echo ""
-echo "3. Testing Authentication Callback Handling"
+
+echo "2. Testing Authentication Callback Handling"
 echo "Simulating a callback from Casdoor (without code parameter):"
-curl -s -v -X GET http://localhost:5000/api/auth/callback 2>&1 | grep -E "^([<>]|HTTP/)"
+curl -s -v -X GET "$DOMAIN/api/auth/callback" 2>&1 | grep -E "^([<>]|HTTP/)" | head -10
 
 echo ""
-echo "4. Checking Callback URL Configuration"
-echo "Accessing Go server /api/health endpoint to see logs..."
-curl -s -X GET http://localhost:8081/api/health > /dev/null
+echo "3. Testing auth routes on the Express server"
+echo "Testing /auth/casdoor redirect:"
+curl -s -I -X GET "$DOMAIN/auth/casdoor" | grep -E "^(HTTP|Location)"
 
 echo ""
-echo "5. Done! Check logs for any callback URL setup and redirection settings."
+echo "4. Done! Check the results and server logs for authentication flow details."
