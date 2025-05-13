@@ -207,6 +207,14 @@ func main() {
                         
                         log.Printf("Using Casdoor callback URL: %s", callbackURL)
                         
+                        // Double-check if we're in a Replit environment by looking at environment variables
+                        replitDomains := os.Getenv("REPLIT_DOMAINS")
+                        if replitDomains != "" {
+                            // We're in a Replit environment, make sure to use the proper domain
+                            callbackURL = fmt.Sprintf("https://%s/api/auth/callback", replitDomains)
+                            log.Printf("OVERRIDE: Using Replit callback URL from env vars: %s", callbackURL)
+                        }
+                        
                         // Generate the OAuth URL using Casdoor SDK
                         // Note: The SDK function only takes callbackURL parameter in this version
                         authURL := casdoorsdk.GetSigninUrl(callbackURL)
@@ -276,49 +284,57 @@ func main() {
                         var dashboardPath = "/dashboard" // Specific route to redirect to
                         
                         // Determine the proper base URL based on environment
-                        host := c.Request.Host
-                        
-                        // Get the X-Forwarded-Host when available
-                        forwardedHost := c.GetHeader("X-Forwarded-Host")
-                        
-                        // Check for custom header from Express
-                        replitDomain := c.GetHeader("X-Replit-Domain")
-                        forwardedProto := c.GetHeader("X-Forwarded-Proto")
-                        
-                        // Log all headers for debugging
-                        log.Printf("Host headers: Host=%s, X-Forwarded-Host=%s, X-Forwarded-Proto=%s", 
-                            host, forwardedHost, forwardedProto)
-                        log.Printf("Custom header X-Replit-Domain=%s", replitDomain)
-                        
-                        // Try to get the domain that was used for the original auth request
-                        // First check if the domain was saved in a cookie
-                        originalDomain, _ := c.Cookie("original_domain")
-                        if originalDomain != "" {
-                            baseURL = originalDomain
-                            log.Printf("Using original domain from cookie: %s", baseURL)
-                        } else if replitDomain != "" {
-                            // If Express sent us a domain, use it (second most reliable)
-                            baseURL = replitDomain
-                            log.Printf("Using domain from Express header: %s", baseURL)
-                        } else if strings.Contains(host, "replit") || strings.Contains(host, ".app") || 
-                           strings.Contains(host, "repl.co") {
-                            // Default to https in Replit environment
-                            protocol := "https"
-                            if forwardedProto != "" {
-                                protocol = forwardedProto
-                            }
-                            
-                            // Determine the hostname for callback
-                            if forwardedHost != "" {
-                                host = forwardedHost
-                            }
-                            
-                            baseURL = fmt.Sprintf("%s://%s", protocol, host)
-                            log.Printf("Replit environment detected, using base URL: %s", baseURL)
+                        // First check for REPLIT_DOMAINS environment variable (most reliable)
+                        replitDomains := os.Getenv("REPLIT_DOMAINS")
+                        if replitDomains != "" {
+                            baseURL = fmt.Sprintf("https://%s", replitDomains)
+                            log.Printf("Using Replit Domains from environment variable for redirect: %s", baseURL)
                         } else {
-                            // Local development - Express server is the entry point
-                            baseURL = "http://localhost:5000"
-                            log.Printf("Local environment detected, using base URL: %s", baseURL)
+                            // Fall back to headers
+                            host := c.Request.Host
+                            
+                            // Get the X-Forwarded-Host when available
+                            forwardedHost := c.GetHeader("X-Forwarded-Host")
+                            
+                            // Check for custom header from Express
+                            replitDomain := c.GetHeader("X-Replit-Domain")
+                            forwardedProto := c.GetHeader("X-Forwarded-Proto")
+                            
+                            // Log all headers for debugging
+                            log.Printf("Host headers: Host=%s, X-Forwarded-Host=%s, X-Forwarded-Proto=%s", 
+                                host, forwardedHost, forwardedProto)
+                            log.Printf("Custom header X-Replit-Domain=%s", replitDomain)
+                            
+                            // Try to get the domain that was used for the original auth request
+                            // First check if the domain was saved in a cookie
+                            originalDomain, _ := c.Cookie("original_domain")
+                            if originalDomain != "" {
+                                baseURL = originalDomain
+                                log.Printf("Using original domain from cookie: %s", baseURL)
+                            } else if replitDomain != "" {
+                                // If Express sent us a domain, use it (second most reliable)
+                                baseURL = replitDomain
+                                log.Printf("Using domain from Express header: %s", baseURL)
+                            } else if strings.Contains(host, "replit") || strings.Contains(host, ".app") || 
+                               strings.Contains(host, "repl.co") {
+                                // Default to https in Replit environment
+                                protocol := "https"
+                                if forwardedProto != "" {
+                                    protocol = forwardedProto
+                                }
+                                
+                                // Determine the hostname for callback
+                                if forwardedHost != "" {
+                                    host = forwardedHost
+                                }
+                                
+                                baseURL = fmt.Sprintf("%s://%s", protocol, host)
+                                log.Printf("Replit environment detected, using base URL: %s", baseURL)
+                            } else {
+                                // Local development - Express server is the entry point
+                                baseURL = "http://localhost:5000"
+                                log.Printf("Local environment detected, using base URL: %s", baseURL)
+                            }
                         }
                         
                         log.Printf("Using base URL for dashboard redirect: %s", baseURL)
