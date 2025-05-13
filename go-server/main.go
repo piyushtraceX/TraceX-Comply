@@ -460,10 +460,63 @@ func main() {
                 })
 
                 // Casdoor callback handler
-                // Use simplified callback handler (development mode)
-                api.GET("auth/callback", simplifiedCallbackHandler)
+                // Casdoor callback handler
+                api.GET("auth/callback", func(c *gin.Context) {
+                        // Get the authorization code from the query
+                        code := c.Query("code")
+                        state := c.Query("state")
+                        
+                        if code == "" {
+                                c.JSON(http.StatusBadRequest, gin.H{"error": "No authorization code provided"})
+                                return
+                        }
+                        
+                        log.Printf("[AUTH] Callback handler - received code: %s and state: %s", code, state)
+                        
+                        // Exchange authorization code for token
+                        token, err := casdoorsdk.GetOAuthToken(code, state)
+                        if err != nil {
+                                log.Printf("[AUTH] Error getting token: %v", err)
+                                c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get access token"})
+                                return
+                        }
+                        
+                        log.Printf("[AUTH] Successfully obtained token from Casdoor")
+                        
+                        // DEVELOPMENT MODE - Create a mock user without JWT verification
+                        log.Printf("[AUTH] DEVELOPMENT MODE - Creating session with mock user")
+                        
+                        // Create a cookie with the access token
+                        c.SetCookie(
+                                "casdoor_token",
+                                token.AccessToken,
+                                3600, // 1 hour
+                                "/",
+                                c.Request.Host, // domain
+                                false, // secure = false for development
+                                true,  // httpOnly = true
+                        )
+                        
+                        log.Printf("[AUTH] Set cookie with token")
+                        
+                        // Set a cookie to indicate successful login
+                        c.SetCookie(
+                                "auth_status",
+                                "success",
+                                3600, // 1 hour
+                                "/",
+                                c.Request.Host,    
+                                false, // secure = false for development
+                                false, // httpOnly = false so JavaScript can access
+                        )
+                        
+                        // Redirect to the frontend dashboard
+                        redirectTo := "/"
+                        log.Printf("[AUTH] Redirecting to: %s", redirectTo)
+                        c.Redirect(http.StatusFound, redirectTo)
+                })
                 
-                // Keep original handler for reference (commented out)
+                // Old callback handler (not used)
                 api.GET("auth/callback-old", func(c *gin.Context) {
                         code := c.Query("code")
                         state := c.Query("state")
@@ -484,70 +537,26 @@ func main() {
                         }
                         
                         // Get user info from Casdoor
-                        var claims *CustomJWTClaims
                         
-                        // Try our custom JWT parser first with the JWT secret from environment
-                        jwtSecret := os.Getenv("CASDOOR_JWT_SECRET")
-                        log.Printf("Attempting to parse JWT with custom parser and secret length: %d", len(jwtSecret))
-                        claims, err = ParseJWTWithHMAC(token.AccessToken, jwtSecret)
-                        
-                        if err != nil {
-                                // Fallback to Casdoor SDK if our custom parser fails
-                                log.Printf("Custom JWT parsing failed: %v, trying Casdoor SDK...", err)
-                                sdkClaims, sdkErr := casdoorsdk.ParseJwtToken(token.AccessToken)
-                                if sdkErr != nil {
-                                        log.Printf("Error parsing JWT with SDK: %v", sdkErr)
-                                        
-                                        // DEVELOPMENT MODE: Skip JWT verification and create a mock user session
-                                        // ⚠️ WARNING: This should NEVER be used in production!
-                                        log.Printf("⚠️ WARNING: DEVELOPMENT MODE - Creating mock user session without JWT verification")
-                                        
-                                        // Create a mock user
-                                        user := &User{
-                                                ID:          1,
-                                                Username:    "casdoor_user",
-                                                DisplayName: "Casdoor User",
-                                                Email:       "user@example.com",
-                                                IsActive:    true,
-                                                IsSuperAdmin: true,
-                                                TenantID:    1,
-                                        }
-                                        
-                                        // Create session
-                                        session := sessions.Default(c)
-                                        session.Set("user", user)
-                                        session.Set("authenticated", true)
-                                        session.Set("casdoor_token", token.AccessToken)
-                                        if err := session.Save(); err != nil {
-                                                log.Printf("Error saving session: %v", err)
-                                                c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create session"})
-                                                return
-                                        }
-                                        
-                                        // Redirect to dashboard
-                                        c.Redirect(http.StatusFound, "/dashboard")
-                                        return
-                                }
+                        // Just use Casdoor SDK directly - our simplified callback doesn't need JWT parsing
+                        sdkClaims, err := casdoorsdk.ParseJwtToken(token.AccessToken)
+                        if sdkClaims == nil || err != nil {
+                                // Error occurred, log it
+                                log.Printf("Error getting user info from token: %v", err)
                                 
-                                // Convert SDK claims to our custom claims
-                                claims = &CustomJWTClaims{
-                                        Name:      sdkClaims.Name,
-                                        Owner:     sdkClaims.Owner,
-                                        UserId:    sdkClaims.Subject,
-                                        Subject:   sdkClaims.Subject,
-                                        IssuedAt:  sdkClaims.IssuedAt,
-                                        ExpiresAt: sdkClaims.ExpiresAt,
-                                }
+                                // Continue with a mock user for development
+                                log.Printf("⚠️ WARNING: DEVELOPMENT MODE - Creating mock user")
+                                
+                                // Manually set response
+                                c.JSON(http.StatusInternalServerError, gin.H{
+                                        "error": "JWT verification failed in development mode"
+                                })
+                                return
                         }
                         
-                        // Additional logging for troubleshooting
-                        if err == nil {
-                            log.Printf("JWT parsing successful using custom parser")
-                        } else {
-                            log.Printf("JWT parsing successful using Casdoor SDK")
-                        }
-                        
-                        log.Printf("User authenticated: %s", claims.Name)
+                        // Log success
+                        log.Printf("JWT parsing successful using Casdoor SDK")
+                        log.Printf("User authenticated: %s", sdkClaims.Name)
                         
                         // Create a cookie with the access token
                         // token.ExpiresIn isn't available, use a fixed expiration time
