@@ -167,13 +167,22 @@ func main() {
                             forwardedHost := c.GetHeader("X-Forwarded-Host")
                             forwardedProto := c.GetHeader("X-Forwarded-Proto")
                             
-                            // Check for custom header from Express
+                            // Check for custom headers from Express
                             replitDomain := c.GetHeader("X-Replit-Domain")
+                            replitDomainsFromHeader := c.GetHeader("X-Replit-Domains-Env")
                             
                             // Log all headers for debugging
                             log.Printf("Host headers: Host=%s, X-Forwarded-Host=%s, X-Forwarded-Proto=%s", 
                                 host, forwardedHost, forwardedProto)
-                            log.Printf("Custom header X-Replit-Domain=%s", replitDomain)
+                            log.Printf("Custom headers: X-Replit-Domain=%s, X-Replit-Domains-Env=%s", 
+                                replitDomain, replitDomainsFromHeader)
+                            
+                            // If Express passed the env var as a header, use it
+                            if replitDomainsFromHeader != "" {
+                                // Override the env var with what Express sent us
+                                replitDomainsEnv = replitDomainsFromHeader
+                                log.Printf("IMPORTANT: Got REPLIT_DOMAINS from Express header: %s", replitDomainsFromHeader)
+                            }
                             
                             // If Express sent us a domain, use it
                             if replitDomain != "" {

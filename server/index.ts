@@ -175,6 +175,16 @@ const startProxy = async () => {
         // If REPLIT_DOMAINS env var is available, use it (most reliable)
         console.log(`EXPRESS PROXY: Adding X-Replit-Domains-Env header: ${replitDomains}`);
         proxyReq.setHeader('X-Replit-Domains-Env', replitDomains);
+        
+        // Also add environment dump (for debugging)
+        console.log("EXPRESS PROXY: Environment variables:");
+        Object.keys(process.env)
+          .filter(key => key.includes("REPLIT"))
+          .forEach(key => {
+            console.log(`  ${key}: ${process.env[key]}`);
+          });
+      } else {
+        console.log("EXPRESS PROXY: No REPLIT_DOMAINS environment variable found");
       }
       
       if (req.hostname.includes('replit') || req.hostname.includes('.app')) {
