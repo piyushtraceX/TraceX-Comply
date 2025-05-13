@@ -142,6 +142,11 @@ const startProxy = async () => {
   // Add a catch-all route for missing API routes with helpful debugging info
   app.all('/api/*', (req, res, next) => {
     console.log(`EXPRESS: Processing API request for ${req.method} ${req.url}`);
+    console.log(`EXPRESS: Path details - originalUrl: ${req.originalUrl}, path: ${req.path}, baseUrl: ${req.baseUrl}`);
+    
+    // Make sure the target URL includes /api in the path
+    console.log(`EXPRESS: Target would be: http://localhost:8081${req.originalUrl}`);
+    
     next();
   });
 
@@ -151,16 +156,30 @@ const startProxy = async () => {
     changeOrigin: true,
     secure: false,
     xfwd: true,
-    pathRewrite: undefined, // Do not rewrite paths
+    pathRewrite: undefined, // Do not modify paths
     // Add logging but fix TypeScript errors
     onProxyReq: function(proxyReq: any, req: any, res: any) {
-      console.log(`EXPRESS PROXY: Forwarding ${req.method} ${req.url} to Go server`);
+      const originalPath = req.originalUrl;
+      const targetPath = proxyReq.path;
+      console.log(`EXPRESS PROXY: Forwarding ${req.method} ${originalPath} to Go server as ${targetPath}`);
+      
+      // Add X-Forwarded headers for proper Go server handling
+      proxyReq.setHeader('X-Forwarded-Proto', req.protocol);
+      proxyReq.setHeader('X-Forwarded-Host', req.get('host'));
+      
+      // Add our custom header for domain detection
+      if (req.hostname.includes('replit') || req.hostname.includes('.app')) {
+        const protocol = req.protocol || 'https';
+        const replitDomain = `${protocol}://${req.hostname}`;
+        console.log(`EXPRESS PROXY: Adding X-Replit-Domain header: ${replitDomain}`);
+        proxyReq.setHeader('X-Replit-Domain', replitDomain);
+      }
     },
     onProxyRes: function(proxyRes: any, req: any, res: any) {
-      console.log(`EXPRESS PROXY: Received ${proxyRes.statusCode} ${proxyRes.statusMessage} from Go server for ${req.method} ${req.url}`);
+      console.log(`EXPRESS PROXY: Received ${proxyRes.statusCode} ${proxyRes.statusMessage} from Go server for ${req.method} ${req.originalUrl}`);
     },
     onError: function(err: Error, req: any, res: any) {
-      console.error(`EXPRESS PROXY ERROR: ${err.message} for ${req.method} ${req.url}`);
+      console.error(`EXPRESS PROXY ERROR: ${err.message} for ${req.method} ${req.originalUrl}`);
       res.writeHead(502, { 'Content-Type': 'text/plain' });
       res.end(`Proxy Error: ${err.message}`);
     }
