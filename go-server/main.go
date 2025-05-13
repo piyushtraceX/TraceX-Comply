@@ -480,11 +480,39 @@ func main() {
                         }
                         
                         // Get user info from Casdoor
-                        claims, err := casdoorsdk.ParseJwtToken(token.AccessToken)
+                        var claims *CustomJWTClaims
+                        
+                        // Try our custom JWT parser first with the JWT secret from environment
+                        jwtSecret := os.Getenv("CASDOOR_JWT_SECRET")
+                        log.Printf("Attempting to parse JWT with custom parser and secret length: %d", len(jwtSecret))
+                        claims, err = ParseJWTWithHMAC(token.AccessToken, jwtSecret)
+                        
                         if err != nil {
-                                log.Printf("Error parsing JWT: %v", err)
-                                c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse user token"})
-                                return
+                                // Fallback to Casdoor SDK if our custom parser fails
+                                log.Printf("Custom JWT parsing failed: %v, trying Casdoor SDK...", err)
+                                sdkClaims, sdkErr := casdoorsdk.ParseJwtToken(token.AccessToken)
+                                if sdkErr != nil {
+                                        log.Printf("Error parsing JWT with SDK: %v", sdkErr)
+                                        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse user token"})
+                                        return
+                                }
+                                
+                                // Convert SDK claims to our custom claims
+                                claims = &CustomJWTClaims{
+                                        Name:      sdkClaims.Name,
+                                        Owner:     sdkClaims.Owner,
+                                        UserId:    sdkClaims.Subject,
+                                        Subject:   sdkClaims.Subject,
+                                        IssuedAt:  sdkClaims.IssuedAt,
+                                        ExpiresAt: sdkClaims.ExpiresAt,
+                                }
+                        }
+                        
+                        // Additional logging for troubleshooting
+                        if err == nil {
+                            log.Printf("JWT parsing successful using custom parser")
+                        } else {
+                            log.Printf("JWT parsing successful using Casdoor SDK")
                         }
                         
                         log.Printf("User authenticated: %s", claims.Name)
