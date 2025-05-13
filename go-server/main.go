@@ -572,7 +572,6 @@ func main() {
                 })
 
                 // Casdoor callback handler
-                // Casdoor callback handler
                 api.GET("auth/callback", func(c *gin.Context) {
                         // Get the authorization code from the query
                         code := c.Query("code")
@@ -594,9 +593,6 @@ func main() {
                         }
                         
                         log.Printf("[AUTH] Successfully obtained token from Casdoor")
-                        
-                        // DEVELOPMENT MODE - Create a mock user without JWT verification
-                        log.Printf("[AUTH] DEVELOPMENT MODE - Creating session with mock user")
                         
                         // Create a cookie with the access token
                         c.SetCookie(
@@ -622,8 +618,36 @@ func main() {
                                 false, // httpOnly = false so JavaScript can access
                         )
                         
-                        // Redirect to the frontend dashboard
+                        // Check if we have a client redirect URI cookie
+                        clientRedirectURI, err := c.Cookie("client_redirect_uri")
                         redirectTo := "/"
+                        
+                        if err == nil && clientRedirectURI != "" {
+                                log.Printf("[AUTH] Found client redirect URI in cookie: %s", clientRedirectURI)
+                                redirectTo = clientRedirectURI
+                                
+                                // Clear the cookie as we're using it
+                                c.SetCookie(
+                                        "client_redirect_uri",
+                                        "",
+                                        -1, // Expire immediately
+                                        "/",
+                                        c.Request.Host,
+                                        false,
+                                        false,
+                                )
+                        } else {
+                                log.Printf("[AUTH] No client redirect URI found, using default: %s", redirectTo)
+                        }
+                        
+                        // Parse the token to extract user info
+                        user, parseErr := casdoorsdk.ParseJwtToken(token.AccessToken)
+                        if parseErr == nil && user != nil {
+                                log.Printf("[AUTH] Successfully parsed JWT, user: %s, email: %s", user.Name, user.Email)
+                        } else {
+                                log.Printf("[AUTH] Failed to parse JWT: %v", parseErr)
+                        }
+                        
                         log.Printf("[AUTH] Redirecting to: %s", redirectTo)
                         c.Redirect(http.StatusFound, redirectTo)
                 })
