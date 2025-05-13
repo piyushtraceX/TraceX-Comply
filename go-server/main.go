@@ -329,30 +329,33 @@ func main() {
                         // Last chance logging
                         log.Printf("FINAL CALLBACK URL: %s", callbackURL)
 
-                        // DEBUGGING: Print full authURL construction process
-                        sdk_function_url := casdoorsdk.GetSigninUrl(callbackURL)
+                        // BUILD VERSION 3 - COMPLETELY MANUAL OAUTH URL CONSTRUCTION
+                        // We're bypassing the Casdoor SDK for URL generation since it's ignoring our callback URL
                         
-                        // Manually construct and print the URL for comparison
-                        // Using net/url to properly encode the callback URL
-                        escapedCallback := url.QueryEscape(callbackURL)
-                        log.Printf("ESCAPED CALLBACK URL: %s", escapedCallback)
-                        
-                        // Hardcode the Casdoor URL with our application parameters
-                        manual_auth_url := fmt.Sprintf(
-                            "https://tracextech.casdoor.com/login/oauth/authorize?client_id=d85be9c2468eae1dbf58&response_type=code&redirect_uri=%s&scope=read&state=eudr-complimate", 
-                            escapedCallback)
-                        
-                        log.Printf("SDK URL: %s", sdk_function_url)
-                        log.Printf("MANUAL URL: %s", manual_auth_url)
-                        
-                        // Check if SDK URL contains the proper callback URL
-                        var authURL string
-                        if !strings.Contains(sdk_function_url, url.QueryEscape(callbackURL)) {
-                            log.Printf("WARNING: SDK URL does not contain the proper callback URL! Using manual URL instead.")
-                            authURL = manual_auth_url
+                        // First, ensure callback URL uses HTTPS and the Replit domain
+                        var finalCallbackURL string
+                        if strings.Contains(callbackURL, "localhost") && replitDomainsEnv != "" {
+                            finalCallbackURL = fmt.Sprintf("https://%s/api/auth/callback", replitDomainsEnv)
+                            log.Printf("LOCAL TO REPLIT: Converting callback URL from %s to %s", callbackURL, finalCallbackURL)
                         } else {
-                            authURL = sdk_function_url
+                            finalCallbackURL = callbackURL
                         }
+                        
+                        // Use the same values we initialized the SDK with
+                        casdoorEndpointForURL := "https://tracextech.casdoor.com"
+                        clientIdForURL := "d85be9c2468eae1dbf58"
+                        log.Printf("Using hardcoded config - Endpoint: %s, ClientID: %s", casdoorEndpointForURL, clientIdForURL)
+                        
+                        // Manually construct the URL with proper URL encoding for the callback
+                        escapedCallback := url.QueryEscape(finalCallbackURL)
+                        log.Printf("FINAL ESCAPED CALLBACK URL: %s", escapedCallback)
+                        
+                        // Construct the OAuth URL completely manually with our known values
+                        authURL := fmt.Sprintf(
+                            "%s/login/oauth/authorize?client_id=%s&response_type=code&redirect_uri=%s&scope=read&state=eudr-complimate", 
+                            casdoorEndpointForURL, clientIdForURL, escapedCallback)
+                        
+                        log.Printf("COMPLETE MANUAL OAUTH URL: %s", authURL)
                         
                         log.Printf("Redirecting to Casdoor URL: %s", authURL)
                         c.Redirect(http.StatusTemporaryRedirect, authURL)
